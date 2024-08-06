@@ -7,6 +7,13 @@ const leadController = {
         try {
           const data = req.body;
           data.leadId = leadId(); 
+
+          if (data.customer_feedBack === 'followUp') {
+            if (!data.followUpDetail) {
+              return res.status(400).json({ message: 'followUpDetail is required when customer_feedBack is followUp' });
+            }
+          }
+
           const lead = await leadService.leadCreateService(data);
           res.status(201).json({ message: 'Lead created successfully', lead });
         } catch (error) {

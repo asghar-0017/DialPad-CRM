@@ -26,6 +26,7 @@ const agentController = {
           const data = req.body;
           const email = req.body.email;
           data.agentId=agentId()
+          
     
           const existingAgent = await agentRepository.findByEmail(email);
           if (existingAgent) {
