@@ -41,8 +41,13 @@ const agentController = {
 
     getAgent:async(req,res)=>{
     try{
-        const result=await agentService.agentGetInService();
-        res.status(201).json({ message: 'success', data:result });
+        const result=await agentService.agentGetInService(); 
+       
+    const data = result.map(agent => {
+        const { id,agentId, firstName, lastName, email, phone, role } = agent;
+        return {id, agentId, firstName, lastName, email, phone, role };
+      });
+        res.status(201).json({ message: 'success', data:data });
       }
      catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -50,7 +55,5 @@ const agentController = {
     }
 };
   
-
-
 
 module.exports = {agentController} 
