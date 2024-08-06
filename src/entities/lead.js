@@ -9,16 +9,32 @@ module.exports = new EntitySchema({
       primary: true,
       generated: true,
     },
-    leadId:{
-      type:"int",
-      unique:true,
-      
+    leadId: {
+      type: "int",
+      unique: true,
     },
     leadName: {
       type: "varchar",
     },
-    leadDetails: {
+    address: {
       type: "text",
+    },
+    phone: {
+      type: "varchar",
+    },
+    website: {
+      type: "varchar",
+    },
+    email: {
+      type: "varchar",
+    },
+    customer_feedBack: {
+      type: "enum",
+      enum: ['onGoing', 'hangUp', 'followUp'],
+    },
+    followUpDetail: {
+      type: "varchar",
+      nullable:true
     },
     created_at: {
       type: "timestamp",

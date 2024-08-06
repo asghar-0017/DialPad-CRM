@@ -1,8 +1,9 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const { logger } = require('../logger'); // Adjust path as needed
-const AdminAuthRoute = require('./routes/auth');
-const agentRoute=require('./routes/agent')
+const AdminAuthRoute = require('./routes/authRoute');
+const agentRoute=require('./routes/agentRoute')
+const leadRoute=require('./routes/leadRoute')
 const dataSource = require('./infrastructure/psql'); // Adjust path as needed
 const cors=require('cors')
 
@@ -28,6 +29,8 @@ app.get('/', async (req, res) => {
 
 AdminAuthRoute(app);
 agentRoute(app)
+leadRoute(app)
+
 
 const startServer = async () => {
   try {

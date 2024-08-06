@@ -19,6 +19,10 @@ module.exports = new EntitySchema({
         type: "varchar",
         nullable: true,
       },
+      role: {
+        type: "varchar",
+        default: "admin",
+      },
       created_at: {
         type: "timestamp",
         default: () => "CURRENT_TIMESTAMP",

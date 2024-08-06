@@ -81,8 +81,9 @@ const adminAuth = {
       response.status(500).send({ message: 'Internal Server Error', error: error.message });
     }
   },
-  authenticate: async (request, response, next) => {
+   authenticate :async (request, response, next) => {
     try {
+      console.log("API hit");
       const authHeader = request.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return response.status(401).send({ message: 'No token provided' });
@@ -99,11 +100,21 @@ const adminAuth = {
         return response.status(401).send({ message: 'Token mismatch' });
       }
   
-      next(); 
+      const decoded = jwt.verify(token, process.env.SCERET_KEY);
+      const user = await adminService.findUserById(decoded.userName); // Adjust to your method for getting user by ID
+      if (!user) {
+        return response.status(401).send({ message: 'User not found' });
+      }
+  
+      request.user = user; // Set req.user here
+      console.log("User", user);
+      next();
     } catch (error) {
       response.status(500).send({ message: 'Internal Server Error', error: error.message });
     }
   },
+  
+  
   
 
   verifyToken: async (request, response) => {
