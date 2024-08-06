@@ -1,0 +1,53 @@
+const { EntitySchema } = require("typeorm");
+
+module.exports = new EntitySchema({
+  name: "agent",
+  tableName: "agent",
+  columns: {
+    id: {
+      type: "int",
+      primary: true,
+      generated: true,
+    },
+    agentId:{
+      type: "int",
+      primary: true,
+      unique:true
+    },
+    firstName: {
+      type: "varchar",
+      nullable:true,
+    },
+    lastName: {
+      type: "varchar",
+      nullable:true,
+    },
+    email: {
+      type: "varchar",
+      nullable:true,
+
+    },
+    phone:{
+     type:"varchar",
+     nullable:true,
+
+    },
+    password: {
+      type: "varchar",
+      nullable: false,
+    },
+    role: {
+      type: "varchar",
+      default: "agent", 
+    },
+    created_at: {
+      type: "timestamp",
+      default: () => "CURRENT_TIMESTAMP",
+    },
+    updated_at: {
+      type: "timestamp",
+      default: () => "CURRENT_TIMESTAMP",
+      onUpdate: "CURRENT_TIMESTAMP",
+    },
+  },
+});
