@@ -23,6 +23,14 @@ const leadService = {
     }catch(error){
         throw error
     }
+  },
+  updateLeadByService:async({ data,leadId, agent })=>{
+    try{
+        const result=await leadRepository.updateLeadData({ data,leadId, agent })
+        return result
+    }catch(error){
+        throw error
+    }
   }
 
  

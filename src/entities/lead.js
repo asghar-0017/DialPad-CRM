@@ -34,7 +34,7 @@ module.exports = new EntitySchema({
     },
     followUpDetail: {
       type: "varchar",
-      nullable:true
+      nullable: true,
     },
     created_at: {
       type: "timestamp",
@@ -54,4 +54,16 @@ module.exports = new EntitySchema({
       onDelete: "CASCADE",
     },
   },
+  hooks: {
+    beforeInsert: (entity) => {
+        if (entity.customer_feedBack !== 'followUp') {
+            delete entity.followUpDetail;
+        }
+    },
+    beforeUpdate: (entity) => {
+        if (entity.customer_feedBack !== 'followUp') {
+            delete entity.followUpDetail;
+        }
+    },
+},
 });

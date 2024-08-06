@@ -27,8 +27,24 @@ const leadRepository = {
       }
     }catch(error){
         throw error
-    }
-  }
-};
+        }
+    },
+    updateLeadData:async({ data,leadId, agent })=>{
+        try{
+            const lead = await dataSource.getRepository(Lead).findOne({ where: { id: leadId, agent: agent.id } });
+            if (!lead) {
+                throw new Error('Lead not found or does not belong to the agent');
+              }
+              lead.leadName = data.leadName || lead.leadName;
+              lead.leadDetails = data.leadDetails || lead.leadDetails;
+              await leadRepo.save(lead);
+        
+              return lead;
+        }catch(error){
 
-module.exports = leadRepository;
+        }
+
+    }
+    };
+
+    module.exports = leadRepository;
