@@ -1,5 +1,7 @@
 const agentService = require('../service/agentService');
 const agentRepository=require('../repository/agentRepository')
+const agentId=require('../utils/token')
+
 
 
 
@@ -23,6 +25,7 @@ const agentController = {
         try {
           const data = req.body;
           const email = req.body.email;
+          data.agentId=agentId()
     
           const existingAgent = await agentRepository.findByEmail(email);
           if (existingAgent) {
