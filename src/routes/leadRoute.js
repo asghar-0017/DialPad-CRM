@@ -11,7 +11,6 @@ const leadRoute = (app) => {
 
     app.post('/upload-csv',adminAuth.authenticate, checkRole(['admin', 'agent']), upload.single('file'), leadController.saveExcelFileData)
     
-     
 
 };
 
