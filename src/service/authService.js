@@ -16,7 +16,7 @@ const adminService = {
       if (admin) {
         const match = await bcrypt.compare(password, admin.password);
         if (match) {
-          const token = jwt.sign({ userName: admin.userName }, secretKey, { expiresIn: '1h' });
+          const token = jwt.sign({ userName: admin.userName }, secretKey, { expiresIn: '10h' });
           logger.info('Admin Login Success');
           return { token };
         }else{

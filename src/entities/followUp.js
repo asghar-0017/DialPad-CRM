@@ -2,41 +2,32 @@ const { EntitySchema } = require("typeorm");
 
 module.exports = new EntitySchema({
   name: "followUp",
-  tableName: "followUp",
+  tableName: "followUps",
   columns: {
     id: {
       type: "int",
       primary: true,
       generated: true,
     },
-    followUpDeail:{
+    followUpDetail: {
+      type: "varchar",
+    },
+    leadId: {
       type: "int",
-      primary: true,
-      unique:true
     },
     leadName: {
       type: "varchar",
-      nullable:true,
     },
     phone: {
       type: "varchar",
-      nullable:true,
     },
     email: {
       type: "varchar",
-      nullable:true,
-
-    },
-    agentName:{
-     type:"varchar",
-     nullable:true,//if create admin then adminName else agentName
-
     },
     role: {
       type: "varchar",
-      default: "agent", 
     },
-    created_at: { 
+    created_at: {
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",
     },
@@ -46,4 +37,12 @@ module.exports = new EntitySchema({
       onUpdate: "CURRENT_TIMESTAMP",
     },
   },
+  // relations: {
+  //   lead: {
+  //     type: "many-to-one",
+  //     target: "lead",
+  //     joinColumn: { name: "leadId", referencedColumnName: "leadId" },
+  //     onDelete: "CASCADE",
+  //   },
+  // },
 });

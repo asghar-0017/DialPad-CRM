@@ -4,6 +4,7 @@ const { logger } = require('../logger'); // Adjust path as needed
 const AdminAuthRoute = require('./routes/authRoute');
 const agentRoute=require('./routes/agentRoute')
 const leadRoute=require('./routes/leadRoute')
+const followUpRoute=require('./routes/followUpRoute')
 const dataSource = require('./infrastructure/psql'); // Adjust path as needed
 const cors=require('cors')
 
@@ -30,6 +31,7 @@ app.get('/', async (req, res) => {
 AdminAuthRoute(app);
 agentRoute(app)
 leadRoute(app)
+followUpRoute(app)
 
 
 const startServer = async () => {

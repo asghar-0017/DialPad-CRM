@@ -9,28 +9,25 @@ module.exports = new EntitySchema({
       primary: true,
       generated: true,
     },
-    agentId:{
+    agentId: {
       type: "int",
-      primary: true,
-      unique:true
+      unique: true,
     },
     firstName: {
       type: "varchar",
-      nullable:true,
+      nullable: true,
     },
     lastName: {
       type: "varchar",
-      nullable:true,
+      nullable: true,
     },
     email: {
       type: "varchar",
-      nullable:true,
-
+      nullable: true,
     },
-    phone:{
-     type:"varchar",
-     nullable:true,
-
+    phone: {
+      type: "varchar",
+      nullable: true,
     },
     password: {
       type: "varchar",
@@ -38,7 +35,7 @@ module.exports = new EntitySchema({
     },
     role: {
       type: "varchar",
-      default: "agent", 
+      default: "agent",
     },
     created_at: {
       type: "timestamp",
@@ -48,6 +45,18 @@ module.exports = new EntitySchema({
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",
       onUpdate: "CURRENT_TIMESTAMP",
+    },
+  },
+  relations: {
+    leads: {
+      type: "one-to-many",
+      target: "lead",
+      mappedBy: "agent",
+    },
+    followUps: {
+      type: "one-to-many",
+      target: "followUp",
+      mappedBy: "agent",
     },
   },
 });

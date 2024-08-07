@@ -51,19 +51,20 @@ module.exports = new EntitySchema({
       type: "many-to-one",
       target: "agent",
       joinColumn: true,
+      nullable: true,
       onDelete: "CASCADE",
     },
+    createdByAdmin: {
+      type: "many-to-one",
+      target: "auth",
+      joinColumn: true,
+      nullable: true,
+      onDelete: "CASCADE",
+    },
+    followUps: {
+      type: "one-to-many",
+      target: "followUp",
+      mappedBy: "lead",
+    },
   },
-  hooks: {
-    beforeInsert: (entity) => {
-        if (entity.customer_feedBack !== 'followUp') {
-            delete entity.followUpDetail;
-        }
-    },
-    beforeUpdate: (entity) => {
-        if (entity.customer_feedBack !== 'followUp') {
-            delete entity.followUpDetail;
-        }
-    },
-},
 });
