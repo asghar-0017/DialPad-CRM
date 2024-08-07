@@ -3,6 +3,7 @@ const leadId = require('../utils/token');
 const fs = require('fs');
 const path = require('path');
 const csv = require('csv-parser');
+const xlsx = require('xlsx');
 
 const leadController = {
     createLead: async (req, res) => {
@@ -52,39 +53,46 @@ const leadController = {
     },
     saveExcelFileData: async (req, res) => {
         if (!req.file) {
-            return res.status(400).json({ message: 'Please upload a CSV file.' });
+            return res.status(400).json({ message: 'Please upload an Excel file.' });
         }
 
-        const results = [];
         const filePath = path.join(__dirname, '../uploads/', req.file.filename);
-        console.log("Path",filePath)
+        console.log("Path", filePath);
 
-        fs.createReadStream(filePath)
-          .pipe(csv())
-          .on('data', (data) => results.push(data))
-          .on('end', async () => {
-              try {
-                  for (const row of results) {
-                    row.leadId = leadId();
-                      const leadData = {
-                          leadId:row.leadId,
-                          leadName: row.leadName,
-                          phone: row.phone,
-                          email: row.email,
-                          customer_feedBack: row.customer_feedBack,
-                          followUpDetail: row.followUpDetail,
-                      };
-                      await leadService.leadCreateService(leadData, req.user);
-                  }
-                  res.status(200).json({ message: 'Leads created successfully' });
-              } catch (error) {
-                  res.status(500).json({ message: 'Internal Server Error', error: error.message });
-              } finally {
-                  fs.unlinkSync(filePath);
-              }
-          });
+        try {
+            const workbook = xlsx.readFile(filePath);
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const results = xlsx.utils.sheet_to_json(sheet);
+
+            console.log("Excel Data:", results);
+
+            for (const row of results) {
+                if (!row.leadName) {
+                    console.error("Missing leadName in row:", row);
+                    continue; 
+                }
+                row.leadId = leadId();
+                const leadData = {
+                    leadId: row.leadId,
+                    leadName: row.leadName,
+                    phone: row.phone,
+                    email: row.email,
+                    address:row.address,
+                    website:row.website,
+                    customer_feedBack: row.customer_feedBack,
+                    followUpDetail: row.followUpDetail,
+                };
+                await leadService.leadCreateService(leadData, req.user);
+            }
+            res.status(200).json({ message: 'Leads created successfully', data:results });
+        } catch (error) {
+            console.error('Error processing the Excel file:', error);
+            throw error
+        } finally {
+            fs.unlinkSync(filePath);
+        }
     }
-    
 
 };
 

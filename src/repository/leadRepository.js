@@ -22,9 +22,9 @@ const leadRepository = {
         try {
             let lead;
             if (user.role === 'agent') {
-                lead = await dataSource.getRepository(Lead).findOne({ where: { id: leadId, agent: user.id } });
+                lead = await dataSource.getRepository(Lead).findOne({ where: { leadId, agent: user.id } });
             } else if (user.role === 'admin') {
-                lead = await dataSource.getRepository(Lead).findOne({ where: { id: leadId } });
+                lead = await dataSource.getRepository(Lead).findOne({ where: { leadId } });
             }
 
             if (!lead) {
