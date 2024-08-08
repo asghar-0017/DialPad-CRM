@@ -40,7 +40,13 @@ const leadController = {
                 if (lead.customer_feedBack !== 'followUp') {
                     delete lead.followUpDetail;
                 }
+                if (lead.customer_feedBack === 'followUp') {
+                    delete lead.followUpDetail;
+                }
                 if (lead.customer_feedBack !== 'other') {
+                    delete lead.otherDetail;
+                }
+                if (lead.customer_feedBack === 'other') {
                     delete lead.otherDetail;
                 }
                 return lead;
