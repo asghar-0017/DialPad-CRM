@@ -2,23 +2,35 @@ const express = require('express');
 const dotenv = require('dotenv');
 const { logger } = require('../logger'); // Adjust path as needed
 const AdminAuthRoute = require('./routes/authRoute');
-const agentRoute=require('./routes/agentRoute')
-const leadRoute=require('./routes/leadRoute')
-const followUpRoute=require('./routes/followUpRoute')
+const agentRoute = require('./routes/agentRoute');
+const leadRoute = require('./routes/leadRoute');
+const followUpRoute = require('./routes/followUpRoute');
+const otherRoute = require('./routes/otherRoute'); // Adjust path as needed
 const dataSource = require('./infrastructure/psql'); // Adjust path as needed
-const cors=require('cors')
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 dotenv.config();
 
 const app = express();
 
+// Middleware for parsing JSON and URL-encoded data
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-app.use(express.json());
+// CORS configuration
 app.use(cors({
-  origin:'*'
-}))
+  origin: '*',
+}));
 
+// Log incoming requests
+app.use((req, res, next) => {
+  logger.info(`Received request: ${req.method} ${req.url}`);
+  logger.info(`Request body: ${JSON.stringify(req.body)}`);
+  next();
+});
 
+// Test endpoint
 app.get('/', async (req, res) => {
   const result = {
     code: 200,
@@ -28,12 +40,23 @@ app.get('/', async (req, res) => {
   res.send(result);
 });
 
+// Route configurations
 AdminAuthRoute(app);
-agentRoute(app)
-leadRoute(app)
-followUpRoute(app)
+agentRoute(app);
+leadRoute(app);
+followUpRoute(app);
+otherRoute(app);
 
+// Error handling middleware for JSON parsing errors
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    logger.error('Bad JSON: ', err.message);
+    return res.status(400).send({ code: 400, status: 'Bad Request', message: 'Invalid JSON payload' });
+  }
+  next();
+});
 
+// Start server
 const startServer = async () => {
   try {
     await dataSource.initialize();
@@ -49,4 +72,4 @@ const startServer = async () => {
   }
 };
 
-module.exports= startServer
+module.exports = startServer;

@@ -30,9 +30,13 @@ module.exports = new EntitySchema({
     },
     customer_feedBack: {
       type: "enum",
-      enum: ['onGoing', 'hangUp', 'followUp'],
+      enum: ['onGoing','voiceMail', 'hangUp', 'followUp','other'],
     },
     followUpDetail: {
+      type: "varchar",
+      nullable: true,
+    },
+    otherDetail: {
       type: "varchar",
       nullable: true,
     },

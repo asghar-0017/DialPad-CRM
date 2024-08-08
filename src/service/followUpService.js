@@ -2,10 +2,6 @@
 const followUpRepository = require('../repository/followUpRepository');
 
 const followUpService = {
-    createFollowUp: async (data) => {
-        console.log("data", data);
-        return await followUpRepository.createFollowUp(data);
-      },
 
   getAllFollowUps: async () => {
     return await followUpRepository.findAll();

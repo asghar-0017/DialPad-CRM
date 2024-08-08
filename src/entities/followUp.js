@@ -11,6 +11,7 @@ module.exports = new EntitySchema({
     },
     followUpDetail: {
       type: "varchar",
+      nullable: true
     },
     leadId: {
       type: "int",

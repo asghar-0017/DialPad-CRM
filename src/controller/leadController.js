@@ -15,6 +15,9 @@ const leadController = {
             if (data.customer_feedBack === 'followUp' && !data.followUpDetail) {
                 return res.status(400).json({ message: 'followUpDetail is required when customer_feedBack is followUp' });
             }
+            if (data.customer_feedBack === 'other' && !data.otherDetail) {
+                return res.status(400).json({ message: 'other is required when customer_feedBack is other' });
+            }
 
             const lead = await leadService.leadCreateService(data, user);
             res.status(201).json({ message: 'Lead created successfully', lead });
@@ -47,8 +50,12 @@ const leadController = {
             console.log("LeadId",leadId)
             const user = req.user;
             console.log("User",user)
+            
 
             const lead = await leadService.updateLeadByService({ data, leadId, user });
+            if (lead && lead.customer_feedBack !== 'followUp') {
+                delete lead.followUpDetail;
+            }
             console.log("lead",lead)
             res.status(201).json({ message: 'Lead Updated successfully', data:lead });
         } catch (error) {
@@ -107,7 +114,38 @@ const leadController = {
         } finally {
             fs.unlinkSync(filePath);
         }
+    },
+    getLeadById:async(req,res)=>{
+        try{
+            const leadId=req.params.leadId
+            const data = await leadService.leadGetServiceById(leadId)
+            if(data){
+                res.status(200).send({message:"success",data:data})
+            }
+        }catch(error){
+            throw error
+
+        }
+    },
+    deleteLead:async(req,res)=>{
+        try {
+            const leadId = req.params.leadId;
+            console.log("LeadId:", leadId);
+            const user = req.user;
+            console.log("User:", user);
+    
+            const result = await leadService.deleteLeadById(leadId, user);
+            
+            if (!result) {
+                return res.status(404).json({ message: 'Lead Data not found' });
+            }
+            res.status(200).json({ message: 'Lead Data deleted successfully',data:result });
+        } catch (error) {
+            res.status(500).json({ message: 'Internal Server Error', error: error.message });
+        }
+    
     }
+
 };
 
 module.exports = { leadController };

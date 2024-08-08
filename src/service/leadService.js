@@ -1,36 +1,50 @@
 const leadRepository = require('../repository/leadRepository');
 const followUpRepository = require('../repository/followUpRepository');
+const otherRepository=require('../repository/otherRepository')
 
 const leadService = {
-    leadCreateService: async (data, user) => {
+     leadCreateService :async (data, user) => {
         try {
             if (user.role === 'agent') {
                 data.agent = user.id;
             } else if (user.role === 'admin') {
                 data.createdByAdmin = user.id;
             }
-
+    
             const lead = await leadRepository.saveLead(data);
             console.log("lead id", lead.leadId);
-            console.log("lead id", data.leadId);
-
+    
+            let followUpData;
+    
             if (data.customer_feedBack === 'followUp') {
-                const followUpData = {
+                followUpData = {
                     followUpDetail: data.followUpDetail,
-                    leadId:  data.leadId, 
+                    leadId: lead.leadId, // Corrected to use the lead's leadId
                     leadName: lead.leadName,
                     phone: lead.phone,
                     email: lead.email,
                     role: user.role,
                 };
                 await followUpRepository.createFollowUp(followUpData);
+            } else if (data.customer_feedBack === 'other') {
+                const otherData = {
+                    otherDetail: data.otherDetail,
+                    leadId: lead.leadId,
+                    leadName: lead.leadName,
+                    phone: lead.phone,
+                    email: lead.email,
+                    role: user.role,
+                };
+                await otherRepository.createOther(otherData);
             }
-
+    
             return lead;
         } catch (error) {
+            console.error("Error creating lead:", error);
             throw error;
         }
     },
+    
 
     leadReadService: async () => {
         try {
@@ -48,7 +62,19 @@ const leadService = {
         } catch (error) {
             throw error;
         }
-    }
+    },
+    leadGetServiceById: async (leadId) => {
+        try {
+            const result = await leadRepository.getLeadDataById(leadId);
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    },
+    deleteLeadById: async (id,user) => {
+        return await leadRepository.delete(id,user);
+      },
+
 };
 
 module.exports = leadService;
