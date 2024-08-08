@@ -17,6 +17,38 @@ findByEmail: async (email) => {
     }catch(error){
 
     }
+  },
+  getAgentDataById:async(agentId)=>{
+    try{
+      const data= await dataSource.getRepository(agentAuth).findOne({where:{agentId}})
+      if(data){
+        return data
+      }
+    }catch(error){
+      throw error
+    }
+  },
+  updateAgentDataById:async(agentId,{firstName,lastName,email,phone},user)=>{
+    try{
+      const data= await dataSource.getRepository(agentAuth).findOne({where:{agentId}})
+      if(data){
+        const result = await dataSource.getRepository(agentAuth).update({ agentId }, {firstName,lastName,email,phone},user)
+        return result
+      }
+    }catch(error){
+      throw error
+    }
+  },
+  deleteAgentDataById:async(agentId,user)=>{
+    try{
+      const data= await dataSource.getRepository(agentAuth).findOne({where:{agentId}})
+      if(data){
+        const result = await dataSource.getRepository(agentAuth).delete({ agentId },user)
+        return result
+      }
+    }catch(error){
+      throw error
+    }
   }
 };
 

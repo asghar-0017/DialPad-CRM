@@ -37,8 +37,6 @@ const followUpRepository = {
             leadName: data.leadName,
             phone: data.phone,
             email: data.email,
-            role: data.role,
-            leadId: id,  
             updated_at: new Date() 
         };
 

@@ -47,6 +47,30 @@ const agentService = {
         throw error
     }
   },
+  agentGetByIdInService:async(agentId)=>{
+    try{
+      const data=await agentRepository.getAgentDataById(agentId)
+      return data
+    }catch(error){
+      throw error
+    }
+  },
+  agentUpdateByIdInService:async(agentId,{firstName,lastName,email,phone},user)=>{
+    try{
+      const data=await agentRepository.updateAgentDataById(agentId,{firstName,lastName,email,phone},user)
+      return data
+    }catch(error){
+      throw error
+    }
+  },
+  agentDeleteByIdInService:async(agentId,user)=>{
+    try{
+      const data=await agentRepository.deleteAgentDataById(agentId,user)
+      return data
+    }catch(error){
+      throw error
+    }
+  }
 
  
  

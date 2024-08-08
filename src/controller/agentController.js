@@ -53,7 +53,48 @@ const agentController = {
      catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
       }
+    },
+
+    getAgentById:async(req,res)=>{
+      try{
+        const agentId=req.params.agentId
+        const result=await agentService.agentGetByIdInService(agentId); 
+       
+    const data = {
+         id:result.id,agentId:result.agentId, firstName:result.firstName, lastName:result.lastName, email:result.email, phone:result.phone, role : result.role
+    };
+        res.status(201).json({ message: 'success', data:data });
+      }
+     catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+      }
+    },
+
+    updateAgent:async(req,res)=>{
+      try{
+        const agentId=req.params.agentId
+        const {firstName,lastName,email,phone}=req.body
+        const user = req.user;
+        const result=await agentService.agentUpdateByIdInService(agentId,{firstName,lastName,email,phone},user); 
+        res.status(201).json({ message: 'success', data:result });
+      }
+     catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+      }
+    },
+    deleteAgent:async(req,res)=>{
+      try{
+        const agentId=req.params.agentId
+        const user = req.user;
+        const result=await agentService.agentDeleteByIdInService(agentId,user); 
+        res.status(201).json({ message: 'success', data:result });
+      }
+     catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+        throw error
+      }
     }
+
 };
   
 
