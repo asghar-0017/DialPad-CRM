@@ -28,11 +28,11 @@ const followUpController = {
 
   updateFollowUp: async (req, res) => {
     try {
-      const { id } = req.params;
+      const { leadId } = req.params;
       const followUpData = req.body;
-      const updatedFollowUp = await followUpService.updateFollowUp(id, followUpData);
+      const updatedFollowUp = await followUpService.updateFollowUp(leadId, followUpData);
       if (updatedFollowUp) {
-        res.status(200).json({ message: 'Follow-up updated successfully', updatedFollowUp });
+        res.status(200).json({ message: 'Follow-up updated successfully', data:updatedFollowUp });
       } else {
         res.status(404).json({ message: 'Follow-up not found' });
       }
@@ -41,19 +41,25 @@ const followUpController = {
     }
   },
 
+
   deleteFollowUp: async (req, res) => {
     try {
-      const { id } = req.params;
-      const deletedFollowUp = await followUpService.deleteFollowUp(id);
-      if (deletedFollowUp) {
-        res.status(200).json({ message: 'Follow-up deleted successfully' });
-      } else {
-        res.status(404).json({ message: 'Follow-up not found' });
-      }
+        const leadId = req.params.leadId;
+        console.log("LeadId:", leadId);
+        const user = req.user;
+        console.log("User:", user);
+
+        const result = await followUpService.deleteFollowUp(leadId, user);
+        
+        if (!result) {
+            return res.status(404).json({ message: 'FollowUp not found' });
+        }
+
+        res.status(200).json({ message: 'FollowUp deleted successfully' });
     } catch (error) {
-      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
-  },
+},
 };
 
 module.exports = followUpController;

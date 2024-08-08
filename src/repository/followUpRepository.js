@@ -1,6 +1,7 @@
 const dataSource = require("../infrastructure/psql");
 const FollowUp = require('../entities/followUp'); // Adjust the path as needed
 const Lead = require('../entities/lead');
+const followUp = require("../entities/followUp");
 
 const followUpRepository = {
   createFollowUp: async (followUpData) => {
@@ -26,24 +27,75 @@ const followUpRepository = {
   },
 
   update: async (id, data) => {
-    const repository = dataSource.getRepository(FollowUp);
-    const followUp = await repository.findOne(id);
-    if (followUp) {
-      repository.merge(followUp, data);
-      return await repository.save(followUp);
-    }
-    return null;
-  },
+    const followUpRepository = dataSource.getRepository(followUp);
+    const leadRepository = dataSource.getRepository(Lead);
+    const followUpEntity = await followUpRepository.findOneBy({ leadId: id });
 
-  delete: async (id) => {
-    const repository = dataSource.getRepository(FollowUp);
-    const followUp = await repository.findOne(id);
-    if (followUp) {
-      await repository.remove(followUp);
-      return true;
+    if (followUpEntity) {
+        const updatedFollowUpData = {
+            ...followUpEntity,
+            followUpDetail: data.followUpDetail,
+            leadName: data.leadName,
+            phone: data.phone,
+            email: data.email,
+            updated_at: new Date() 
+        };
+
+        const leadEntity = await leadRepository.findOneBy({ leadId: id });
+        if (leadEntity) {
+            const updatedLeadData = {
+                ...leadEntity,
+                otherDetail: data.otherDetail,
+                leadName: data.leadName,
+                customerFeedBack:data.customerFeedBack,
+                phone: data.phone,
+                email: data.email,
+                updated_at: new Date()  
+            };
+
+            await followUpRepository.save(updatedFollowUpData);
+            await leadRepository.save(updatedLeadData);
+
+            console.log("Update successful");
+            return true;
+        } else {
+            console.log("No corresponding lead entity found for update.");
+            return false;
+        }
+    } else {
+        console.log("No 'other' entity found with leadId:", id);
+        return false;
     }
-    return false;
-  },
+},
+
+  
+delete: async (id, user) => {
+  try {
+      const followUpRepository = dataSource.getRepository(followUp);
+      const leadRepository = dataSource.getRepository(Lead);
+
+      const otherEntity = await followUpRepository.findOneBy({ leadId: id });
+
+      if (otherEntity) {
+          await followUpRepository.remove(otherEntity);
+
+          const leadEntity = await leadRepository.findOneBy({ leadId: id });
+          if (leadEntity) {
+              await leadRepository.remove(leadEntity);
+          } else {
+              console.log(`No 'lead' entity found with leadId: ${id}`);
+          }
+
+          return true;
+      } else {
+          return false;
+      }
+  } catch (error) {
+      console.error("Error during deletion:", error);
+      return false;
+  }
+},
+
 };
 
 module.exports = followUpRepository;

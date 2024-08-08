@@ -11,8 +11,8 @@ const OtherService = {
     return await otherRepository.findById(leadId);
   },
 
-  updateOtherById: async (id, data) => {
-    return await otherRepository.update(id, data);
+  updateOtherById: async (leadId, data) => {
+    return await otherRepository.update(leadId, data);
   },
 
   deleteOthers: async (id,user) => {

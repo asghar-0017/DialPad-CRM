@@ -5,6 +5,8 @@ const {checkRole}=require('../middleware/checkRole')
 const followUpRoute = (app) => {
     app.get('/get-followUp', adminAuth.authenticate, checkRole(['admin', 'agent']), followUpController.getAllFollowUps);
     app.get('/get-followUp/:leadId', adminAuth.authenticate, checkRole(['admin', 'agent']), followUpController.getFollowUpById);
+    app.put('/update-followUp/:leadId', adminAuth.authenticate, checkRole(['admin', 'agent']), followUpController.updateFollowUp);
+    app.delete('/delete-followUp/:leadId', adminAuth.authenticate, checkRole(['admin']), followUpController.deleteFollowUp);
 
 };
 

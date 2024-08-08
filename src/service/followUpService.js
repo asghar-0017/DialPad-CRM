@@ -15,8 +15,8 @@ const followUpService = {
     return await followUpRepository.update(id, data);
   },
 
-  deleteFollowUp: async (id) => {
-    return await followUpRepository.delete(id);
+  deleteFollowUp: async (id,user) => {
+    return await followUpRepository.delete(id,user);
   },
 };
 
