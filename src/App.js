@@ -1,53 +1,52 @@
 const express = require('express');
+const http = require('http');
 const dotenv = require('dotenv');
-const { logger } = require('../logger'); // Adjust path as needed
+const { logger } = require('../logger');
 const AdminAuthRoute = require('./routes/authRoute');
 const agentRoute = require('./routes/agentRoute');
 const leadRoute = require('./routes/leadRoute');
 const followUpRoute = require('./routes/followUpRoute');
-const otherRoute = require('./routes/otherRoute'); // Adjust path as needed
-const dataSource = require('./infrastructure/psql'); // Adjust path as needed
+const otherRoute = require('./routes/otherRoute');
+const dataSource = require('./infrastructure/psql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { Server } = require('socket.io');
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
 
-// Middleware for parsing JSON and URL-encoded data
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors({ origin: '*' }));
 
-// CORS configuration
-app.use(cors({
-  origin: '*',
-}));
-
-// Log incoming requests
 app.use((req, res, next) => {
   logger.info(`Received request: ${req.method} ${req.url}`);
   logger.info(`Request body: ${JSON.stringify(req.body)}`);
   next();
 });
 
-// Test endpoint
 app.get('/', async (req, res) => {
-  const result = {
+  res.send({
     code: 200,
     status: 'OK',
     message: 'Express server is running',
-  };
-  res.send(result);
+  });
 });
 
-// Route configurations
 AdminAuthRoute(app);
 agentRoute(app);
-leadRoute(app);
+leadRoute(app);  // Route including socket.io 
 followUpRoute(app);
 otherRoute(app);
 
-// Error handling middleware for JSON parsing errors
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
     logger.error('Bad JSON: ', err.message);
@@ -56,15 +55,27 @@ app.use((err, req, res, next) => {
   next();
 });
 
-// Start server
-const startServer = async () => {
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+
+  socket.on('updateOther', (data) => {
+    io.emit('refreshData', data);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+const StartServer = async () => {
   try {
     await dataSource.initialize();
     logger.info("Database connection has been established");
 
     const PORT = process.env.PORT || 4000;
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       logger.info(`Server is listening on ${PORT}`);
+      console.log('Socket.io instance is initialized');
     });
   } catch (error) {
     logger.error(error.message);
@@ -72,4 +83,5 @@ const startServer = async () => {
   }
 };
 
-module.exports = startServer;
+// Export both the server and the io instance
+module.exports = { StartServer, io };

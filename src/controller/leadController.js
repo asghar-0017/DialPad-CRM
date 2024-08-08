@@ -2,8 +2,8 @@ const leadService = require('../service/leadService');
 const leadId = require('../utils/token');
 const fs = require('fs');
 const path = require('path');
-const csv = require('csv-parser');
 const xlsx = require('xlsx');
+const { io } = require('../App'); // Import io instance from app.js
 
 const leadController = {
     createLead: async (req, res) => {
@@ -20,6 +20,13 @@ const leadController = {
             }
 
             const lead = await leadService.leadCreateService(data, user);
+            console.log("Io instance:", io);
+            if (io) {
+                console.log('Emitting leadCreated event');
+                io.emit('leadCreated', lead);
+            } else {
+                console.error('Socket.io instance is not initialized');
+            }
             res.status(201).json({ message: 'Lead created successfully', lead });
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -33,6 +40,9 @@ const leadController = {
                 if (lead.customer_feedBack !== 'followUp') {
                     delete lead.followUpDetail;
                 }
+                if (lead.customer_feedBack !== 'other') {
+                    delete lead.otherDetail;
+                }
                 return lead;
             });
 
@@ -45,30 +55,26 @@ const leadController = {
     updateLead: async (req, res) => {
         try {
             const data = req.body;
-            console.log("data",data)
             const leadId = req.params.leadId;
-            console.log("LeadId",leadId)
             const user = req.user;
-            console.log("User",user)
-            
 
             const lead = await leadService.updateLeadByService({ data, leadId, user });
             if (lead && lead.customer_feedBack !== 'followUp') {
                 delete lead.followUpDetail;
             }
-            console.log("lead",lead)
-            res.status(201).json({ message: 'Lead Updated successfully', data:lead });
+
+            res.status(201).json({ message: 'Lead Updated successfully', data: lead });
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
     },
+
     saveExcelFileData: async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ message: 'Please upload an Excel file.' });
         }
 
         const filePath = path.join(__dirname, '../uploads/', req.file.filename);
-        console.log("Path", filePath);
 
         try {
             const workbook = xlsx.readFile(filePath);
@@ -76,11 +82,10 @@ const leadController = {
             const sheet = workbook.Sheets[sheetName];
             const results = xlsx.utils.sheet_to_json(sheet);
 
-            console.log("Excel Data:", results);
-
             if (results.length === 0) {
                 return res.status(400).json({ message: 'No data found in the Excel file.' });
             }
+
             const requiredColumns = ['leadName', 'phone', 'email','address','website','customer_feedBack'];
             const sampleRow = results[0];
             const missingColumns = requiredColumns.filter(col => !sampleRow.hasOwnProperty(col));
@@ -92,7 +97,7 @@ const leadController = {
             for (const row of results) {
                 if (!row.leadName || !row.phone || !row.email) {
                     console.error("Missing required fields in row:", row);
-                    continue; 
+                    continue;
                 }
                 row.leadId = leadId();
                 const leadData = {
@@ -115,37 +120,33 @@ const leadController = {
             fs.unlinkSync(filePath);
         }
     },
-    getLeadById:async(req,res)=>{
-        try{
-            const leadId=req.params.leadId
-            const data = await leadService.leadGetServiceById(leadId)
-            if(data){
-                res.status(200).send({message:"success",data:data})
-            }
-        }catch(error){
-            throw error
 
-        }
-    },
-    deleteLead:async(req,res)=>{
+    getLeadById: async (req, res) => {
         try {
             const leadId = req.params.leadId;
-            console.log("LeadId:", leadId);
-            const user = req.user;
-            console.log("User:", user);
-    
-            const result = await leadService.deleteLeadById(leadId, user);
-            
-            if (!result) {
-                return res.status(404).json({ message: 'Lead Data not found' });
+            const data = await leadService.leadGetServiceById(leadId);
+            if (data) {
+                res.status(200).send({ message: "success", data: data });
             }
-            res.status(200).json({ message: 'Lead Data deleted successfully',data:result });
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
-    
-    }
+    },
 
+    deleteLead: async (req, res) => {
+        try {
+            const leadId = req.params.leadId;
+            const user = req.user;
+
+            const result = await leadService.deleteLeadById(leadId, user);
+            if (!result) {
+                return res.status(404).json({ message: 'Lead Data not found' });
+            }
+            res.status(200).json({ message: 'Lead Data deleted successfully', data: result });
+        } catch (error) {
+            res.status(500).json({ message: 'Internal Server Error', error: error.message });
+        }
+    }
 };
 
 module.exports = { leadController };
