@@ -24,6 +24,10 @@ const leadRepository = {
     },
     updateLeadData: async ({ data, leadId, user }) => {
         try {
+            if (!leadId) {
+                throw new Error('leadId is required');
+            }
+    
             let lead;
             if (user.role === 'agent') {
                 lead = await dataSource.getRepository(Lead).findOne({ where: { leadId, agent: user.id } });
@@ -34,32 +38,35 @@ const leadRepository = {
             if (!lead) {
                 throw new Error('Lead not found or does not belong to the agent');
             }
+    
             console.log("Lead in Repo", lead);
     
             if (data.customer_feedBack === 'followUp') {
                 const followUpData = {
                     followUpDetail: data.followUpDetail,
-                    leadId: data.leadId,
+                    leadId: lead.leadId, 
+                    address: data.address,
                     leadName: data.leadName,
                     phone: data.phone,
                     email: data.email,
-                    role: user.role,
+                    role:user.role
                 };
-    
+                console.log("lead In followup",followUpData.leadId)
                 const existingFollowUp = await dataSource.getRepository(FollowUp).findOne({ where: { leadId } });
+                console.log("Is Existing FollowUp", existingFollowUp);
                 if (existingFollowUp) {
                     await dataSource.getRepository(FollowUp).update({ leadId }, followUpData);
                 } else {
                     await dataSource.getRepository(FollowUp).save(followUpData);
                 }
-            }if (data.customer_feedBack === 'other') {
+            } else if (data.customer_feedBack === 'other') {
                 const otherData = {
                     otherDetail: data.otherDetail,
-                    leadId: data.leadId,
+                    leadId: lead.leadId,
                     leadName: data.leadName,
                     phone: data.phone,
                     email: data.email,
-                    role: user.role,
+                    role:user.role
                 };
     
                 const existingOther = await dataSource.getRepository(other).findOne({ where: { leadId } });
@@ -68,32 +75,23 @@ const leadRepository = {
                 } else {
                     await dataSource.getRepository(other).save(otherData);
                 }
-            } 
-            else {
-                // Remove follow-up if customer_feedBack is not 'followUp'
+            } else {
                 await dataSource.getRepository(FollowUp).delete({ leadId });
                 await dataSource.getRepository(other).delete({ leadId });
                 data.followUpDetail = null; 
                 data.otherDetail = null; 
             }
     
-            // Update the lead data
             await dataSource.getRepository(Lead).update({ leadId }, data);
             const updatedLead = await dataSource.getRepository(Lead).findOne({ where: { leadId } });
     
-            // Remove followUpDetail from the response if it exists and customer_feedBack is not 'followUp'
-            if (updatedLead && updatedLead.customer_feedBack !== 'followUp') {
-                delete updatedLead.followUpDetail;
-            }
-            if (updatedLead && updatedLead.customer_feedBack !== 'other') {
-                delete updatedLead.otherDetail;
-            }
-    
             return updatedLead;
         } catch (error) {
+            console.error('Error updating lead data:', error);
             throw error;
         }
     },
+    
     getLeadDataById: async (leadId) => {
         try {
             const data=  await dataSource.getRepository(Lead).findOne({ where: { leadId } });

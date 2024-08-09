@@ -1,50 +1,63 @@
 const adminService = require('../service/authService');
-const  generateResetCode  = require('../utils/token');
+const generateResetCode = require('../utils/token');
 const { sendResetEmail } = require('../service/resetEmail');
-const redis = require('../infrastructure/redis');
-
 const jwt = require('jsonwebtoken');
+const authRepository=require('../repository/authRepository')
+const {logger}=require('../../logger')
 
-const secretKey = process.env.SCERET_KEY; // Replace with your secret key
+require('dotenv').config()
 
+const secretKey = process.env.SCERET_KEY;
 
 const adminAuth = {
-  login: async (request, response) => {
+  login: async (req,res) => {
     try {
-      const adminData = request.body;
-      const data = await adminService.login(adminData);
-      if (data) {
-        await adminService.storeAdminToken(data.token);
-        response.status(200).send({ message: 'Login Success', data });
+      const { userName, password } = req.body;
+      const admin = await adminService.login( { userName, password })
+      if(admin){
+        res.status(200).send({token:admin})
       }else{
-        response.status(404).send({message:"admin not Found"})
+        res.status(404).send({message:"invalid UserName and Password"})
       }
-    } catch (error) {
-      throw error
     }
-  },
- 
-  logout: async (request, response) => {
-    try {
-      const token = request.headers.authorization.split(' ')[1];
-      const isValidToken = await adminService.validateAdminToken(token);
-      if (isValidToken) {
-        await adminService.logout(token);
-        response.status(200).send({ message: 'Logout Success' });
-      } else {
-        response.status(400).send({ message: 'Failed to Logout: Invalid token or user.' });
-      }
-    } catch (error) {
-      response.status(500).send({ message: 'Internal Server Error', error: error.message });
+     catch (error) {
+      logger.error('Error during admin login', error);
+      throw error;
     }
   },
 
+    logout: async (req, res) => {
+      try {
+        // const authHeader = req.headers.authorization;
+        // if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        //   return res.status(401).send({ message: 'No token provided' });
+        // }
+        // const token = authHeader.split(' ')[1];
+        const {token}=req.body
+        const admin = await authRepository.findTokenByToken(token);
+
+        if (admin) {
+          admin.verifyToken = ''; 
+          await authRepository.save(admin);
+          logger.info('Admin Logout Success');
+          res.status(200).send({ message: 'Logged out successfully' });
+        } else {
+          res.status(401).send({ message: 'Invalid token' });
+        }
+      } catch (error) {
+        logger.error('Error during admin logout', error);
+        res.status(500).send({ message: 'Internal Server Error', error: error.message });
+        throw error
+      }
+    },
+    
   forgotPassword: async (request, response) => {
     try {
       const { email } = request.body;
-      if(email === process.env.ADMIN_EMAIL){
+      if (email === "rajaasgharali009@gmail.com") {
         const code = generateResetCode();
-        await adminService.saveResetCode(code);
+        console.log("Generate code",code)
+        await adminService.saveResetCode(code,email);
         await sendResetEmail(email, code);
         response.status(200).send({ message: 'Password reset code sent.' });
       } else {
@@ -60,9 +73,11 @@ const adminAuth = {
       const { code } = request.body;
       const isCodeValid = await adminService.validateResetCode(code);
       if (isCodeValid) {
-        await redis.del(`${code}:resetCode`);
-        response.status(200).send({ message: 'Code verified successfully.' });
+        const admin = await authRepository.findByToken(code);
+          admin.resetCode = ''; 
+          await authRepository.save(admin);
 
+        response.status(200).send({ message: 'Code verified successfully.' });
       } else {
         response.status(400).send({ message: 'Invalid or expired code.' });
       }
@@ -74,78 +89,67 @@ const adminAuth = {
   resetPassword: async (request, response) => {
     try {
       const { newPassword } = request.body;
-        await adminService.updatePassword(newPassword);
-        response.status(200).send({ message: 'Password reset successfully.' });
- 
+      await adminService.updatePassword(newPassword);
+      response.status(200).send({ message: 'Password reset successfully.' });
     } catch (error) {
       response.status(500).send({ message: 'Internal Server Error', error: error.message });
     }
   },
-   authenticate :async (request, response, next) => {
+
+  authenticate: async (request, response, next) => {
     try {
       console.log("API hit");
       const authHeader = request.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return response.status(401).send({ message: 'No token provided' });
       }
-  
+
       const token = authHeader.split(' ')[1];
       const isValidToken = await adminService.validateAdminToken(token);
+      console.log("Is validate Token",isValidToken)
       if (!isValidToken) {
         return response.status(401).send({ message: 'Invalid token' });
       }
-  
-      const storedToken = await redis.get(`admin:${token}`);
-      if (storedToken !== token) {
-        return response.status(401).send({ message: 'Token mismatch' });
-      }
-  
-      const decoded = jwt.verify(token, process.env.SCERET_KEY);
-      const user = await adminService.findUserById(decoded.userName); // Adjust to your method for getting user by ID
+
+      const decoded = jwt.verify(token, secretKey);
+      const user = await adminService.findUserById(decoded.userName);
+      console.log("User",user)
       if (!user) {
         return response.status(401).send({ message: 'User not found' });
       }
-  
-      request.user = user; // Set req.user here
+
+      request.user = user;
       console.log("User", user);
-      next();
+      next();   
     } catch (error) {
       response.status(500).send({ message: 'Internal Server Error', error: error.message });
     }
   },
-  
-  
-  
 
   verifyToken: async (request, response) => {
     try {
       const authHeader = request.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return response.status(401).send({code:401, message: 'No token provided' });
+        return response.status(401).send({ code: 401, message: 'No token provided' });
       }
 
       const token = authHeader.split(' ')[1];
       const decoded = jwt.verify(token, secretKey);
-      
-      const storedToken = await redis.get(`admin:${token}`);
-      if (storedToken !== token) {
-        return response.status(401).send({code:401, message: 'Token mismatch' });
-      }
+
 
       const user = await adminService.findUserById(decoded.userName);
       if (!user) {
-        return response.status(401).send({ code:401,message: 'Invalid token' });
+        return response.status(401).send({ code: 401, message: 'Invalid token' });
       }
 
-      return response.status(200).send({code:200, isValid: true });
+      return response.status(200).send({ code: 200, isValid: true });
     } catch (error) {
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-        return response.status(401).send({code:401, message: 'Invalid token' });
+        return response.status(401).send({ code: 401, message: 'Invalid token' });
       }
-      return response.status(500).send({code:401, message: 'Internal Server Error', error: error.message });
+      return response.status(500).send({ code: 500, message: 'Internal Server Error', error: error.message });
     }
   },
 };
 
-
-module.exports = {adminAuth} ;
+module.exports = { adminAuth };

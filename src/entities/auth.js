@@ -23,6 +23,14 @@ module.exports = new EntitySchema({
         type: "varchar",
         default: "admin",
       },
+      verifyToken:{
+        type: "varchar",
+        default: ''
+      },
+      resetCode:{
+        type: "varchar",
+        default: ''
+      },
       created_at: {
         type: "timestamp",
         default: () => "CURRENT_TIMESTAMP",

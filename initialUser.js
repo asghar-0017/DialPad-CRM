@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const dataSource = require('./src/infrastructure/psql');
 const AdminAuth = require('./src/entities/auth'); // Adjust this import according to your entities structure
+require('dotenv').config()
 
 const initializeAdmin = async () => {
   try {
@@ -11,7 +12,7 @@ const initializeAdmin = async () => {
 
     if (!admin) {
       const hashedPassword = await bcrypt.hash('admin', 10);
-      const newAdmin = adminRepository.create({ userName: 'admin', password: hashedPassword,email:'admin@softmarksolutions.com' });
+      const newAdmin = adminRepository.create({ userName: 'admin', password: hashedPassword,email:process.env.ADMIN_EMAIL });
       await adminRepository.save(newAdmin);
       console.log('Initial admin user created');
     } else {

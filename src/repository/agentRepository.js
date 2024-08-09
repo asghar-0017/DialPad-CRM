@@ -51,5 +51,31 @@ findByEmail: async (email) => {
     }
   }
 };
+const agent = require('../entities/agent');
+const dataSouece=require('../infrastructure/psql')
 
-module.exports = agentRepository;
+const authAgentRepository = {
+  findByUserName: async (userName) => {
+    return await dataSouece.getRepository(agent).findOne({ where: { userName } });
+  },
+
+  findByEmail: async (email) => {
+    return await dataSouece.getRepository(agent).findOne({ where: { email } });
+  },
+
+  findByToken: async (token) => {
+    return await dataSouece.getRepository(agent).findOne({ where: { resetCode: token } });
+  },
+
+  save: async (admin) => {
+    return await dataSouece.getRepository(agent).save(admin);
+  },
+
+  findTokenByToken: async (token) => {
+    return await dataSouece.getRepository(agent).findOne({ where: { verifyToken: token } });
+
+  },
+};
+
+module.exports = {agentRepository,authAgentRepository};
+

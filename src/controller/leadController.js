@@ -40,13 +40,7 @@ const leadController = {
                 if (lead.customer_feedBack !== 'followUp') {
                     delete lead.followUpDetail;
                 }
-                if (lead.customer_feedBack === 'followUp') {
-                    delete lead.followUpDetail;
-                }
                 if (lead.customer_feedBack !== 'other') {
-                    delete lead.otherDetail;
-                }
-                if (lead.customer_feedBack === 'other') {
                     delete lead.otherDetail;
                 }
                 return lead;
@@ -67,6 +61,9 @@ const leadController = {
             const lead = await leadService.updateLeadByService({ data, leadId, user });
             if (lead && lead.customer_feedBack !== 'followUp') {
                 delete lead.followUpDetail;
+            }
+            if (lead && lead.customer_feedBack !== 'other') {
+                delete lead.otherDetail;
             }
 
             res.status(201).json({ message: 'Lead Updated successfully', data: lead });
