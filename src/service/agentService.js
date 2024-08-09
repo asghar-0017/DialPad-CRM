@@ -99,17 +99,25 @@ const agentService = {
       throw error
     }
   },
-  updateAssignTaskToAgentById:async({agentId,taskId},task)=>{
+  getAssignTaskToAgentByTaskId:async(taskId)=>{
     try{
-      const data=await agentRepository.updateAssignTaskToAgentById({agentId,taskId},task)
+      const data=await agentRepository.getAssignTaskToAgentByTaskId(taskId)
       return data
     }catch(error){
       throw error
     }
   },
-  deleteAssignTaskToAgentById:async(agenId)=>{
+  updateAssignTaskToAgentById:async(agentId,taskId,task)=>{
     try{
-      const data=await agentRepository.deleteAssignTaskToAgentById(agenId)
+      const data=await agentRepository.updateAssignTaskToAgentById(agentId,taskId,task)
+      return data
+    }catch(error){
+      throw error
+    }
+  },
+  deleteAssignTaskToAgentById:async(agenId,taskId)=>{
+    try{
+      const data=await agentRepository.deleteAssignTaskToAgentById(agenId,taskId)
       return data
     }catch(error){
       throw error

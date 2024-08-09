@@ -128,35 +128,54 @@ const agentController = {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
-    updateAssignTaskById:async(req,res)=>{
+    getAssignTaskByTaskId:async (req, res) => {
       try {
-        const {agentId,taskId} = req.params.agentId;
-        const task=req.body
-        const data = await agentService.updateAssignTaskToAgentById({agentId,taskId},task);
+        const taskId = req.params.taskId;
+        const data = await agentService.getAssignTaskToAgentByTaskId(taskId);
         if (data === 'Data Not Found') {
           res.status(404).send({ message: 'Data Not Found' });
         } else {
-          res.status(200).send({ message: 'Task Updated SuccessFully', data });
+          res.status(200).send({ message: 'Success', data });
         }
       } catch (error) {
-        console.error('Error Updating tasks:', error.message);
+        console.error('Error fetching tasks by agent ID:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
-    deleteAssignTaskById:async(req,res)=>{
+    updateAssignTaskById: async (req, res) => {
       try {
-        const agentId = req.params.agentId;
-        const data = await agentService.deleteAssignTaskToAgentById(agentId);
+        const { agentId, taskId } = req.params;  // Correct destructuring
+        const bodyData = req.body;
+        console.log("agentId",agentId)
+        console.log("TaskId",taskId)
+        console.log("task",bodyData)
+        const data = await agentService.updateAssignTaskToAgentById(agentId, taskId, bodyData);
         if (data === 'Data Not Found') {
           res.status(404).send({ message: 'Data Not Found' });
         } else {
-          res.status(200).send({ message: 'Task Deleted SuccessFully', data });
+          res.status(200).send({ message: 'Task Updated Successfully', data });
         }
       } catch (error) {
-        console.error('Error Deleting tasks:', error.message);
+        console.error('Error Updating task:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    },
+    
+    deleteAssignTaskById: async (req, res) => {
+      try {
+        const { agentId, taskId } = req.params;  // Pass both agentId and taskId
+        const data = await agentService.deleteAssignTaskToAgentById(agentId, taskId);
+        if (data === 'Data Not Found') {
+          res.status(404).send({ message: 'Data Not Found' });
+        } else {
+          res.status(200).send({ message: 'Task Deleted Successfully', data });
+        }
+      } catch (error) {
+        console.error('Error Deleting task:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
       }
     }
+    
 
     
 
@@ -309,7 +328,7 @@ const agentAuthController = {
       const decoded = jwt.verify(token, secretKey);
 
 
-      const user = await adminService.findUserById(decoded.userName);
+      const user = await agentAuthService.findUserById(decoded.userName);
       if (!user) {
         return response.status(401).send({ code: 401, message: 'Invalid token' });
       }

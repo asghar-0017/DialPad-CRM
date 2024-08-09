@@ -5,7 +5,7 @@ const {checkRole}=require('../middleware/checkRole')
 const upload = require('../utils/upload')
 
 const leadRoute = (app) => {
-    app.post('/create-lead', agentAuthController.authenticate, checkRole(['admin', 'agent']), leadController.createLead);
+    app.post('/create-lead', adminAuth.authenticate,agentAuthController.authenticate, checkRole(['admin', 'agent']), leadController.createLead);
     app.get('/get-lead', adminAuth.authenticate, checkRole(['admin', 'agent']), leadController.readLead);
     app.get('/get-lead/:leadId', adminAuth.authenticate, checkRole(['admin', 'agent']), leadController.getLeadById);
     app.put('/update-lead/:leadId', adminAuth.authenticate, checkRole(['admin', 'agent']), leadController.updateLead);

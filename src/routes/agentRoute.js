@@ -13,8 +13,9 @@ const agentRoute = (app) => {
     app.post('/assign-task/:agentId',adminAuth.authenticate, checkRole(['admin']), agentController.assignTask)
     app.get('/get-assign-task',adminAuth.authenticate, checkRole(['admin']), agentController.getAssignTask)
     app.get('/get-assign-task/:agentId', adminAuth.authenticate, checkRole(['admin']), agentController.getAssignTaskById);
+    app.get('/get-assign-task/:taskId', adminAuth.authenticate, checkRole(['admin']), agentController.getAssignTaskByTaskId);
     app.put('/update-assign-task/:agentId/:taskId', adminAuth.authenticate, checkRole(['admin']), agentController.updateAssignTaskById);
-    app.delete('/delete-assign-task/:agentId', adminAuth.authenticate, checkRole(['admin']), agentController.deleteAssignTaskById);
+    app.delete('/delete-assign-task/:agentId/:taskId', adminAuth.authenticate, checkRole(['admin']), agentController.deleteAssignTaskById);
 
 
     app.post('/login-agent',agentAuthController.login)
@@ -22,7 +23,7 @@ const agentRoute = (app) => {
     app.post('/verify-reset-code-agent', agentAuthController.verifyResetCode);
     app.post('/reset-password-agent', agentAuthController.resetPassword);
     app.post('/logout-agent', adminAuth.authenticate, agentAuthController.logout);
-    // app.post('/verify-token', adminAuth.verifyToken);
+    app.post('/verify-token', agentAuthController.verifyToken);
 
 };
 
