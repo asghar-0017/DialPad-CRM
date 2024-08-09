@@ -4,6 +4,10 @@ const { logger } = require('../../logger');
 const jwt = require('jsonwebtoken');
 const dataSource = require('../infrastructure/psql');
 const auth = require('../entities/auth');
+const { agentRepository } = require('../repository/agentRepository');
+const { adminAuth } = require('../controller/authController');
+const Agent=require('../entities/agent')
+const Admin=require('../entities/auth')
 require('dotenv').config(); // Ensure this line is at the top
 
 const secretKey = process.env.SCERET_KEY; // Fixed typo
@@ -32,29 +36,46 @@ const adminService = {
     }
   },
 
-   saveResetCode :async (code, email) => {
+  saveResetCode: async (code, email) => {
     try {
-      const admin = await authRepository.findByEmail(email);
-      if (!admin) {
-        throw new Error('Admin not found');
-      }
-      admin.resetCode = code;
-            await dataSource.getRepository(auth).save(admin);
-      
-      console.log("Reset code stored successfully:", code);
+        const admin = await authRepository.findByEmail(email);
+        const agent = await agentRepository.findByEmail(email);
+
+        if (!admin && !agent) {
+            throw new Error('No user found with the provided email');
+        }
+
+        // Save reset code for admin if found
+        if (admin) {
+            admin.resetCode = code;
+            await dataSource.getRepository(Admin).save(admin); // Use Auth entity class
+            console.log("Reset code stored successfully for admin:", code);
+        }
+
+        // Save reset code for agent if found
+        if (agent) {
+            agent.resetCode = code;
+            await dataSource.getRepository(Agent).save(agent); // Use Agent entity class
+            console.log("Reset code stored successfully for agent:", code);
+        }
     } catch (error) {
-      logger.error('Error saving reset code', error);
-      throw error;
+        logger.error('Error saving reset code', {
+            message: error.message,
+            stack: error.stack,
+            code: error.code, // Include error code if available
+        });
+        throw error;
     }
-  },
-  
+},
+
+
 
 
   validateAdminToken: async (token) => {
     try {
       console.log("Token",token)
       const storedToken = await authRepository.findTokenByToken(token)
-      console.log("Store token find",storedToken.verifyToken)
+      console.log("Store token find",storedToken)
        if(storedToken.verifyToken==token){
         return true
        }

@@ -1,6 +1,7 @@
 const {agentService,agentAuthService}= require('../service/agentService');
-const {agentRepository}=require('../repository/agentRepository')
+const {agentRepository,authAgentRepository}=require('../repository/agentRepository')
 const agentId=require('../utils/token')
+
 
 
 const agentController = {
@@ -77,7 +78,22 @@ const agentController = {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
         throw error
       }
+    },
+    assignTask:async(req,res)=>{
+      try{
+        const leadId=req.params.leadId
+        const task=req.body
+        const data=await agentService.assignTaskToAgent(leadId,task)
+        if(data){
+          res.status(200).send({message:"success",data:data})
+        }else{
+          res.status(404).send({message:"data Not Found"})
+        }
+      }catch(error){
+        throw error
+      }
     }
+
 
 };
   
@@ -87,7 +103,9 @@ const generateResetCode = require('../utils/token');
 const { sendResetEmail } = require('../service/resetEmail');
 const jwt = require('jsonwebtoken');
 const authRepository=require('../repository/authRepository')
-const {logger}=require('../../logger')
+const {logger}=require('../../logger');
+const dataSource = require('../infrastructure/psql');
+const { request } = require('express');
 
 require('dotenv').config()
 
@@ -139,28 +157,32 @@ const agentAuthController = {
   forgotPassword: async (request, response) => {
     try {
       const { email } = request.body;
-      if (email === "rajaasgharali009@gmail.com") {
+      const checkEmail=await authAgentRepository.findByEmail(email)
+      if(checkEmail){
         const code = generateResetCode();
         console.log("Generate code",code)
-        await adminService.saveResetCode(code,email);
+        await agentAuthService.saveResetCode(code,email);
         await sendResetEmail(email, code);
         response.status(200).send({ message: 'Password reset code sent.' });
       } else {
         response.status(400).send({ message: "Invalid Email Address" });
       }
-    } catch (error) {
+    }
+    catch (error) {
       response.status(500).send({ message: 'Internal Server Error', error: error.message });
     }
+  
   },
 
   verifyResetCode: async (request, response) => {
     try {
       const { code } = request.body;
-      const isCodeValid = await adminService.validateResetCode(code);
+      console.log("code",code)
+      const isCodeValid = await agentAuthService.validateResetCode(code);
       if (isCodeValid) {
-        const admin = await authRepository.findByToken(code);
-          admin.resetCode = ''; 
-          await authRepository.save(admin);
+        const agent = await authAgentRepository.findByToken(code);
+        agent.resetCode = ''; 
+          await authAgentRepository.save(agent);
 
         response.status(200).send({ message: 'Code verified successfully.' });
       } else {
@@ -174,7 +196,7 @@ const agentAuthController = {
   resetPassword: async (request, response) => {
     try {
       const { newPassword } = request.body;
-      await adminService.updatePassword(newPassword);
+      await agentAuthService.updatePassword(newPassword);
       response.status(200).send({ message: 'Password reset successfully.' });
     } catch (error) {
       response.status(500).send({ message: 'Internal Server Error', error: error.message });

@@ -4,6 +4,8 @@ const {agentRepository,authAgentRepository} = require('../repository/agentReposi
 
 const { logger } = require('../../logger');
 const jwt = require('jsonwebtoken');
+const Agent=require('../entities/agent')
+
 
 const secretKey = process.env.SCERET_KEY;
 
@@ -71,6 +73,14 @@ const agentService = {
     }catch(error){
       throw error
     }
+  },
+  assignTaskToAgent:async(agentId,task)=>{
+    try{
+      const data=await agentRepository.assignTaskToAgentById(agentId,task)
+      return data
+    }catch(error){
+      throw error
+    }
   }
 
  
@@ -79,8 +89,7 @@ const agentService = {
 
 const authRepository = require('../repository/authRepository');
 const dataSource = require('../infrastructure/psql');
-const auth = require('../entities/auth');
-require('dotenv').config(); // Ensure this line is at the top
+require('dotenv').config();
 
 if (!secretKey) {
   throw new Error('SECRET_KEY environment variable is not set.');
@@ -110,12 +119,12 @@ const agentAuthService = {
 
    saveResetCode :async (code, email) => {
     try {
-      const admin = await authRepository.findByEmail(email);
-      if (!admin) {
-        throw new Error('Admin not found');
+      const agent = await authAgentRepository.findByEmail(email);
+      if (!agent) {
+        throw new Error('agent not found');
       }
-      admin.resetCode = code;
-            await dataSource.getRepository(auth).save(admin);
+      agent.resetCode = code;
+            await dataSource.getRepository(Agent).save(agent);
       
       console.log("Reset code stored successfully:", code);
     } catch (error) {
@@ -144,7 +153,7 @@ const agentAuthService = {
 
   validateResetCode: async (code) => {
     try {
-     const token= await authRepository.findByToken(code); 
+     const token= await authAgentRepository.findByToken(code); 
       if(token){
         return true
       }else{
@@ -158,13 +167,13 @@ const agentAuthService = {
 
   updatePassword: async (newPassword) => {
     try {
-      const email = authRepository.email;
-      const admin = await authRepository.findByEmail(email);
+      const email = agentRepository.email;
+      const agent = await agentRepository.findByEmail(email);
 
-      if (admin) {
+      if (agent) {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        admin.password = hashedPassword;
-        await authRepository.save(admin);
+        agent.password = hashedPassword;
+        await authAgentRepository.save(agent);
         return true;
       }
 

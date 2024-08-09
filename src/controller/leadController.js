@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const xlsx = require('xlsx');
 const { io } = require('../App'); // Import io instance from app.js
+const dataSource = require('../infrastructure/psql');
 
 const leadController = {
     createLead: async (req, res) => {
@@ -80,6 +81,7 @@ const leadController = {
         const filePath = path.join(__dirname, '../uploads/', req.file.filename);
 
         try {
+            const user = req.user;
             const workbook = xlsx.readFile(filePath);
             const sheetName = workbook.SheetNames[0];
             const sheet = workbook.Sheets[sheetName];
@@ -112,6 +114,7 @@ const leadController = {
                     website: row.website,
                     customer_feedBack: row.customer_feedBack,
                     followUpDetail: row.followUpDetail,
+                    role:user.role
                 };
                 await leadService.leadCreateService(leadData, req.user);
             }
