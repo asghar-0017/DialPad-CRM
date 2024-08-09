@@ -35,6 +35,7 @@ const agentService = {
 //     }
 //   },
   agentCreateService: async (data) => {
+    console.log("Data in service",data)
     const password=data.password
     const hashedPassword = await bcrypt.hash(password, 10);
     data.password=hashedPassword
@@ -74,18 +75,47 @@ const agentService = {
       throw error
     }
   },
-  assignTaskToAgent:async(agentId,task)=>{
+  assignTaskToAgent:async(agentId,task,taskId)=>{
     try{
-      const data=await agentRepository.assignTaskToAgentById(agentId,task)
+      const data=await agentRepository.assignTaskToAgentById(agentId,task,taskId)
+      return data
+    }catch(error){
+      throw error
+    }
+  },
+  getAssignTaskToAgent:async()=>{
+    try{
+      const data=await agentRepository.getAssignTaskToAgent()
+      return data
+    }catch(error){
+      throw error
+    }
+  },
+  getAssignTaskToAgentById:async(agenId)=>{
+    try{
+      const data=await agentRepository.getAssignTaskToAgentById(agenId)
+      return data
+    }catch(error){
+      throw error
+    }
+  },
+  updateAssignTaskToAgentById:async({agentId,taskId},task)=>{
+    try{
+      const data=await agentRepository.updateAssignTaskToAgentById({agentId,taskId},task)
+      return data
+    }catch(error){
+      throw error
+    }
+  },
+  deleteAssignTaskToAgentById:async(agenId)=>{
+    try{
+      const data=await agentRepository.deleteAssignTaskToAgentById(agenId)
       return data
     }catch(error){
       throw error
     }
   }
-
- 
- 
-};
+}
 
 const authRepository = require('../repository/authRepository');
 const dataSource = require('../infrastructure/psql');
@@ -99,7 +129,8 @@ const agentAuthService = {
     try {
       const agent=await authAgentRepository.findByEmail(email)
       console.log("agent",agent)
-      if (agent) {
+      if (agent && password===agent.password) {
+        
         const match =  bcrypt.compare(password, agent.password);
         if (match) {
           const token = jwt.sign({ email: agent.email }, secretKey, { expiresIn: '10h' });
@@ -135,7 +166,7 @@ const agentAuthService = {
   
 
 
-  validateAdminToken: async (token) => {
+  validateAgentToken: async (token) => {
     try {
       console.log("Token",token)
       const storedToken = await authRepository.findTokenByToken(token)
@@ -193,6 +224,21 @@ const agentAuthService = {
       throw error;
     }
   },
+  validateAgentToken: async (token) => {
+    try {
+      console.log("Token",token)
+      const storedToken = await authAgentRepository.findTokenByToken(token)
+      console.log("Store token find",storedToken)
+       if(storedToken.verifyToken==token){
+        return true
+       }
+      
+    } catch (error) {
+      logger.error('Error validating admin token', error);
+      throw error;
+    }
+  },
+
 };
 
 module.exports = {agentService,agentAuthService};

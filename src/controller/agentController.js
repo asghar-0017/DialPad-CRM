@@ -1,6 +1,8 @@
 const {agentService,agentAuthService}= require('../service/agentService');
 const {agentRepository,authAgentRepository}=require('../repository/agentRepository')
 const agentId=require('../utils/token')
+const taskId=require('../utils/token')
+
 
 
 
@@ -12,6 +14,7 @@ const agentController = {
           console.log("data",data)
           const email = req.body.email;
           data.agentId=agentId()
+
           
           const existingAgent = await agentRepository.findByEmail(email);
           if (existingAgent) {
@@ -79,11 +82,29 @@ const agentController = {
         throw error
       }
     },
-    assignTask:async(req,res)=>{
+    assignTask: async (req, res) => {
+      try {
+        const leadId = req.params.leadId;
+        const task = req.body;
+        task.taskId = taskId(); 
+        console.log("Task Id", task.taskId);
+    
+        const data = await agentService.assignTaskToAgent(leadId, task, task.taskId);
+    
+        if (data) {
+          res.status(200).send({ message: "success", data: data });
+        } else {
+          res.status(404).send({ message: "data Not Found" });
+        }
+      } catch (error) {
+        console.error('Error in assignTask:', error.message);
+        res.status(500).send({ message: 'Error assigning task' });
+      }
+    },
+    
+    getAssignTask:async(req,res)=>{
       try{
-        const leadId=req.params.leadId
-        const task=req.body
-        const data=await agentService.assignTaskToAgent(leadId,task)
+        const data=await agentService.getAssignTaskToAgent()
         if(data){
           res.status(200).send({message:"success",data:data})
         }else{
@@ -92,7 +113,52 @@ const agentController = {
       }catch(error){
         throw error
       }
+    },
+    getAssignTaskById:async (req, res) => {
+      try {
+        const agentId = req.params.agentId;
+        const data = await agentService.getAssignTaskToAgentById(agentId);
+        if (data === 'Data Not Found') {
+          res.status(404).send({ message: 'Data Not Found' });
+        } else {
+          res.status(200).send({ message: 'Success', data });
+        }
+      } catch (error) {
+        console.error('Error fetching tasks by agent ID:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    },
+    updateAssignTaskById:async(req,res)=>{
+      try {
+        const {agentId,taskId} = req.params.agentId;
+        const task=req.body
+        const data = await agentService.updateAssignTaskToAgentById({agentId,taskId},task);
+        if (data === 'Data Not Found') {
+          res.status(404).send({ message: 'Data Not Found' });
+        } else {
+          res.status(200).send({ message: 'Task Updated SuccessFully', data });
+        }
+      } catch (error) {
+        console.error('Error Updating tasks:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    },
+    deleteAssignTaskById:async(req,res)=>{
+      try {
+        const agentId = req.params.agentId;
+        const data = await agentService.deleteAssignTaskToAgentById(agentId);
+        if (data === 'Data Not Found') {
+          res.status(404).send({ message: 'Data Not Found' });
+        } else {
+          res.status(200).send({ message: 'Task Deleted SuccessFully', data });
+        }
+      } catch (error) {
+        console.error('Error Deleting tasks:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
     }
+
+    
 
 
 };
@@ -131,24 +197,23 @@ const agentAuthController = {
 
     logout: async (req, res) => {
       try {
-        // const authHeader = req.headers.authorization;
-        // if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        //   return res.status(401).send({ message: 'No token provided' });
-        // }
-        // const token = authHeader.split(' ')[1];
-        const {token}=req.body
-        const admin = await authRepository.findTokenByToken(token);
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          return res.status(401).send({ message: 'No token provided' });
+        }
+        const token = authHeader.split(' ')[1];
+        const agent = await authAgentRepository.findTokenByToken(token);
 
-        if (admin) {
-          admin.verifyToken = ''; 
-          await authRepository.save(admin);
-          logger.info('Admin Logout Success');
+        if (agent) {
+          agent.verifyToken = ''; 
+          await authAgentRepository.save(agent);
+          logger.info('Agent Logout Success');
           res.status(200).send({ message: 'Logged out successfully' });
         } else {
           res.status(401).send({ message: 'Invalid token' });
         }
       } catch (error) {
-        logger.error('Error during admin logout', error);
+        logger.error('Error during agent logout', error);
         res.status(500).send({ message: 'Internal Server Error', error: error.message });
         throw error
       }
@@ -212,21 +277,21 @@ const agentAuthController = {
       }
 
       const token = authHeader.split(' ')[1];
-      const isValidToken = await adminService.validateAdminToken(token);
+      const isValidToken = await agentAuthService.validateAgentToken(token);
       console.log("Is validate Token",isValidToken)
       if (!isValidToken) {
         return response.status(401).send({ message: 'Invalid token' });
       }
 
       const decoded = jwt.verify(token, secretKey);
-      const user = await adminService.findUserById(decoded.userName);
+      const user = await agentAuthService.findUserById(decoded.userName);
       console.log("User",user)
       if (!user) {
         return response.status(401).send({ message: 'User not found' });
       }
 
       request.user = user;
-      console.log("User", user);
+      console.log("agent User", user);
       next();   
     } catch (error) {
       response.status(500).send({ message: 'Internal Server Error', error: error.message });

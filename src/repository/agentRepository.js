@@ -51,22 +51,23 @@ findByEmail: async (email) => {
       throw error
     }
   },
-  assignTaskToAgentById: async (agentId, task) => {
+  assignTaskToAgentById: async (agentId, task, taskId) => {
     try {
-      const agentRepository = dataSource.getRepository('agent'); // Use entity name as string
+      const agentRepository = dataSource.getRepository('agent');
       const agent = await agentRepository.findOne({ where: { agentId } });
   
       if (!agent) {
         console.log("No agent found with ID:", agentId);
-        return null; // Return null if no agent is found
+        return null;
       }
   
-      // Create and save the task
-      const agentTaskRepository = dataSource.getRepository('agentTask'); // Use entity name as string
+      const agentTaskRepository = dataSource.getRepository('agentTask');
       const taskEntity = agentTaskRepository.create({
-        task: task.task, // Assuming task has a `task` field
-        agent: agent, // Associate the task with the agent
-        leadId:agent.leadId
+        id: taskId,
+        task: task.task,
+        agent: agent, 
+        leadId: task.leadId,
+        taskId:task.taskId
       });
   
       await agentTaskRepository.save(taskEntity);
@@ -76,7 +77,72 @@ findByEmail: async (email) => {
       console.error('Error in assignTaskToAgentById:', error.message);
       throw new Error('Error assigning task to agent');
     }
+  },
+  
+  getAssignTaskToAgent:async()=>{
+    try{
+      const agentTaskRepository = dataSource.getRepository('agentTask');
+      const agent = await agentTaskRepository.find();
+      if(agent){
+        return agent
+      }else{
+        return 'Data Not Found'
+      }
+    }catch(error){
+      throw error
+    }
+  },
+  getAssignTaskToAgentById :async (agentId) => {
+    try {
+      const agentTaskRepository = dataSource.getRepository('agentTask');
+      const tasks = await agentTaskRepository.find({ where: { agentId } }); // Use find to get all records with the same agentId
+      
+      console.log("Tasks", tasks); 
+  
+      if (tasks.length > 0) {
+        return tasks;
+      } else {
+        return 'Data Not Found';
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      throw new Error('Error fetching tasks');
+    }
+  },
+  updateAssignTaskToAgentById:async ({agentId,taskId}, task) => {
+    try {
+      const agentTaskRepository = dataSource.getRepository('agentTask');
+        const existingTask = await agentTaskRepository.findOne({ where: { agentId } });
+      if (existingTask) {
+        await agentTaskRepository.update({ agentId,taskId} , task);
+          const updatedTask = await agentTaskRepository.findOne({ where: { agentId } });
+        return updatedTask;
+      } else {
+        return 'Data Not Found';
+      }
+    } catch (error) {
+      console.error('Error updating task for agent:', error.message);
+      throw new Error('Error updating task for agent');
+    }
+  },
+  deleteAssignTaskToAgentById:async (agentId) => {
+    try {
+      const agentTaskRepository = dataSource.getRepository('agentTask');
+        const existingTask = await agentTaskRepository.findOne({ where: { agentId } });
+      if (existingTask) {
+       const deleteTask= await agentTaskRepository.remove(existingTask);
+       return deleteTask
+         
+      } else {
+        return 'Data Not Found'; 
+      }
+    } catch (error) {
+      console.error('Error deleting task for agent:', error.message);
+      throw new Error('Error deleting task for agent');
+    }
   }
+  
+  
   
   
 };
@@ -96,8 +162,8 @@ const authAgentRepository = {
     return await dataSouece.getRepository(agent).findOne({ where: { resetCode: token } });
   },
 
-  save: async (admin) => {
-    return await dataSouece.getRepository(agent).save(admin);
+  save: async (agent) => {
+    return await dataSouece.getRepository(agent).save(agent);
   },
 
   findTokenByToken: async (token) => {

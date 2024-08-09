@@ -12,6 +12,9 @@ module.exports = new EntitySchema({
     agentId: {
       type: "int",
     },
+    taskId: {
+        type: "int",
+      },
     task: {
       type: "varchar",
       nullable: true,
