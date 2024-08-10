@@ -2,13 +2,13 @@ const dataSource = require("../infrastructure/psql");
 const Lead = require('../entities/lead');
 const FollowUp = require('../entities/followUp'); // Adjust the path as needed
 const other = require('../entities/otherDetail'); // Adjust the path as needed
-const lead = require("../entities/lead");
-const followUp = require("../entities/followUp");
 
 
 const leadRepository = {
+    
     saveLead: async (lead) => {
         try {
+            console.log("Lead in Repo",lead)
             return await dataSource.getRepository(Lead).save(lead);
         } catch (error) {
             throw error;

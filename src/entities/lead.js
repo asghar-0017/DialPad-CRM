@@ -30,7 +30,7 @@ module.exports = new EntitySchema({
     },
     customer_feedBack: {
       type: "enum",
-      enum: ['onGoing','voiceMail', 'hangUp', 'followUp','other'],
+      enum: ['onGoing', 'voiceMail', 'hangUp', 'followUp', 'other'],
     },
     followUpDetail: {
       type: "varchar",
@@ -43,7 +43,14 @@ module.exports = new EntitySchema({
     role: {
         type: "varchar",
     },
-  
+    agentId: {
+      type: 'int',
+      nullable: true,
+    },
+    createdByAdmin: {
+      type: "int",
+      nullable: true,
+    },
     created_at: {
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",
@@ -55,24 +62,17 @@ module.exports = new EntitySchema({
     },
   },
   relations: {
-    agent: {
-      type: "many-to-one",
-      target: "agent",
-      joinColumn: true,
-      nullable: true,
-      onDelete: "CASCADE",
-    },
     createdByAdmin: {
       type: "many-to-one",
       target: "auth",
-      joinColumn: true,
-      nullable: true,
-      onDelete: "CASCADE",
+      joinColumn: { name: "createdByAdmin", referencedColumnName: "id" },
+      onDelete: "SET NULL",
     },
-    followUps: {
-      type: "one-to-many",
-      target: "followUp",
-      mappedBy: "lead",
+    agent: {
+      type: "many-to-one",
+      target: "agent",
+      joinColumn: { name: "agentId", referencedColumnName: "agentId" },
+      onDelete: "SET NULL",
     },
   },
 });

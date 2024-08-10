@@ -133,26 +133,24 @@ if (!secretKey) {
   throw new Error('SECRET_KEY environment variable is not set.');
 }
 const agentAuthService = {
-  login: async ( { email, password }) => {
+  login: async ({ email, password }) => {
     try {
-      const agent=await authAgentRepository.findByEmail(email)
-      console.log("agent",agent)
-      if (agent && password===agent.password) {
-        
-        const match =  bcrypt.compare(password, agent.password);
-        if (match) {
-          const token = jwt.sign({ email: agent.email }, secretKey, { expiresIn: '10h' });
+      const agent = await authAgentRepository.findByEmail(email);
+      console.log("agent", agent);
+        if (agent && await bcrypt.compare(password, agent.password)) {
+        const token = jwt.sign({ email: agent.email }, secretKey, { expiresIn: '10h' });
           agent.verifyToken = token;
-          await agentRepository.saveAgent(agent);
-          logger.info('Login Success');
-          return token
-        }
+        await agentRepository.saveAgent(agent);
+  
+        logger.info('Login Success');
+        return token 
       }
-      logger.warn('Login Failed');
+        logger.warn('Login Failed');
       return null;
+  
     } catch (error) {
       logger.error('Error during Agent login', error);
-      throw error;
+      throw new Error('Error during Agent login');
     }
   },
 
@@ -225,7 +223,7 @@ const agentAuthService = {
 
   findUserById: async (userName) => {
     try {
-      const user = await authRepository.findByUserName(userName);
+      const user = await authAgentRepository.findByUserName(userName);
       return user;
     } catch (error) {
       logger.error('Error finding user by ID', error);
@@ -234,16 +232,11 @@ const agentAuthService = {
   },
   validateAgentToken: async (token) => {
     try {
-      console.log("Token",token)
-      const storedToken = await authAgentRepository.findTokenByToken(token)
-      console.log("Store token find",storedToken)
-       if(storedToken.verifyToken==token){
-        return true
-       }
-      
+      const storedToken = await authAgentRepository.findTokenByToken(token);
+      return storedToken && storedToken.verifyToken === token;
     } catch (error) {
-      logger.error('Error validating admin token', error);
-      throw error;
+      console.log('Error validating agent token', error);
+      return false; // Return false instead of throwing an error
     }
   },
 

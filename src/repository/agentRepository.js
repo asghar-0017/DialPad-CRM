@@ -64,10 +64,10 @@ findByEmail: async (email) => {
       const agentTaskRepository = dataSource.getRepository('agentTask');
       const taskEntity = agentTaskRepository.create({
         id: taskId,
-        task: task.task,
+        task: task.task || task,
         agent: agent, 
         leadId: task.leadId,
-        taskId:task.taskId
+        taskId:taskId
       });
   
       await agentTaskRepository.save(taskEntity);
@@ -95,7 +95,7 @@ findByEmail: async (email) => {
   getAssignTaskToAgentById :async (taskId) => {
     try {
       const agentTaskRepository = dataSource.getRepository('agentTask');
-      const tasks = await agentTaskRepository.findOne({ where: { taskId } });
+      const tasks = await agentTaskRepository.findOneBy( { taskId } );
       return tasks
     } catch (error) {
       console.error('Error fetching tasks:', error);

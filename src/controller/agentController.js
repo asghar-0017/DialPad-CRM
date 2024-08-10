@@ -2,7 +2,9 @@ const {agentService,agentAuthService}= require('../service/agentService');
 const {agentRepository,authAgentRepository}=require('../repository/agentRepository')
 const agentId=require('../utils/token')
 const taskId=require('../utils/token')
-
+const fs = require('fs');
+const path = require('path');
+const xlsx = require('xlsx');
 
 
 
@@ -174,8 +176,75 @@ const agentController = {
         console.error('Error Deleting task:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
       }
-    }
+    },
+    // const path = require('path');
+    // const fs = require('fs');
+    // const xlsx = require('xlsx');
+    // const agentRepository = require('../repositories/agentRepository'); // Adjust import based on your project structure
+    // const leadService = require('../services/leadService'); // Adjust import based on your project structure
     
+    saveExcelFileData: async (req, res) => {
+      if (!req.file) {
+          return res.status(400).json({ message: 'Please upload an Excel file.' });
+      }
+  
+      const filePath = path.join(__dirname, '../uploads/', req.file.filename);
+  
+      try {
+          const workbook = xlsx.readFile(filePath);
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const results = xlsx.utils.sheet_to_json(sheet);
+  
+          if (results.length === 0) {
+              return res.status(400).json({ message: 'No data found in the Excel file.' });
+          }
+  
+          const requiredColumns = ['agentId', 'task'];
+          const sampleRow = results[0];
+          const missingColumns = requiredColumns.filter(col => !sampleRow.hasOwnProperty(col));
+  
+          if (missingColumns.length > 0) {
+              return res.status(400).json({ message: `Missing required columns: ${missingColumns.join(', ')}` });
+          }
+  
+          const tasksAssigned = [];
+  
+          for (const row of results) {
+              if (!row.agentId || !row.task) {
+                  console.error("Missing required fields in row:", row);
+                  continue; // Skip this row and move to the next one
+              }
+  
+              const agent = await agentRepository.getAgentDataById(row.agentId);
+              if (agent) {
+                  row.taskId = taskId(); // Assuming taskId() is a function that generates a unique ID
+                  console.log("Task Id", taskId);
+  
+                  const assignedTask = await agentService.assignTaskToAgent(row.agentId, row.task, row.taskId);
+                  tasksAssigned.push(assignedTask);
+  
+              } else {
+                  console.error("Agent not found for agentId:", row.agentId);
+                  continue; // Skip this row if the agent is not found
+              }
+          }
+  
+          if (tasksAssigned.length > 0) {
+              return res.status(200).json({ message: 'Tasks assigned successfully', data: tasksAssigned });
+          } else {
+              return res.status(400).json({ message: 'No tasks were assigned due to missing data or agent not found.' });
+          }
+  
+      } catch (error) {
+          console.error('Error processing the Excel file:', error);
+          res.status(500).json({ message: 'Internal Server Error', error: error.message });
+      } finally {
+          fs.unlinkSync(filePath); // Clean up the uploaded file
+      }
+  },
+   
+
 
     
 

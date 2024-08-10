@@ -11,7 +11,7 @@ module.exports = new EntitySchema({
     },
     otherDetail: {
       type: "varchar",
-      nullable: true
+      nullable: true,
     },
     leadId: {
       type: "int",
@@ -28,6 +28,14 @@ module.exports = new EntitySchema({
     role: {
       type: "varchar",
     },
+    agentId: {
+      type: "int",
+      nullable: true,
+    },
+    createdByAdmin: {
+      type: "int",
+      nullable: true,
+    },
     created_at: {
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",
@@ -38,12 +46,18 @@ module.exports = new EntitySchema({
       onUpdate: "CURRENT_TIMESTAMP",
     },
   },
-  // relations: {
-  //   lead: {
-  //     type: "many-to-one",
-  //     target: "lead",
-  //     joinColumn: { name: "leadId", referencedColumnName: "leadId" },
-  //     onDelete: "CASCADE",
-  //   },
-  // },
+  relations: {
+    lead: {
+      type: "many-to-one",
+      target: "lead",
+      joinColumn: { name: "leadId", referencedColumnName: "leadId" },
+      onDelete: "CASCADE",
+    },
+    createdByAdmin: {
+      type: "many-to-one",
+      target: "auth",
+      joinColumn: { name: "createdByAdmin", referencedColumnName: "id" },
+      onDelete: "CASCADE",
+    },
+  },
 });

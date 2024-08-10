@@ -105,9 +105,10 @@ const adminAuth = {
       }
 
       const token = authHeader.split(' ')[1];
-      const isValidToken = await adminService.validateAdminToken(token);
+      const isValidToken = await adminService.validateAdminToken(token,next);
       console.log("Is validate Token",isValidToken)
       if (!isValidToken) {
+        next()
         return response.status(401).send({ message: 'Invalid token' });
       }
 
@@ -125,6 +126,8 @@ const adminAuth = {
       response.status(500).send({ message: 'Internal Server Error', error: error.message });
     }
   },
+ 
+  
 
   verifyToken: async (request, response) => {
     try {

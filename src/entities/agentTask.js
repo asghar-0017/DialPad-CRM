@@ -10,10 +10,10 @@ module.exports = new EntitySchema({
       generated: true,
     },
     agentId: {
-      type: "int",
+      type: "varchar",
     },
     taskId: {
-        type: "int",
+        type: "varchar",
       },
     task: {
       type: "varchar",

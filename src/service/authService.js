@@ -71,20 +71,15 @@ const adminService = {
 
 
 
-  validateAdminToken: async (token) => {
-    try {
-      console.log("Token",token)
-      const storedToken = await authRepository.findTokenByToken(token)
-      console.log("Store token find",storedToken)
-       if(storedToken.verifyToken==token){
-        return true
-       }
-      
-    } catch (error) {
-      logger.error('Error validating admin token', error);
-      throw error;
-    }
-  },
+validateAdminToken: async (token) => {
+  try {
+    const storedToken = await authRepository.findTokenByToken(token);
+    return storedToken && storedToken.verifyToken === token;
+  } catch (error) {
+    console.log('Error validating admin token', error);
+    return false; // Return false instead of throwing an error
+  }
+},
 
 
   validateResetCode: async (code) => {
