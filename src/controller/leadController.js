@@ -3,7 +3,7 @@ const leadId = require('../utils/token');
 const fs = require('fs');
 const path = require('path');
 const xlsx = require('xlsx');
-const { io } = require('../App'); // Import io instance from app.js
+const { io } = require('..'); // Import io instance from app.js
 const dataSource = require('../infrastructure/psql');
 
 const leadController = {

@@ -1,4 +1,4 @@
 
-const {StartServer}=require('./src/App')
+const {StartServer}=require('./src/index')
 
 StartServer();
