@@ -19,22 +19,29 @@ findByEmail: async (email) => {
 
     }
   },
-  getAgentDataById:async(agentId)=>{
-    try{
-      const data= await dataSource.getRepository(agentAuth).findOne({where:{agentId}})
-      if(data){
-        return data
-      }
-    }catch(error){
-      throw error
+  getAgentDataById: async (agentId) => {
+    try {
+        const data = await dataSource.getRepository(agentAuth).findOne({ where: { agentId } });
+        if (data) {   
+            return data;
+        } if(data=='null'){
+          return { message: `Data Not Found With ${agentId}` };
+        }
+    } catch (error) {
+        console.error('Error fetching agent data:', error);
+        throw error;
     }
-  },
+},
+
   updateAgentDataById:async(agentId,{firstName,lastName,email,phone},user)=>{
     try{
       const data= await dataSource.getRepository(agentAuth).findOne({where:{agentId}})
       if(data){
         const result = await dataSource.getRepository(agentAuth).update({ agentId }, {firstName,lastName,email,phone},user)
         return result
+      }
+      else{
+        return `Data Not Found With ${agentId}`
       }
     }catch(error){
       throw error
@@ -62,10 +69,12 @@ findByEmail: async (email) => {
         return null;
       }
       console.log("Agent",agent)
+
+   
       const agentTaskRepository = dataSource.getRepository('agentTask');
       const taskEntity = agentTaskRepository.create({
         id: taskId,
-        task: task.task || task,
+        task: task ,
         agent: agent, 
         leadId: task.leadId,
         taskId:taskId
@@ -98,6 +107,7 @@ findByEmail: async (email) => {
             taskId: task.taskId,
             agentId:task.agentId,
             task: task.task,
+            data:agentData
             // fullName: `${agentData.firstName} ${agentData.lastName}`
           };
         } 

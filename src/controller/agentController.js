@@ -33,7 +33,9 @@ const agentController = {
     getAgent:async(req,res)=>{
     try{
         const result=await agentService.agentGetInService(); 
-       
+        if(!result || result.length==0){
+          return res.status(404).send({Data:`Data not Found with ${agentId}`})
+        }
     const data = result.map(agent => {
         const { id,agentId, firstName, lastName, email, phone, role } = agent;
         return {id, agentId, firstName, lastName, email, phone, role };
@@ -45,21 +47,31 @@ const agentController = {
       }
     },
 
-    getAgentById:async(req,res)=>{
-      try{
-        const agentId=req.params.agentId
-        const result=await agentService.agentGetByIdInService(agentId); 
-       
-    const data = {
-         id:result.id,agentId:result.agentId, firstName:result.firstName, lastName:result.lastName, email:result.email, phone:result.phone, role : result.role
-    };
-        res.status(201).json({ message: 'success', data:data });
+    getAgentById: async (req, res) => {
+      try {
+          const agentId = req.params.agentId;
+          const result = await agentService.agentGetByIdInService(agentId); 
+  
+          if (result) {
+              const data = {
+                  id: result.id,
+                  agentId: result.agentId,
+                  firstName: result.firstName,
+                  lastName: result.lastName,
+                  email: result.email,
+                  phone: result.phone,
+                  role: result.role
+              };
+              res.status(200).json({ message: 'Success', data });
+          } else {
+              res.status(404).json({ message: `Data not found for agentId ${agentId}` });
+          }
+      } catch (error) {
+          console.error('Error fetching agent data:', error);
+          res.status(500).json({ message: 'Internal Server Error', error: error.message });
       }
-     catch (error) {
-        res.status(500).json({ message: 'Internal Server Error', error: error.message });
-      }
-    },
-
+  },
+  
     updateAgent:async(req,res)=>{
       try{
         const agentId=req.params.agentId
@@ -91,7 +103,7 @@ const agentController = {
         task.taskId = taskId(); 
         console.log("agent Id", agenId);
     
-        const data = await agentService.assignTaskToAgent(agenId, task, task.taskId);
+        const data = await agentService.assignTaskToAgent(agenId, task.task, task.taskId);
     
         if (data) {
           res.status(200).send({ message: "success", data: data });
@@ -224,20 +236,18 @@ const agentController = {
           for (const row of results) {
               if (!row.agentId || !row.task) {
                   console.error("Missing required fields in row:", row);
-                  continue; // Skip this row and move to the next one
+                  continue;
               }
   
               const agent = await agentRepository.getAgentDataById(row.agentId);
               if (agent) {
-                  row.taskId = taskId(); // Assuming taskId() is a function that generates a unique ID
-                  console.log("Task Id", taskId);
-  
+                  row.taskId = taskId();   
                   const assignedTask = await agentService.assignTaskToAgent(row.agentId, row.task, row.taskId);
                   tasksAssigned.push(assignedTask);
   
               } else {
                   console.error("Agent not found for agentId:", row.agentId);
-                  continue; // Skip this row if the agent is not found
+                  continue; 
               }
           }
   
@@ -251,7 +261,7 @@ const agentController = {
           console.error('Error processing the Excel file:', error);
           res.status(500).json({ message: 'Internal Server Error', error: error.message });
       } finally {
-          fs.unlinkSync(filePath); // Clean up the uploaded file
+          fs.unlinkSync(filePath); 
       }
   },
    

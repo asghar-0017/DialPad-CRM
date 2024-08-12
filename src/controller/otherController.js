@@ -23,17 +23,24 @@ const otherController = {
   
   getOtherUpById: async (req, res) => {
     try {
-      const { leadId } = req.params;
-      const other = await otherService.getOthersUpById(leadId);
-      if (other) {
-        res.status(200).json({ message: 'Success', data:other });
-      } else {
-        res.status(404).json({ message: 'other not found' });
-      }
+        const { leadId } = req.params;
+        const other = await otherService.getOthersUpById(leadId);
+
+        if (other) {
+            if (other.role === 'admin') {
+                const { id, leadId, leadName, phone, email, role, otherDetail } = other;
+                const data = { id, leadId, leadName, phone, email, role, otherDetail };
+                return res.status(200).json({ message: 'success', data });
+            } else {
+                return res.status(200).json({ message: 'success', data: other });
+            }
+        } else {
+            return res.status(404).json({ message: 'Data Not Found' });
+        }
     } catch (error) {
-      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
-  },
+},
 
   updateOther: async (req, res) => {
     try {

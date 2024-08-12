@@ -5,26 +5,52 @@ const followUpController = {
 
   getAllFollowUps: async (req, res) => {
     try {
-      const followUps = await followUpService.getAllFollowUps();
-      res.status(200).json({ message: 'success', data:followUps });
+        const followUps = await followUpService.getAllFollowUps();
+        if (!followUps || followUps.length === 0) {
+            return res.status(404).json({ message: 'No follow-ups found' });
+        }
+        const data = followUps.map(followUp => {
+            if (followUp.role === 'admin') {
+                const { id, leadId, leadName, phone, email, role, followUpDetail } = followUp;
+                return { id, leadId, leadName, phone, email, role, followUpDetail };
+            } else {
+                return followUp;
+            }
+        });
+        res.status(200).json({ message: 'success', data });
     } catch (error) {
-      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
-  },
+},
 
-  getFollowUpById: async (req, res) => {
-    try {
+
+getFollowUpById: async (req, res) => {
+  try {
       const { leadId } = req.params;
       const followUp = await followUpService.getFollowUpById(leadId);
-      if (followUp) {
-        res.status(200).json({ message: 'Success', data:followUp });
-      } else {
-        res.status(404).json({ message: 'Follow-up not found' });
+
+      if (!followUp) {
+          return res.status(404).json({ message: 'Follow-up not found' });
       }
-    } catch (error) {
+      const data = followUp.role === 'admin'
+          ? {
+              id: followUp.id,
+              leadId: followUp.leadId,
+              leadName: followUp.leadName,
+              phone: followUp.phone,
+              email: followUp.email,
+              role: followUp.role,
+              followUpDetail: followUp.followUpDetail
+            }
+          : followUp;
+
+      res.status(200).json({ message: 'Success', data });
+
+  } catch (error) {
       res.status(500).json({ message: 'Internal Server Error', error: error.message });
-    }
-  },
+  }
+},
+
 
   updateFollowUp: async (req, res) => {
     try {

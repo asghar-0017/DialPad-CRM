@@ -39,6 +39,9 @@ const leadController = {
     readLead: async (req, res) => {
         try {
             const data = await leadService.leadReadService();
+            if (!data || data.length === 0) {
+                return res.status(404).json({ message: 'Data Not Found' });
+            }
             const processedData = data.map(lead => {
                 if (lead.customer_feedBack !== 'followUp') {
                     delete lead.followUpDetail;
@@ -46,10 +49,16 @@ const leadController = {
                 if (lead.customer_feedBack !== 'other') {
                     delete lead.otherDetail;
                 }
+                if(lead.role=='admin'){
+                    delete lead.agentId;
+                }
+
                 return lead;
             });
 
+
             res.status(200).json({ message: 'Success', data: processedData });
+        
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }

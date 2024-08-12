@@ -17,7 +17,12 @@ const leadRepository = {
 
     getLeadData: async () => {
         try {
-            return await dataSource.getRepository(Lead).find();
+            const data=await dataSource.getRepository(Lead).find();
+            if(data){
+                return data
+            }else{
+                return "Data not Found"
+            }
         } catch (error) {
             throw error;
         }
