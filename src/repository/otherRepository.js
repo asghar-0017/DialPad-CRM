@@ -23,7 +23,6 @@ findAll: async () => {
         if (agentData) {
           return {
             ...data,
-            fullName: `${agentData.firstName} ${agentData.lastName}`
           };
         } else {
           return {

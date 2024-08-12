@@ -5,13 +5,22 @@ const otherController = {
 
   getAllOthers: async (req, res) => {
     try {
-      const other = await otherService.getAllOthers();
-      res.status(200).json({ message: 'success', data:other });
+      const { role } = req.user;
+      const others = await otherService.getAllOthers();
+  
+      if (role === 'admin') {
+        const data = others.map(other => {
+          const { id, leadId, leadName, phone, email, role, otherDetail } = other;
+          return { id, leadId, leadName, phone, email, role, otherDetail };
+        });
+        return res.status(200).json({ message: 'success', data });
+      } 
+        return res.status(200).json({ message: 'success', data: others });
     } catch (error) {
-      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+      return res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
   },
-
+  
   getOtherUpById: async (req, res) => {
     try {
       const { leadId } = req.params;
