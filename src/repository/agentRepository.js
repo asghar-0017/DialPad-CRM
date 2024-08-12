@@ -100,7 +100,7 @@ findByEmail: async (email) => {
       if (tasks.length > 0) {
         return tasks;
       } else {
-        return []; // Return an empty array if no tasks are found
+        return []; 
       }
     } catch (error) {
       console.error('Error fetching tasks:', error);
@@ -110,22 +110,19 @@ findByEmail: async (email) => {
   
   getAssignTaskToAgentByTaskId: async (taskId) => {
     try {
-      const agentTaskRepository = dataSource.getRepository('agentTask');
-      const task = await agentTaskRepository.findOne({ where: { id: taskId } }); 
-  
-      console.log("Task", task);
-  
+      const agentTaskRepository =  dataSource.getRepository('agentTask');
+      const task = await agentTaskRepository.findOne({ where: { taskId } });
+
       if (task) {
         return task;
       } else {
-        return 'Data Not Found';
+        return null; 
       }
     } catch (error) {
       console.error('Error fetching task:', error.message);
       throw new Error('Error fetching task');
     }
   },
-  
   updateAssignTaskToAgentById: async (agentId, taskId, updatedTaskData) => {
     try {
       const agentTaskRepository = dataSource.getRepository('agentTask');
@@ -172,7 +169,30 @@ findByEmail: async (email) => {
       console.error('Error deleting task for agent:', error.message);
       throw new Error('Error deleting task for agent');
     }
+  },
+  deleteAssignTaskToAgentByTaskId: async (taskId) => {
+    try {
+      const agentTaskRepository = dataSource.getRepository('agentTask');
+      
+      const existingTask = await agentTaskRepository.findOne({
+        where: {
+          taskId: taskId,
+  
+        }
+      });
+      
+      if (existingTask) {
+        const deleteTask = await agentTaskRepository.remove(existingTask);
+        return deleteTask;
+      } else {
+        return 'Data Not Found';
+      }
+    } catch (error) {
+      console.error('Error deleting task for agent:', error.message);
+      throw new Error('Error deleting task for agent');
+    }
   }
+  
   
   
   

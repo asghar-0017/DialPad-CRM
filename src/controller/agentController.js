@@ -130,20 +130,23 @@ const agentController = {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
-    getAssignTaskByTaskId:async (req, res) => {
+    getAssignTaskByTaskId: async (req, res) => {
       try {
         const taskId = req.params.taskId;
-        const data = await agentService.getAssignTaskToAgentByTaskId(taskId);
-        if (data === 'Data Not Found') {
-          res.status(404).send({ message: 'Data Not Found' });
+        const task = await agentService.getAssignTaskToAgentByTaskId(taskId);
+    
+        if (task) {
+          res.status(200).send({ message: 'Success', data: task });
         } else {
-          res.status(200).send({ message: 'Success', data });
+          res.status(404).send({ message: 'Data Not Found' });
         }
       } catch (error) {
-        console.error('Error fetching tasks by agent ID:', error.message);
+        console.error('Error fetching task by task ID:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
+    
+    
     updateAssignTaskById: async (req, res) => {
       try {
         const { agentId, taskId } = req.params;  // Correct destructuring
@@ -165,7 +168,7 @@ const agentController = {
     
     deleteAssignTaskById: async (req, res) => {
       try {
-        const { agentId, taskId } = req.params;  // Pass both agentId and taskId
+        const { agentId, taskId } = req.params; 
         const data = await agentService.deleteAssignTaskToAgentById(agentId, taskId);
         if (data === 'Data Not Found') {
           res.status(404).send({ message: 'Data Not Found' });
@@ -177,12 +180,21 @@ const agentController = {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
-    // const path = require('path');
-    // const fs = require('fs');
-    // const xlsx = require('xlsx');
-    // const agentRepository = require('../repositories/agentRepository'); // Adjust import based on your project structure
-    // const leadService = require('../services/leadService'); // Adjust import based on your project structure
-    
+    deleteAssignTaskByTaskId: async (req, res) => {
+      try {
+        const { taskId } = req.params; 
+        const data = await agentService.deleteAssignTaskToAgentByTaskId(taskId);
+        if (data === 'Data Not Found') {
+          res.status(404).send({ message: 'Data Not Found' });
+        } else {
+          res.status(200).send({ message: 'Task Deleted Successfully', data });
+        }
+      } catch (error) {
+        console.error('Error Deleting task:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    },
+   
     saveExcelFileData: async (req, res) => {
       if (!req.file) {
           return res.status(400).json({ message: 'Please upload an Excel file.' });
