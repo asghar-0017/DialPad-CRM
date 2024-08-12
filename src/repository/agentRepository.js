@@ -92,19 +92,19 @@ findByEmail: async (email) => {
       throw error
     }
   },
-  getAssignTaskToAgentById: async (taskId) => {
+  getAssignTaskToAgentById: async (agentId) => {
     try {
       const agentTaskRepository = dataSource.getRepository('agentTask');
-      const task = await agentTaskRepository.findOne({ where: { taskId } });
+      const tasks = await agentTaskRepository.find({ where: { agentId } });
       
-      if (task) {
-        return task;
+      if (tasks.length > 0) {
+        return tasks;
       } else {
-        return "Task Not Found"
+        return []; // Return an empty array if no tasks are found
       }
     } catch (error) {
-      console.error('Error fetching task:', error);
-      throw new Error('Error fetching task');
+      console.error('Error fetching tasks:', error);
+      throw new Error('Error fetching tasks');
     }
   },
   
