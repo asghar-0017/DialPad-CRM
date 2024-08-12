@@ -149,12 +149,11 @@ const agentController = {
     
     updateAssignTaskById: async (req, res) => {
       try {
-        const { agentId, taskId } = req.params;  // Correct destructuring
+        const { taskId } = req.params;
         const bodyData = req.body;
-        console.log("agentId",agentId)
         console.log("TaskId",taskId)
         console.log("task",bodyData)
-        const data = await agentService.updateAssignTaskToAgentById(agentId, taskId, bodyData);
+        const data = await agentService.updateAssignTaskToAgentById(taskId, bodyData);
         if (data === 'Data Not Found') {
           res.status(404).send({ message: 'Data Not Found' });
         } else {

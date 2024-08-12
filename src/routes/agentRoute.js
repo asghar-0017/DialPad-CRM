@@ -15,7 +15,7 @@ const agentRoute = (app) => {
     app.get('/get-assign-task', adminAuth.authenticate, checkRole(['admin']),agentController.getAssignTask)
     app.get('/get-assign-tasks/:agentId', adminAuth.authenticate, checkRole(['admin']), agentController.getAssignTaskById);
     app.get('/get-assign-task/:taskId',adminAuth.authenticate, checkRole(['admin']), agentController.getAssignTaskByTaskId);
-    app.put('/update-assign-task/:agentId/:taskId', adminAuth.authenticate, checkRole(['admin']), agentController.updateAssignTaskById);
+    app.put('/update-assign-task/:taskId', adminAuth.authenticate, checkRole(['admin']), agentController.updateAssignTaskById);
     app.delete('/delete-assign-task/:agentId/:taskId',adminAuth.authenticate, checkRole(['admin']),  agentController.deleteAssignTaskById);
     app.delete('/delete-assign-task/:taskId',adminAuth.authenticate, checkRole(['admin']),  agentController.deleteAssignTaskByTaskId);
 

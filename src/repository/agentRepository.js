@@ -123,14 +123,13 @@ findByEmail: async (email) => {
       throw new Error('Error fetching task');
     }
   },
-  updateAssignTaskToAgentById: async (agentId, taskId, updatedTaskData) => {
+  updateAssignTaskToAgentById: async ( taskId, updatedTaskData) => {
     try {
       const agentTaskRepository = dataSource.getRepository('agentTask');
       
       const existingTask = await agentTaskRepository.findOne({
         where: {
           taskId: taskId,
-          agentId: agentId
         }
       });
       console.log("IsExistingTask", existingTask);
