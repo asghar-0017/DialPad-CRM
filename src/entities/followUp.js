@@ -32,10 +32,6 @@ module.exports = new EntitySchema({
       type: "int",
       nullable: true,
     },
-    createdByAdmin: {
-      type: "int",
-      nullable: true,
-    },
     created_at: {
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",
@@ -53,12 +49,12 @@ module.exports = new EntitySchema({
       joinColumn: { name: "leadId", referencedColumnName: "leadId" },
       onDelete: "CASCADE",
     },
-    createdByAdmin: {
-      type: "many-to-one",
-      target: "auth",
-      joinColumn: { name: "createdByAdmin", referencedColumnName: "id" },
-      onDelete: "SET NULL",
-    },
+    // createdByAdmin: {
+    //   type: "many-to-one",
+    //   target: "auth",
+    //   joinColumn: { name: "createdByAdmin", referencedColumnName: "id" },
+    //   onDelete: "SET NULL",
+    // },
     // agent: {
     //   type: "many-to-one",
     //   target: "agent",

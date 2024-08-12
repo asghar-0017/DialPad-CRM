@@ -5,6 +5,7 @@ const path = require('path');
 const xlsx = require('xlsx');
 const { io } = require('..'); // Import io instance from app.js
 const dataSource = require('../infrastructure/psql');
+const otherDetail = require('../entities/otherDetail');
 
 const leadController = {
     createLead: async (req, res) => {
@@ -87,6 +88,7 @@ const leadController = {
             const sheetName = workbook.SheetNames[0];
             const sheet = workbook.Sheets[sheetName];
             const results = xlsx.utils.sheet_to_json(sheet);
+            console.log("result",results)
 
             if (results.length === 0) {
                 return res.status(400).json({ message: 'No data found in the Excel file.' });
@@ -115,6 +117,7 @@ const leadController = {
                     website: row.website,
                     customer_feedBack: row.customer_feedBack,
                     followUpDetail: row.followUpDetail,
+                    otherDetail: row.otherDetail,
                     role:user.role
                 };
                 await leadService.leadCreateService(leadData, req.user);

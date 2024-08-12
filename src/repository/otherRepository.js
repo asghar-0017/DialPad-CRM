@@ -2,6 +2,7 @@ const dataSource = require("../infrastructure/psql");
 const other = require('../entities/otherDetail'); // Adjust the path as needed
 const Lead = require('../entities/lead');
 const lead = require("../entities/lead");
+const agent = require("../entities/agent");
 
 const followUpRepository = {
   createOther: async (otherData) => {
@@ -11,10 +12,34 @@ const followUpRepository = {
         throw error;
     }
 },
-  findAll: async () => {
-    const repository = dataSource.getRepository(other);
-    return await repository.find();
-  },
+findAll: async () => {
+    try {
+      const repository = dataSource.getRepository('other'); 
+      const dataArray = await repository.find(); 
+      const result = await Promise.all(dataArray.map(async (data) => {
+        const agenId = data.agenId;
+        const agentData = await dataSource.getRepository('agent').findOne({ where: { agenId } });
+  
+        if (agentData) {
+          return {
+            ...data,
+            fullName: `${agentData.firstName} ${agentData.lastName}`
+          };
+        } else {
+          return {
+            ...data,
+            fullName: 'Unknown'
+          };
+        }
+      }));
+  
+      return result;
+  
+    } catch (error) {
+      throw error;
+    }
+  }
+  ,
 
   findById: async (leadId) => {
     const data= await dataSource.getRepository(other).findOne({ where: { leadId } });

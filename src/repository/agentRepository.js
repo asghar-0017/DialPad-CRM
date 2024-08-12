@@ -80,19 +80,38 @@ findByEmail: async (email) => {
     }
   },
   
-  getAssignTaskToAgent:async()=>{
-    try{
+  getAssignTaskToAgent: async () => {
+    try {
       const agentTaskRepository = dataSource.getRepository('agentTask');
-      const agent = await agentTaskRepository.find();
-      if(agent){
-        return agent
-      }else{
-        return 'Data Not Found'
+      const agentRepository = dataSource.getRepository('agent');
+      const agentTasks = await agentTaskRepository.find();
+  
+      if (agentTasks.length === 0) {
+        return 'No tasks found';
       }
-    }catch(error){
-      throw error
+  
+      const tasksWithAgentNames = await Promise.all(agentTasks.map(async (task) => {
+        const agentData = await agentRepository.findOne({ where: { agentId: task.agentId } });
+  
+        if (agentData) {
+          return {
+            taskId: task.taskId,
+            agentId:task.agentId,
+            task: task.task,
+            fullName: `${agentData.firstName} ${agentData.lastName}`
+          };
+        } 
+      }));
+  
+      return tasksWithAgentNames;
+  
+    } catch (error) {
+      throw error;
     }
   },
+  
+  
+  
   getAssignTaskToAgentById: async (agentId) => {
     try {
       const agentTaskRepository = dataSource.getRepository('agentTask');
