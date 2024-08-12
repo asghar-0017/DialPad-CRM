@@ -53,6 +53,7 @@ findByEmail: async (email) => {
   },
   assignTaskToAgentById: async (agentId, task, taskId) => {
     try {
+      console.log("AgentID in repo",agentId)
       const agentRepository = dataSource.getRepository('agent');
       const agent = await agentRepository.findOne({ where: { agentId } });
   
@@ -60,7 +61,7 @@ findByEmail: async (email) => {
         console.log("No agent found with ID:", agentId);
         return null;
       }
-  
+      console.log("Agent",agent)
       const agentTaskRepository = dataSource.getRepository('agentTask');
       const taskEntity = agentTaskRepository.create({
         id: taskId,

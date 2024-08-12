@@ -86,12 +86,12 @@ const agentController = {
     },
     assignTask: async (req, res) => {
       try {
-        const leadId = req.params.leadId;
+        const agenId = req.params.agentId;
         const task = req.body;
         task.taskId = taskId(); 
-        console.log("Task Id", task.taskId);
+        console.log("agent Id", agenId);
     
-        const data = await agentService.assignTaskToAgent(leadId, task, task.taskId);
+        const data = await agentService.assignTaskToAgent(agenId, task, task.taskId);
     
         if (data) {
           res.status(200).send({ message: "success", data: data });
