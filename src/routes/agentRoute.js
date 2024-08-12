@@ -5,19 +5,19 @@ const {checkRole}=require('../middleware/checkRole')
 const upload = require('../utils/upload')
 
 const agentRoute = (app) => {
-    app.post('/create-agent', agentController.createAgent);
-    app.get('/get-agent',agentController.getAgent)
-    app.get('/get-agent/:agentId', agentController.getAgentById);
-    app.put('/update-agent/:agentId',  agentController.updateAgent);
-    app.delete('/delete-agent/:agentId', agentController.deleteAgent);
+    app.post('/create-agent',adminAuth.authenticate, checkRole(['admin']), agentController.createAgent);
+    app.get('/get-agent',adminAuth.authenticate, checkRole(['admin']),agentController.getAgent)
+    app.get('/get-agent/:agentId',adminAuth.authenticate, checkRole(['admin']), agentController.getAgentById);
+    app.put('/update-agent/:agentId', adminAuth.authenticate, checkRole(['admin']), agentController.updateAgent);
+    app.delete('/delete-agent/:agentId', adminAuth.authenticate, checkRole(['admin']),agentController.deleteAgent);
 
-    app.post('/assign-task/:agentId', agentController.assignTask)
-    app.get('/get-assign-task', agentController.getAssignTask)
-    app.get('/get-assign-tasks/:agentId',  agentController.getAssignTaskById);
-    app.get('/get-assign-task/:taskId', agentController.getAssignTaskByTaskId);
-    app.put('/update-assign-task/:agentId/:taskId',  agentController.updateAssignTaskById);
-    app.delete('/delete-assign-task/:agentId/:taskId',  agentController.deleteAssignTaskById);
-    app.delete('/delete-assign-task/:taskId',  agentController.deleteAssignTaskByTaskId);
+    app.post('/assign-task/:agentId',adminAuth.authenticate, checkRole(['admin']), agentController.assignTask)
+    app.get('/get-assign-task', adminAuth.authenticate, checkRole(['admin']),agentController.getAssignTask)
+    app.get('/get-assign-tasks/:agentId', adminAuth.authenticate, checkRole(['admin']), agentController.getAssignTaskById);
+    app.get('/get-assign-task/:taskId',adminAuth.authenticate, checkRole(['admin']), agentController.getAssignTaskByTaskId);
+    app.put('/update-assign-task/:agentId/:taskId', adminAuth.authenticate, checkRole(['admin']), agentController.updateAssignTaskById);
+    app.delete('/delete-assign-task/:agentId/:taskId',adminAuth.authenticate, checkRole(['admin']),  agentController.deleteAssignTaskById);
+    app.delete('/delete-assign-task/:taskId',adminAuth.authenticate, checkRole(['admin']),  agentController.deleteAssignTaskByTaskId);
 
 
     app.post('/upload-task', upload.single('file'), agentController.saveExcelFileData)

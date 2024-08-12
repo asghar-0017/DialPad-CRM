@@ -10,6 +10,7 @@ const leadController = {
     createLead: async (req, res) => {
         try {
             const data = req.body;
+            console.log("Data",data)
             data.leadId = leadId();
             const user = req.user;
 
