@@ -98,7 +98,7 @@ findByEmail: async (email) => {
             taskId: task.taskId,
             agentId:task.agentId,
             task: task.task,
-            fullName: `${agentData.firstName} ${agentData.lastName}`
+            // fullName: `${agentData.firstName} ${agentData.lastName}`
           };
         } 
       }));
