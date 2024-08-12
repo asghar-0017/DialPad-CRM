@@ -6,13 +6,13 @@ const upload = require('../utils/upload')
 const combinedAuthenticate=require('../middleware/permission')
 
 const leadRoute = (app) => {
-    app.post('/create-lead',combinedAuthenticate, checkRole(['admin', 'agent']), leadController.createLead);
-    app.get('/get-lead', adminAuth.authenticate, checkRole(['admin', 'agent']), leadController.readLead);
-    app.get('/get-lead/:leadId', adminAuth.authenticate, checkRole(['admin', 'agent']), leadController.getLeadById);
-    app.put('/update-lead/:leadId', adminAuth.authenticate, checkRole(['admin', 'agent']), leadController.updateLead);
-    app.delete('/delete-lead/:leadId', adminAuth.authenticate, checkRole(['admin']), leadController.deleteLead);
+    app.post('/create-lead', leadController.createLead);
+    app.get('/get-lead', leadController.readLead);
+    app.get('/get-lead/:leadId', leadController.getLeadById);
+    app.put('/update-lead/:leadId', leadController.updateLead);
+    app.delete('/delete-lead/:leadId', leadController.deleteLead);
 
-    app.post('/upload-csv',adminAuth.authenticate, checkRole(['admin', 'agent']), upload.single('file'), leadController.saveExcelFileData)
+    app.post('/upload-csv', upload.single('file'), leadController.saveExcelFileData)
     
 
 };
