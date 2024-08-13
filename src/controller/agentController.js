@@ -267,6 +267,62 @@ const agentController = {
    
 
 
+  saveExcelFileDataOfCreateAgent: async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: 'Please upload an Excel file.' });
+    }
+    const filePath = path.join(__dirname, '../uploads/', req.file.filename);
+
+    try {
+        const workbook = xlsx.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const results = xlsx.utils.sheet_to_json(sheet);
+        if (results.length === 0) {
+            return res.status(400).json({ message: 'No data found in the Excel file.' });
+        }
+        const requiredColumns = ['firstName', 'lastName', 'email', 'phone', 'password'];
+        const sampleRow = results[0];
+        const missingColumns = requiredColumns.filter(col => !sampleRow.hasOwnProperty(col));
+
+        if (missingColumns.length > 0) {
+            return res.status(400).json({ message: `Missing required columns: ${missingColumns.join(', ')}` });
+        }
+        const createAgent = [];
+        for (const row of results) {
+            if (!row.firstName || !row.lastName || !row.email || !row.phone || !row.password) {
+                console.error("Missing required fields in row:", row);
+                continue; 
+            }
+            const email = row.email;
+            try {
+                const existingAgent = await agentRepository.findByEmail(email);
+                if (existingAgent) {
+                    console.log(`User with email ${email} already registered.`);
+                    continue;
+                }
+                row.agentId = agentId(); 
+                const agent = await agentService.agentCreateService(row);
+                createAgent.push(agent); 
+            } catch (err) {
+                console.error(`Error creating agent for email ${email}:`, err.message);
+            }
+        }
+        if (createAgent.length > 0) {
+            return res.status(201).json({ message: 'Agents registered successfully', agents: createAgent });
+        } else {
+            return res.status(400).json({ message: 'No agents were created.' });
+        }
+    } catch (error) {
+        console.error('Error processing the Excel file:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    } finally {
+        fs.unlinkSync(filePath); 
+    }
+},
+
+
+
     
 
 
