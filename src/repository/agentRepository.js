@@ -75,7 +75,7 @@ findByEmail: async (email) => {
       const taskEntity = agentTaskRepository.create({
         id: taskId,
         task: task ,
-        data:agent,
+        agent: agent, 
         leadId: task.leadId,
         taskId:taskId
       });
@@ -107,6 +107,7 @@ findByEmail: async (email) => {
             taskId: task.taskId,
             agentId:task.agentId,
             task: task.task,
+            // data:agentData
             // fullName: `${agentData.firstName} ${agentData.lastName}`
           };
         } 
