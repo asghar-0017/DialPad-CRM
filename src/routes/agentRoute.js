@@ -12,16 +12,16 @@ const agentRoute = (app) => {
     app.put('/update-agent/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.updateAgent);
     app.delete('/delete-agent/:agentId', combinedAuthenticate, checkRole(['admin']),agentController.deleteAgent);
 
-    app.post('/assign-task/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.assignTask)
+    app.post('/assign-task/:agentId',combinedAuthenticate, checkRole(['admin']), agentController.assignTask)
     app.get('/get-assign-task', combinedAuthenticate, checkRole(['admin','agent']),agentController.getAssignTask)
     app.get('/get-assign-tasks/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignTaskById);
     app.get('/get-assign-task/:taskId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignTaskByTaskId);
-    app.put('/update-assign-task/:taskId',combinedAuthenticate, checkRole(['admin','agent']), agentController.updateAssignTaskById);
+    app.put('/update-assign-task/:taskId',combinedAuthenticate, checkRole(['admin']), agentController.updateAssignTaskById);
     app.delete('/delete-assign-task/:agentId/:taskId',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignTaskById);
     app.delete('/delete-assign-task/:taskId',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignTaskByTaskId);
 
 
-    app.post('/upload-task', upload.single('file'), agentController.saveExcelFileData)
+    app.post('/upload-task', combinedAuthenticate, checkRole(['admin']),upload.single('file'), agentController.saveExcelFileData)
 
 
 
