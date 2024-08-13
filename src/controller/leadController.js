@@ -10,17 +10,14 @@ const leadController = {
     createLead: async (req, res) => {
         try {
             const data = req.body;
-            console.log("Data",data)
             data.leadId = leadId();
             const user = req.user;
-
             if (data.customer_feedBack === 'followUp' && !data.followUpDetail) {
                 return res.status(400).json({ message: 'followUpDetail is required when customer_feedBack is followUp' });
             }
             if (data.customer_feedBack === 'other' && !data.otherDetail) {
                 return res.status(400).json({ message: 'other is required when customer_feedBack is other' });
             }
-
             const lead = await leadService.leadCreateService(data, user);
            if(lead){
             res.status(201).json({ message: 'Lead created successfully', lead });
@@ -46,13 +43,9 @@ const leadController = {
                 if(lead.role=='admin'){
                     delete lead.agentId;
                 }
-
                 return lead;
             });
-
-
-            res.status(200).json({ message: 'Success', data: processedData });
-        
+            res.status(200).json({ message: 'Success', data: processedData }); 
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
@@ -63,7 +56,6 @@ const leadController = {
             const data = req.body;
             const leadId = req.params.leadId;
             const user = req.user;
-
             const lead = await leadService.updateLeadByService({ data, leadId, user });
             if (lead && lead.customer_feedBack !== 'followUp') {
                 delete lead.followUpDetail;
@@ -71,7 +63,6 @@ const leadController = {
             if (lead && lead.customer_feedBack !== 'other') {
                 delete lead.otherDetail;
             }
-
             res.status(201).json({ message: 'Lead Updated successfully', data: lead });
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -82,9 +73,7 @@ const leadController = {
         if (!req.file) {
             return res.status(400).json({ message: 'Please upload an Excel file.' });
         }
-
         const filePath = path.join(__dirname, '../uploads/', req.file.filename);
-
         try {
             const user = req.user;
             const workbook = xlsx.readFile(filePath);
@@ -92,19 +81,15 @@ const leadController = {
             const sheet = workbook.Sheets[sheetName];
             const results = xlsx.utils.sheet_to_json(sheet);
             console.log("result",results)
-
             if (results.length === 0) {
                 return res.status(400).json({ message: 'No data found in the Excel file.' });
             }
-
             const requiredColumns = ['leadName', 'phone', 'email','address','website','customer_feedBack'];
             const sampleRow = results[0];
             const missingColumns = requiredColumns.filter(col => !sampleRow.hasOwnProperty(col));
-
             if (missingColumns.length > 0) {
                 return res.status(400).json({ message: `Missing required columns: ${missingColumns.join(', ')}` });
             }
-
             for (const row of results) {
                 if (!row.leadName || !row.phone || !row.email) {
                     console.error("Missing required fields in row:", row);
@@ -150,7 +135,6 @@ const leadController = {
         try {
             const leadId = req.params.leadId;
             const user = req.user;
-
             const result = await leadService.deleteLeadById(leadId, user);
             if (!result) {
                 return res.status(404).json({ message: 'Lead Data not found' });

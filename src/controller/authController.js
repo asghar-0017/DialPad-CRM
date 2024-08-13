@@ -28,11 +28,6 @@ const adminAuth = {
 
     logout: async (req, res) => {
       try {
-        // const authHeader = req.headers.authorization;
-        // if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        //   return res.status(401).send({ message: 'No token provided' });
-        // }
-        // const token = authHeader.split(' ')[1];
         const {token}=req.body
         const admin = await authRepository.findTokenByToken(token);
 
@@ -134,16 +129,12 @@ const adminAuth = {
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return response.status(401).send({ code: 401, message: 'No token provided' });
       }
-
       const token = authHeader.split(' ')[1];
       const decoded = jwt.verify(token, secretKey);
-
-
       const user = await adminService.findUserById(decoded.userName);
       if (!user) {
         return response.status(401).send({ code: 401, message: 'Invalid token' });
       }
-
       return response.status(200).send({ code: 200, isValid: true });
     } catch (error) {
       if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {

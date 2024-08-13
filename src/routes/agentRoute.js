@@ -25,13 +25,13 @@ const agentRoute = (app) => {
     app.post('/create-agent-csv', combinedAuthenticate, checkRole(['admin','agent']),upload.single('file'), agentController.saveExcelFileDataOfCreateAgent)
 
 
-
     app.post('/login-agent',agentAuthController.login)
     app.post('/forgot-password-agent', agentAuthController.forgotPassword);
     app.post('/verify-reset-code-agent', agentAuthController.verifyResetCode);
     app.post('/reset-password-agent', agentAuthController.resetPassword);
     app.post('/logout-agent', adminAuth.authenticate, agentAuthController.logout);
     app.post('/verify-token', agentAuthController.verifyToken);
+    app.put('/update-status/:agentId',combinedAuthenticate, checkRole(['admin']),agentAuthController.updateAgentStatus)
 
 };
 

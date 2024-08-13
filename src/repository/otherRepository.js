@@ -24,31 +24,19 @@ findAll: async () => {
           return {
             ...data,
           };
-        } else {
-          return {
-            ...data,
-            fullName: 'Unknown'
-          };
         }
       }));
-  
       return result;
-  
     } catch (error) {
       throw error;
     }
-  }
-  ,
+  },
 
   findById: async (leadId) => {
     const data= await dataSource.getRepository(other).findOne({ where: { leadId } });
-    console.log("data",data)
-    if(data){
-      return data
-    }else{
-      return `Data not Found With id ${leadId}` 
-    }
+    return data?data: `Data not Found With leadId ${leadId}`
   },
+
   update: async (id, data) => {
     const otherRepository = dataSource.getRepository(other);
     const leadRepository = dataSource.getRepository(lead);

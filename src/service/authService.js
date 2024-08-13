@@ -40,36 +40,28 @@ const adminService = {
     try {
         const admin = await authRepository.findByEmail(email);
         const agent = await agentRepository.findByEmail(email);
-
         if (!admin && !agent) {
             throw new Error('No user found with the provided email');
         }
-
-        // Save reset code for admin if found
         if (admin) {
             admin.resetCode = code;
-            await dataSource.getRepository(Admin).save(admin); // Use Auth entity class
+            await dataSource.getRepository(Admin).save(admin); 
             console.log("Reset code stored successfully for admin:", code);
         }
-
-        // Save reset code for agent if found
         if (agent) {
             agent.resetCode = code;
-            await dataSource.getRepository(Agent).save(agent); // Use Agent entity class
+            await dataSource.getRepository(Agent).save(agent); 
             console.log("Reset code stored successfully for agent:", code);
         }
     } catch (error) {
         logger.error('Error saving reset code', {
             message: error.message,
             stack: error.stack,
-            code: error.code, // Include error code if available
+            code: error.code, 
         });
         throw error;
     }
 },
-
-
-
 
 validateAdminToken: async (token) => {
   try {
@@ -79,11 +71,9 @@ validateAdminToken: async (token) => {
     }
   } catch (error) {
     console.log('Error validating admin token', error);
-    return false; // Return false instead of throwing an error
+    return false;
   }
 },
-
-
   validateResetCode: async (code) => {
     try {
      const token= await authRepository.findByToken(code); 
@@ -102,14 +92,12 @@ validateAdminToken: async (token) => {
     try {
       const email = authRepository.email;
       const admin = await authRepository.findByEmail(email);
-
       if (admin) {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         admin.password = hashedPassword;
         await authRepository.save(admin);
         return true;
       }
-
       return false;
     } catch (error) {
       logger.error('Error updating password', error);

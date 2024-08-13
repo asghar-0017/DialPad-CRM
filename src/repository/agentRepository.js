@@ -98,10 +98,8 @@ findByEmail: async (email) => {
       if (agentTasks.length === 0) {
         return 'No tasks found';
       }
-  
       const tasksWithAgentNames = await Promise.all(agentTasks.map(async (task) => {
         const agentData = await agentRepository.findOne({ where: { agentId: task.agentId } });
-  
         if (agentData) {
           return {
             taskId: task.taskId,
@@ -112,21 +110,16 @@ findByEmail: async (email) => {
           };
         } 
       }));
-  
       return tasksWithAgentNames;
-  
     } catch (error) {
       throw error;
     }
   },
   
-  
-  
   getAssignTaskToAgentById: async (agentId) => {
     try {
       const agentTaskRepository = dataSource.getRepository('agentTask');
       const tasks = await agentTaskRepository.find({ where: { agentId } });
-      
       if (tasks.length > 0) {
         return tasks;
       } else {
@@ -141,8 +134,7 @@ findByEmail: async (email) => {
   getAssignTaskToAgentByTaskId: async (taskId) => {
     try {
       const agentTaskRepository =  dataSource.getRepository('agentTask');
-      const task = await agentTaskRepository.findOne({ where: { taskId } });
-
+      const task = await agentTaskRepository.findOne({ where: { taskId } })
       if (task) {
         return task;
       } else {
@@ -153,17 +145,15 @@ findByEmail: async (email) => {
       throw new Error('Error fetching task');
     }
   },
+
   updateAssignTaskToAgentById: async ( taskId, updatedTaskData) => {
     try {
       const agentTaskRepository = dataSource.getRepository('agentTask');
-      
       const existingTask = await agentTaskRepository.findOne({
         where: {
           taskId: taskId,
         }
-      });
-      console.log("IsExistingTask", existingTask);
-  
+      });  
       if (existingTask) {
         await agentTaskRepository.update({ taskId }, updatedTaskData);
         const updatedTask = await agentTaskRepository.findOne({ where: { taskId } });
@@ -187,7 +177,6 @@ findByEmail: async (email) => {
           agentId: agentId
         }
       });
-      
       if (existingTask) {
         const deleteTask = await agentTaskRepository.remove(existingTask);
         return deleteTask;
@@ -251,6 +240,23 @@ const authAgentRepository = {
     return await dataSouece.getRepository(agent).findOne({ where: { verifyToken: token } });
 
   },
+  updateStatusInRepo: async (status, agentId) => {
+    try {
+        const agentRepository = dataSource.getRepository(agent);
+        const existingAgent = await agentRepository.findOne({ where: { agentId } });
+        if (!existingAgent) {
+            return (`Agent with ID ${agentId} not found`);
+        }
+        await agentRepository.update({ agentId }, { isActivated: status });
+        const updatedAgent = await agentRepository.findOne({ where: { agentId } });
+        return updatedAgent;
+
+    } catch (error) {
+        console.error('Error updating status:', error);
+        throw new Error('Failed to update agent status');
+    }
+}
+
 };
 
 module.exports = {agentRepository,authAgentRepository};

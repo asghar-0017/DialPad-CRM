@@ -23,12 +23,10 @@ const followUpController = {
     }
 },
 
-
 getFollowUpById: async (req, res) => {
   try {
       const { leadId } = req.params;
       const followUp = await followUpService.getFollowUpById(leadId);
-
       if (!followUp) {
           return res.status(404).json({ message: 'Follow-up not found' });
       }
@@ -45,12 +43,10 @@ getFollowUpById: async (req, res) => {
           : followUp;
 
       res.status(200).json({ message: 'Success', data });
-
   } catch (error) {
       res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 },
-
 
   updateFollowUp: async (req, res) => {
     try {
@@ -67,20 +63,16 @@ getFollowUpById: async (req, res) => {
     }
   },
 
-
   deleteFollowUp: async (req, res) => {
     try {
         const leadId = req.params.leadId;
         console.log("LeadId:", leadId);
         const user = req.user;
-        console.log("User:", user);
-
-        const result = await followUpService.deleteFollowUp(leadId, user);
-        
+        console.log("User:", user)
+        const result = await followUpService.deleteFollowUp(leadId, user); 
         if (!result) {
             return res.status(404).json({ message: 'FollowUp not found' });
         }
-
         res.status(200).json({ message: 'FollowUp deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });

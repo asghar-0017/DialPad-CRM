@@ -20,7 +20,6 @@ const leadService = {
                     throw new Error('Agent ID does not exist in the agent table');
                 }
             }
-    
             const lead = await leadRepository.saveLead(data);
             
             if (!lead || !lead.leadId) {
@@ -51,17 +50,12 @@ const leadService = {
                 };
                 await otherRepository.createOther(otherData);
             }
-    
             return lead;
         } catch (error) {
             console.error("Error creating lead:", error.message);
             throw new Error('Error creating lead');
         }
     },
-    
-    
-    
-    
 
     leadReadService: async () => {
         try {
@@ -80,6 +74,7 @@ const leadService = {
             throw error;
         }
     },
+    
     leadGetServiceById: async (leadId) => {
         try {
             const result = await leadRepository.getLeadDataById(leadId);

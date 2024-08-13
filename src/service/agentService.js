@@ -144,6 +144,8 @@ const agentAuthService = {
   login: async ({ email, password }) => {
     try {
       const agent = await authAgentRepository.findByEmail(email);
+      if(agent){
+      if(agent.isActivated==true){
       console.log("agent", agent);
         if (agent && await bcrypt.compare(password, agent.password)) {
         const token = jwt.sign({ email: agent.email }, secretKey, { expiresIn: '10h' });
@@ -153,10 +155,14 @@ const agentAuthService = {
         logger.info('Login Success');
         return token 
       }
+    }else{
+      return "Account Blocked"
+    }
         logger.warn('Login Failed');
       return null;
   
-    } catch (error) {
+    } 
+  }catch (error) {
       logger.error('Error during Agent login', error);
       throw new Error('Error during Agent login');
     }
@@ -244,9 +250,17 @@ const agentAuthService = {
       return storedToken && storedToken.verifyToken === token;
     } catch (error) {
       console.log('Error validating agent token', error);
-      return false; // Return false instead of throwing an error
+      return false; 
     }
   },
+  updateAgentStatusByAgentId:async(status,agentId)=>{
+    try{
+      const data=await authAgentRepository.updateStatusInRepo(status,agentId)
+      return data
+    }catch(error){
+      throw error
+    }
+  }
 
 };
 

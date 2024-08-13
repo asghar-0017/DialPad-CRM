@@ -45,6 +45,10 @@ module.exports = new EntitySchema({
       type: "varchar",
       default: ''
     },
+    isActivated:{
+    type: Boolean,
+    default: true
+    },
     created_at: {
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",
