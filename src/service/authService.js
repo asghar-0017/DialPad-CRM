@@ -21,7 +21,7 @@ const adminService = {
       if (admin) {
         const match = await bcrypt.compare(password, admin.password);
         if (match) {
-          const token = jwt.sign({ userName: admin.userName }, secretKey, { expiresIn: '10h' });
+          const token = jwt.sign({ userName: admin.userName,role: admin.role }, secretKey, { expiresIn: '10h' });
           admin.verifyToken = token;
           await authRepository.save(admin);
           logger.info('Admin Login Success');

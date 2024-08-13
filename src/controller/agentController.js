@@ -10,6 +10,7 @@ const generateResetCode = require('../utils/token');
 const { sendResetEmail } = require('../service/resetEmail');
 const jwt = require('jsonwebtoken');
 const {logger}=require('../../logger');
+const adminService = require('../service/authService');
 require('dotenv').config()
 const secretKey = process.env.SCERET_KEY;
 
@@ -440,27 +441,55 @@ const agentAuthController = {
       response.status(500).send({ message: 'Internal Server Error', error: error.message });
     }
   },
+//   verifyToken: async (request, response) => {
+//     try {
+//         const authHeader = request.headers.authorization;
+//         if (!authHeader || !authHeader.startsWith('Bearer ')) {
+//             return response.status(401).send({ code: 401, message: 'No token provided' });
+//         }
 
-  verifyToken: async (request, response) => {
-    try {
-      const authHeader = request.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return response.status(401).send({ code: 401, message: 'No token provided' });
-      }
-      const token = authHeader.split(' ')[1];
-      const decoded = jwt.verify(token, secretKey);
-      const user = await agentAuthService.findUserById(decoded.userName);
-      if (!user) {
-        return response.status(401).send({ code: 401, message: 'Invalid token' });
-      }
-      return response.status(200).send({ code: 200, isValid: true });
-    } catch (error) {
-      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-        return response.status(401).send({ code: 401, message: 'Invalid token' });
-      }
-      return response.status(500).send({ code: 500, message: 'Internal Server Error', error: error.message });
-    }
-  },
+//         const token = authHeader.split(' ')[1];
+//         let decoded;
+
+//         try {
+//             decoded = jwt.verify(token, secretKey);
+//         } catch (error) {
+//             console.log('Token verification error:', error);
+//             return response.status(401).send({ code: 401, message: 'Invalid token' });
+//         }
+
+//         console.log("Decoded Token:", decoded);
+//         console.log("Decoded UserName:", decoded.email);
+
+//         console.log("Decoded Role:", decoded.role);
+
+//         let user;
+//         if (decoded.role === 'admin') {
+//             user = await adminService.findUserById(decoded.userName);
+//         } else if (decoded.role === 'agent') {
+//             user = await authAgentRepository.findByEmail(decoded.email);
+//         }
+
+//         console.log("User from DB:", user);
+
+//         // Check if the user exists and token matches
+//         if (!user || user.verifyToken !== token) {
+//             return response.status(401).send({ code: 401, message: 'Invalid token or role' });
+//         }
+
+//         return response.status(200).send({ code: 200, isValid: true, role: decoded.role });
+
+//     } catch (error) {
+//         if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+//             return response.status(401).send({ code: 401, message: 'Invalid token' });
+//         }
+//         return response.status(500).send({ code: 500, message: 'Internal Server Error', error: error.message });
+//     }
+// },
+
+
+
+
   updateAgentStatus: async (req, res) => {
     try {
         const { status } = req.body;
