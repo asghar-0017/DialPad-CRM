@@ -3,7 +3,6 @@ const leadId = require('../utils/token');
 const fs = require('fs');
 const path = require('path');
 const xlsx = require('xlsx');
-const { io } = require('..'); // Import io instance from app.js
 const dataSource = require('../infrastructure/psql');
 const otherDetail = require('../entities/otherDetail');
 
@@ -23,14 +22,9 @@ const leadController = {
             }
 
             const lead = await leadService.leadCreateService(data, user);
-            console.log("Io instance:", io);
-            if (io) {
-                console.log('Emitting leadCreated event');
-                io.emit('leadCreated', lead);
-            } else {
-                console.error('Socket.io instance is not initialized');
-            }
+           if(lead){
             res.status(201).json({ message: 'Lead created successfully', lead });
+           }
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }

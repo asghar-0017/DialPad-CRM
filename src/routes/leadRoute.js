@@ -6,12 +6,12 @@ const upload = require('../utils/upload')
 const combinedAuthenticate=require('../middleware/permission')
 
 const leadRoute = (app) => {
-    app.post('/create-lead',adminAuth.authenticate, checkRole(['admin']), leadController.createLead);
-    app.get('/get-lead',adminAuth.authenticate, checkRole(['admin']), leadController.readLead);
-    app.get('/get-lead/:leadId',adminAuth.authenticate, checkRole(['admin']), leadController.getLeadById);
-    app.put('/update-lead/:leadId',adminAuth.authenticate, checkRole(['admin']), leadController.updateLead);
-    app.delete('/delete-lead/:leadId',adminAuth.authenticate, checkRole(['admin']), leadController.deleteLead);
-    app.post('/upload-csv',adminAuth.authenticate, checkRole(['admin']), upload.single('file'), leadController.saveExcelFileData)
+    app.post('/create-lead',combinedAuthenticate, checkRole(['admin','agent']), leadController.createLead);
+    app.get('/get-lead',combinedAuthenticate, checkRole(['admin','agent']), leadController.readLead);
+    app.get('/get-lead/:leadId',combinedAuthenticate, checkRole(['admin','agent']), leadController.getLeadById);
+    app.put('/update-lead/:leadId',combinedAuthenticate, checkRole(['admin','agent']), leadController.updateLead);
+    app.delete('/delete-lead/:leadId',combinedAuthenticate, checkRole(['admin']), leadController.deleteLead);
+    app.post('/upload-csv',combinedAuthenticate, checkRole(['admin','agent']), upload.single('file'), leadController.saveExcelFileData)
     
 
 };

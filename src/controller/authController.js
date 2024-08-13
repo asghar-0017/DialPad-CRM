@@ -103,7 +103,6 @@ const adminAuth = {
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return response.status(401).send({ message: 'No token provided' });
       }
-
       const token = authHeader.split(' ')[1];
       const isValidToken = await adminService.validateAdminToken(token,next);
       console.log("Is validate Token",isValidToken)

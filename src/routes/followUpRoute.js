@@ -1,12 +1,13 @@
 const followUpController  = require('../controller/followUpController');
 const {adminAuth}=require('../controller/authController')
 const {checkRole}=require('../middleware/checkRole')
+const combinedAuthenticate=require('../middleware/permission')
 
 const followUpRoute = (app) => {
-    app.get('/get-followUp', adminAuth.authenticate, checkRole(['admin']),followUpController.getAllFollowUps);
-    app.get('/get-followUp/:leadId',adminAuth.authenticate, checkRole(['admin']), followUpController.getFollowUpById);
-    app.put('/update-followUp/:leadId', adminAuth.authenticate, checkRole(['admin']),followUpController.updateFollowUp);
-    app.delete('/delete-followUp/:leadId',adminAuth.authenticate, checkRole(['admin']), followUpController.deleteFollowUp);
+    app.get('/get-followUp',combinedAuthenticate, checkRole(['admin','agent']),followUpController.getAllFollowUps);
+    app.get('/get-followUp/:leadId',combinedAuthenticate, checkRole(['admin','agent']), followUpController.getFollowUpById);
+    app.put('/update-followUp/:leadId', combinedAuthenticate, checkRole(['admin','agent']),followUpController.updateFollowUp);
+    app.delete('/delete-followUp/:leadId',combinedAuthenticate, checkRole(['admin']), followUpController.deleteFollowUp);
 
 };
 

@@ -19,7 +19,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: '*',
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST','DELETE','PUT'],
   },
 });
 
@@ -43,7 +43,7 @@ app.get('/', async (req, res) => {
 
 AdminAuthRoute(app);
 agentRoute(app);
-leadRoute(app);  // Route including socket.io 
+leadRoute(app);  
 followUpRoute(app);
 otherRoute(app);
 
@@ -83,5 +83,4 @@ const StartServer = async () => {
   }
 };
 
-// Export both the server and the io instance
 module.exports = { StartServer, io };

@@ -74,7 +74,9 @@ const adminService = {
 validateAdminToken: async (token) => {
   try {
     const storedToken = await authRepository.findTokenByToken(token);
-    return storedToken && storedToken.verifyToken === token;
+    if(storedToken){
+      return storedToken
+    }
   } catch (error) {
     console.log('Error validating admin token', error);
     return false; // Return false instead of throwing an error
