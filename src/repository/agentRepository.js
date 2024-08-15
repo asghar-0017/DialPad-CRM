@@ -90,10 +90,6 @@ findByEmail: async (email) => {
       const agentTaskRepository = dataSource.getRepository('agentTask');
       const agentRepository = dataSource.getRepository('agent');
       const agentTasks = await agentTaskRepository.find();
-  
-      if (agentTasks.length === 0) {
-        return 'No tasks found';
-      }
       const tasksWithAgentNames = await Promise.all(agentTasks.map(async (task) => {
         const agentData = await agentRepository.findOne({ where: { agentId: task.agentId } });
         if (agentData) {
