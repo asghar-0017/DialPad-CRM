@@ -354,8 +354,8 @@ const agentAuthController = {
         console.log("Agent",agent)
         if (agent) {
             agent.verifyToken= '';
-            console.log("verify-token",agent.verifyToken)  // Invalidate the token
-            await authAgentRepository.save(agent);  // Save the updated agent data
+            console.log("verify-token",agent.verifyToken)  
+            await agentRepository.saveAgent(agent);
             logger.info('Agent Logout Success');
             return res.status(200).send({ message: 'Logged out successfully' });
         } else {
