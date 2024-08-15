@@ -36,6 +36,16 @@ findAll: async () => {
     const data= await dataSource.getRepository(other).findOne({ where: { leadId } });
     return data?data: `Data not Found With leadId ${leadId}`
   },
+  getAllSpecificOtherDataByAgentId:async(agentId)=>{
+    try {
+      const data = await dataSource.getRepository(other).find({ where: { agentId } });
+      console.log("Retrieved leads:", data);
+      return data;
+  } catch (error) {
+      console.error('Error in repository layer:', error);
+      throw error;
+  }
+  },
 
   update: async (id, data) => {
     const otherRepository = dataSource.getRepository(other);

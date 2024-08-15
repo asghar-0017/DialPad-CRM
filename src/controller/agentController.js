@@ -327,7 +327,6 @@ const agentAuthController = {
   login: async (req,res) => {
     try {
       const { email, password } = req.body;
-      console.log("body",req.body)
       const agent = await agentAuthService.login( { email, password })
       if(agent){
         res.status(200).send(agent)

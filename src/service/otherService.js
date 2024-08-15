@@ -10,6 +10,14 @@ const OtherService = {
   getOthersUpById: async (leadId) => {
     return await otherRepository.findById(leadId);
   },
+  otherAllGetServiceByAgentId:async(agentId)=>{
+    try {
+      const result = await otherRepository.getAllSpecificOtherDataByAgentId(agentId);
+      return result;
+  } catch (error) {
+      throw error;
+  }
+  },
 
   updateOtherById: async (leadId, data) => {
     return await otherRepository.update(leadId, data);
