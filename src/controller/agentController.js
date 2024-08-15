@@ -424,19 +424,22 @@ const agentAuthController = {
         return response.status(401).send({ message: 'No token provided' });
       }
       const token = authHeader.split(' ')[1];
-      const isValidToken = await agentAuthService.validateAgentToken(token);
+      const isValidToken = await agentAuthService.validateAgentToken(token,next);
       console.log("Is validate Token",isValidToken)
       if (!isValidToken) {
+        next()
         return response.status(401).send({ message: 'Invalid token' });
       }
+
       const decoded = jwt.verify(token, secretKey);
       const user = await agentAuthService.findUserById(decoded.userName);
       console.log("User",user)
       if (!user) {
         return response.status(401).send({ message: 'User not found' });
       }
+
       request.user = user;
-      console.log("agent User", user);
+      console.log("User", user);
       next();   
     } catch (error) {
       response.status(500).send({ message: 'Internal Server Error', error: error.message });
