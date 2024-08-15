@@ -330,7 +330,12 @@ const agentAuthController = {
       const agent = await agentAuthService.login( { email, password })
       if(agent){
         res.status(200).send(agent)
-      }else{
+      }
+      if(agent.status==false){
+        res.status(200).send(agent.isActivated)
+
+      }
+      else{
         res.status(404).send({message:"invalid UserName and Password"})
       }
     }

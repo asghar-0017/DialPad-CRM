@@ -5,6 +5,7 @@ const path = require('path');
 const xlsx = require('xlsx');
 const dataSource = require('../infrastructure/psql');
 const otherDetail = require('../entities/otherDetail');
+const followUp = require('../entities/followUp');
 
 const leadController = {
     createLead: async (req, res) => {
@@ -124,7 +125,16 @@ const leadController = {
             const leadId = req.params.leadId;
             const data = await leadService.leadGetServiceById(leadId);
             if (data) {
+                if (data && data.customer_feedBack !== 'followUp') {
+                    delete data.followUpDetail;
+                }
+                if (data && data.customer_feedBack !== 'other') {
+                    delete data.otherDetail;
+                }
                 res.status(200).send({ message: "success", data: data });
+            }else{
+                res.status(200).send({ message: "Data Not Found", });
+
             }
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -133,8 +143,16 @@ const leadController = {
     getallSpecificLeadByAgentId: async (req, res) => {
         try {
             const agentId = req.params.agentId;
-            const data = await leadService.leadAllGetServiceByAgentId(agentId);   
+            const data = await leadService.leadAllGetServiceByAgentId(agentId);       
             if (data && data.length > 0) {
+                data.forEach(lead => {
+                    if (lead.customer_feedBack !== 'followUp') {
+                        delete lead.followUpDetail;
+                    }
+                    if (lead.customer_feedBack !== 'other') {
+                        delete lead.otherDetail;
+                    }
+                });
                 res.status(200).send({ message: "success", data: data });
             } else {
                 res.status(404).send({ message: `No leads found for agentId ${agentId}` });
@@ -144,6 +162,7 @@ const leadController = {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
     },
+    
     deleteLead: async (req, res) => {
         try {
             const leadId = req.params.leadId;
