@@ -25,6 +25,16 @@ const followUpRepository = {
       return `Data not Found With id ${leadId}` 
     }
   },
+  getAllSpecificFollowUpDataByAgentId:async(agentId)=>{
+    try {
+        const data = await dataSource.getRepository(FollowUp).find({ where: { agentId } });
+        console.log("Retrieved leads:", data);
+        return data;
+    } catch (error) {
+        console.error('Error in repository layer:', error);
+        throw error;
+    }
+  },
 
   update: async (id, data) => {
     const followUpRepository = dataSource.getRepository(followUp);

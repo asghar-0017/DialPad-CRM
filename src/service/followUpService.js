@@ -10,6 +10,14 @@ const followUpService = {
   getFollowUpById: async (leadId) => {
     return await followUpRepository.findById(leadId);
   },
+  followUpAllGetServiceByAgentId:async(agentId)=>{
+    try {
+      const result = await followUpRepository.getAllSpecificFollowUpDataByAgentId(agentId);
+      return result;
+  } catch (error) {
+      throw error;
+  }
+  },
 
   updateFollowUp: async (id, data) => {
     return await followUpRepository.update(id, data);

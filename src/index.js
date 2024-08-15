@@ -58,10 +58,6 @@ app.use((err, req, res, next) => {
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  socket.on('updateOther', (data) => {
-    io.emit('refreshData', data);
-  });
-
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });

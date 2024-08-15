@@ -148,12 +148,16 @@ const agentAuthService = {
       if(agent.isActivated==true){
       console.log("agent", agent);
         if (agent && await bcrypt.compare(password, agent.password)) {
-        const token = jwt.sign({ email: agent.email,role: agent.role }, secretKey, { expiresIn: '10h' });
-          agent.verifyToken = token;
+        const token = jwt.sign({ email: agent.email,role: agent.role,agenId:agent.agentId }, secretKey, { expiresIn: '10h' });
+          // agent.verifyToken = token;
+          const Token={
+            token: agent.verifyToken,
+            agenId:agent.agentId
+          }
         await agentRepository.saveAgent(agent);
   
         logger.info('Login Success');
-        return token 
+        return Token 
       }
     }else{
       return "Account Blocked"
