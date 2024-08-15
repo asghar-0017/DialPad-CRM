@@ -43,7 +43,9 @@ const agentController = {
         const data = result.map(agent => {
         const { id,agentId, firstName, lastName, email, phone, role } = agent;
         return {id, agentId, firstName, lastName, email, phone, role };
-      });
+     
+    });
+    
         res.status(201).json({ message: 'success', data:data });
       }
      catch (error) {

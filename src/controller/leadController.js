@@ -130,7 +130,20 @@ const leadController = {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
     },
-
+    getallSpecificLeadByAgentId: async (req, res) => {
+        try {
+            const agentId = req.params.agentId;
+            const data = await leadService.leadAllGetServiceByAgentId(agentId);   
+            if (data && data.length > 0) {
+                res.status(200).send({ message: "success", data: data });
+            } else {
+                res.status(404).send({ message: `No leads found for agentId ${agentId}` });
+            }
+        } catch (error) {
+            console.error('Error fetching leads:', error);
+            res.status(500).json({ message: 'Internal Server Error', error: error.message });
+        }
+    },
     deleteLead: async (req, res) => {
         try {
             const leadId = req.params.leadId;

@@ -83,6 +83,14 @@ const leadService = {
             throw error;
         }
     },
+    leadAllGetServiceByAgentId:async(agentId)=>{
+        try {
+            const result = await leadRepository.getAllSpecificLeadDataByAgentId(agentId);
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    },
     deleteLeadById: async (id,user) => {
         return await leadRepository.delete(id,user);
       },

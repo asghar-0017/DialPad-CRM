@@ -91,6 +91,17 @@ const leadRepository = {
             throw error;
         }
     },
+    getAllSpecificLeadDataByAgentId: async (agentId) => {
+        try {
+            const data = await dataSource.getRepository(Lead).find({ where: { agentId } });
+            console.log("Retrieved leads:", data);
+            return data;
+        } catch (error) {
+            console.error('Error in repository layer:', error);
+            throw error;
+        }
+    },
+    
     delete: async (id, user) => {
         const leadRepository = dataSource.getRepository(Lead);
         const followUpRepository = dataSource.getRepository(FollowUp);
