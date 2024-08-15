@@ -22,11 +22,7 @@ findByEmail: async (email) => {
   getAgentDataById: async (agentId) => {
     try {
         const data = await dataSource.getRepository(agentAuth).findOne({ where: { agentId } });
-        if (data) {   
-            return data;
-        } if(data=='null'){
-          return { message: `Data Not Found With ${agentId}` };
-        }
+       return data
     } catch (error) {
         console.error('Error fetching agent data:', error);
         throw error;

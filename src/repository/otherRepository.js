@@ -34,7 +34,7 @@ findAll: async () => {
 
   findById: async (leadId) => {
     const data= await dataSource.getRepository(other).findOne({ where: { leadId } });
-    return data?data: `Data not Found With leadId ${leadId}`
+    return data
   },
   getAllSpecificOtherDataByAgentId:async(agentId)=>{
     try {

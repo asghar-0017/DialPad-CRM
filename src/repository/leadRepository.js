@@ -18,7 +18,7 @@ const leadRepository = {
     getLeadData: async () => {
         try {
             const data=await dataSource.getRepository(Lead).find();
-            return data ? data : `data Not found`
+            return data
         } catch (error) {
             throw error;
         }
@@ -86,7 +86,7 @@ const leadRepository = {
     getLeadDataById: async (leadId) => {
         try {
             const data=  await dataSource.getRepository(Lead).findOne({ where: { leadId } });
-            return data ? data : `Data not Found With Id ${leadId}`
+            return data 
         } catch (error) {
             throw error;
         }
