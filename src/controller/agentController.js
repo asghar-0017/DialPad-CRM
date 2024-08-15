@@ -65,7 +65,8 @@ const agentController = {
                   lastName: result.lastName,
                   email: result.email,
                   phone: result.phone,
-                  role: result.role
+                  role: result.role,
+                  isActivated:result.isActivated
               };
               res.status(200).json({ message: 'Success', data });
           } else {
