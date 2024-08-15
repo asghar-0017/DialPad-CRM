@@ -340,29 +340,34 @@ const agentAuthController = {
     }
   },
 
-    logout: async (req, res) => {
-      try {
+  logout: async (req, res) => {
+    try {
+        console.log("API Hit: Logout");
+
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-          return res.status(401).send({ message: 'No token provided' });
+            return res.status(401).send({ message: 'No token provided' });
         }
+
         const token = authHeader.split(' ')[1];
         const agent = await authAgentRepository.findTokenByToken(token);
-
+        console.log("Agent",agent)
         if (agent) {
-          agent.verifyToken = ''; 
-          await authAgentRepository.save(agent);
-          logger.info('Agent Logout Success');
-          res.status(200).send({ message: 'Logged out successfully' });
+            agent.verifyToken = '';  // Invalidate the token
+            await authAgentRepository.save(agent);  // Save the updated agent data
+            logger.info('Agent Logout Success');
+            return res.status(200).send({ message: 'Logged out successfully' });
         } else {
-          res.status(401).send({ message: 'Invalid token' });
+            logger.warn('Invalid token during logout attempt');
+            return res.status(401).send({ message: 'Invalid token' });
         }
-      } catch (error) {
-        logger.error('Error during agent logout', error);
+    } catch (error) {
+        logger.error('Error during agent logout:', error);
         res.status(500).send({ message: 'Internal Server Error', error: error.message });
-        throw error
-      }
-    },
+        throw error;
+    }
+  },
+
     
   forgotPassword: async (request, response) => {
     try {
@@ -432,7 +437,8 @@ const agentAuthController = {
       }
 
       const decoded = jwt.verify(token, secretKey);
-      const user = await agentAuthService.findUserById(decoded.userName);
+      console.log("decode",decoded)
+      const user = await authAgentRepository.findByEmail(decoded.email);
       console.log("User",user)
       if (!user) {
         return response.status(401).send({ message: 'User not found' });

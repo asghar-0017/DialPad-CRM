@@ -149,7 +149,7 @@ const agentAuthService = {
       console.log("agent", agent);
         if (agent && await bcrypt.compare(password, agent.password)) {
         const token = jwt.sign({ email: agent.email,role: agent.role,agenId:agent.agentId }, secretKey, { expiresIn: '10h' });
-          // agent.verifyToken = token;
+          agent.verifyToken = token;
           const Token={
             token: agent.verifyToken,
             agentId:agent.agentId
