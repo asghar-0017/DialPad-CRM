@@ -41,8 +41,8 @@ const agentController = {
           return res.status(404).send({Data:`Data not Found with ${agentId}`})
         }
         const data = result.map(agent => {
-        const { id,agentId, firstName, lastName, email, phone, role } = agent;
-        return {id, agentId, firstName, lastName, email, phone, role };
+        const { id,agentId, firstName, lastName, email, phone, role ,isActivated} = agent;
+        return {id, agentId, firstName, lastName, email, phone, role,isActivated };
      
     });
     
