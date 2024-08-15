@@ -4,7 +4,7 @@ const { sendResetEmail } = require('../service/resetEmail');
 const jwt = require('jsonwebtoken');
 const authRepository=require('../repository/authRepository')
 const {logger}=require('../../logger');
-const { authAgentRepository } = require('../repository/agentRepository');
+const { authAgentRepository, agentRepository } = require('../repository/agentRepository');
 
 require('dotenv').config()
 
@@ -27,25 +27,40 @@ const adminAuth = {
     }
   },
 
-    logout: async (req, res) => {
-      try {
-        const {token}=req.body
-        const admin = await authRepository.findTokenByToken(token);
+  logout: async (req, res) => {
+    try {
+        console.log("API Hit: Logout");
 
-        if (admin) {
-          admin.verifyToken = ''; 
-          await authRepository.save(admin);
-          logger.info('Admin Logout Success');
-          res.status(200).send({ message: 'Logged out successfully' });
-        } else {
-          res.status(401).send({ message: 'Invalid token' });
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).send({ message: 'No token provided' });
         }
-      } catch (error) {
-        logger.error('Error during admin logout', error);
-        res.status(500).send({ message: 'Internal Server Error', error: error.message });
-        throw error
-      }
-    },
+
+        const token = authHeader.split(' ')[1];
+
+        const admin = await authRepository.findTokenByToken(token);
+        if (admin) {
+            admin.verifyToken = '';
+            await authRepository.save(admin);
+            logger.info('Admin Logout Success');
+            return res.status(200).send({ message: 'Logged out successfully' });
+        }
+        const agent = await authAgentRepository.findTokenByToken(token);
+        if (agent) {
+            agent.verifyToken = '';
+            await agentRepository.saveAgent(agent);
+            logger.info('Agent Logout Success');
+            return res.status(200).send({ message: 'Logged out successfully' });
+        }
+        return res.status(401).send({ message: 'Invalid token' });
+
+    } catch (error) {
+        logger.error('Error during logout:', error);
+        return res.status(500).send({ message: 'Internal Server Error', error: error.message });
+    }
+},
+
+
     
   forgotPassword: async (request, response) => {
     try {

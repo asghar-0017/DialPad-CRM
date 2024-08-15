@@ -340,33 +340,45 @@ const agentAuthController = {
     }
   },
 
-  logout: async (req, res) => {
-    try {
-        console.log("API Hit: Logout");
+//   logout: async (req, res) => {
+//     try {
+//         console.log("API Hit: Logout");
 
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).send({ message: 'No token provided' });
-        }
+//         const authHeader = req.headers.authorization;
+//         if (!authHeader || !authHeader.startsWith('Bearer ')) {
+//             return res.status(401).send({ message: 'No token provided' });
+//         }
 
-        const token = authHeader.split(' ')[1];
-        const agent = await authAgentRepository.findTokenByToken(token);
-        console.log("Agent",agent)
-        if (agent) {
-            agent.verifyToken= '';
-            console.log("verify-token",agent.verifyToken)  
-            await agentRepository.saveAgent(agent);
-            logger.info('Agent Logout Success');
-            return res.status(200).send({ message: 'Logged out successfully' });
-        } else {
-            return res.status(401).send({ message: 'Invalid token' });
-        }
-    } catch (error) {
-        logger.error('Error during agent logout:', error);
-        res.status(500).send({ message: 'Internal Server Error', error: error.message });
-        throw error;
-    }
-  },
+//         const token = authHeader.split(' ')[1];
+
+//         // Check if token belongs to an admin
+//         const admin = await authRepository.findTokenByToken(token);
+//         if (admin) {
+//             admin.verifyToken = '';
+//             await authRepository.save(admin);
+//             logger.info('Admin Logout Success');
+//             return res.status(200).send({ message: 'Logged out successfully' });
+//         }
+
+//         // Check if token belongs to an agent
+//         const agent = await authAgentRepository.findTokenByToken(token);
+//         if (agent) {
+//             agent.verifyToken = '';
+//             await agentRepository.saveAgent(agent);
+//             logger.info('Agent Logout Success');
+//             return res.status(200).send({ message: 'Logged out successfully' });
+//         }
+
+//         // If token doesn't match any user
+//         return res.status(401).send({ message: 'Invalid token' });
+
+//     } catch (error) {
+//         logger.error('Error during logout:', error);
+//         res.status(500).send({ message: 'Internal Server Error', error: error.message });
+//         throw error;
+//     }
+// },
+
 
     
   forgotPassword: async (request, response) => {
