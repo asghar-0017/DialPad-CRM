@@ -14,6 +14,7 @@ const leadService = {
             } else if (user.role === 'admin') {
                 data.role = 'admin';
             }
+            console.log("AgentId",data.agentId)
                 if (data.agentId) {
                 const agentExists = await agentRepository.getAgentDataById(data.agentId);
                 if (!agentExists) {

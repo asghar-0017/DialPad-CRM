@@ -1,6 +1,7 @@
 const adminService = require('../service/authService');
 const jwt = require('jsonwebtoken');
 const { agentAuthService } = require('../service/agentService');
+const { authAgentRepository } = require('../repository/agentRepository');
 require('dotenv').config();
 
 const secretKey = process.env.SCERET_KEY;
@@ -35,9 +36,10 @@ const combinedAuthenticate = async (req, res, next) => {
         try {
             console.log('Attempting to validate agent token...');
             const isValidAgentToken = await agentAuthService.validateAgentToken(token);
+            console.log("isvaliditing agent",isValidAgentToken)
             if (isValidAgentToken) {
                 decoded = jwt.verify(token, secretKey);
-                user = await agentAuthService.findUserById(decoded.userName);
+                user = await authAgentRepository.findByEmail(decoded.email);
                 if (user) {
                     req.user = user;
                     console.log('Agent token validated successfully, proceeding to next middleware');
