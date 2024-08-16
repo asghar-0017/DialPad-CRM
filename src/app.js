@@ -60,10 +60,10 @@ app.use((err, req, res, next) => {
 io.on('connection', (socket) => {
   logger.info(`A user connected: ${socket.id}`);
 
-  socket.on("send_message", (data) => {
-    io.emit("receive_message", data);
-    logger.info(`Message sent: ${JSON.stringify(data)}`);
-  });
+  socket.on("send_message",(data)=>{
+    console.log("data of socket",data)
+    socket.broadcast.emit("receive_message",data)
+  })
 
   socket.on('disconnect', () => {
     logger.info(`User disconnected: ${socket.id}`);

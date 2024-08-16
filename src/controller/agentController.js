@@ -28,7 +28,7 @@ const agentController = {
             return res.status(400).json({ message: 'User already registered' });
           }
           const agent = await agentService.agentCreateService(data);
-          io.emit('agent_created', agent);
+          io.emit('send_message', agent);
 
           res.status(201).json({ message: 'Agent registered successfully', agent });
 
@@ -48,7 +48,7 @@ const agentController = {
         return {id, agentId, firstName, lastName, email, phone, role,isActivated };
      
     });
-    io.emit('agentData socket', data);
+    io.emit('receive_message', data);
 
         res.status(201).json({ message: 'success', data:data });
       }
