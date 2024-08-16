@@ -31,18 +31,20 @@ findByEmail: async (email) => {
 },
 
   updateAgentDataById:async(agentId,{firstName,lastName,email,phone},user)=>{
-    try{
-      const data= await dataSource.getRepository(agentAuth).findOne({where:{agentId}})
-      if(data){
-        const result = await dataSource.getRepository(agentAuth).update({ agentId }, {firstName,lastName,email,phone},user)
-        return result
+    try {
+      const data = await dataSource.getRepository(agentAuth).findOne({ where: { agentId } });
+      if (data) {
+          await dataSource.getRepository(agentAuth).update({ agentId }, { firstName, lastName, email, phone });
+          const updatedData = await dataSource.getRepository(agentAuth).findOne({ where: { agentId } });
+            return updatedData;
+      } else {
+          return `No data found with agentId: ${agentId}`;
       }
-      else{
-        return `Data Not Found With ${agentId}`
-      }
-    }catch(error){
-      throw error
-    }
+  } catch (error) {
+      throw new Error(`Error updating agent data: ${error.message}`);
+  }
+  
+  
   },
   deleteAgentDataById: async (agentId, user) => {
     try {

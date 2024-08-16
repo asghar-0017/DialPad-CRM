@@ -83,18 +83,22 @@ const agentController = {
   },
   
     updateAgent:async(io,req,res)=>{
-      try{
-        const agentId=req.params.agentId
-        const {firstName,lastName,email,phone}=req.body
+      try {
+        const agentId = req.params.agentId;
+        const { firstName, lastName, email, phone } = req.body;
         const user = req.user;
-        const result=await agentService.agentUpdateByIdInService(agentId,{firstName,lastName,email,phone},user); 
-        io.emit('receive_message', result);
-        res.status(201).json({ message: 'success', data:result });
-      }
-     catch (error) {
+            const result = await agentService.agentUpdateByIdInService(agentId, { firstName, lastName, email, phone }, user);
+    
+        if (result) {
+            res.status(201).json({ message: 'success', data: result });
+                io.emit('agent_updated', result);
+        } else {
+            res.status(404).json({ message: 'Agent not found' });
+        }
+    } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
-      }
-    },
+    }
+  },
 
     deleteAgent:async(req,res)=>{
       try{
