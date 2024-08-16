@@ -6,7 +6,7 @@ const upload = require('../utils/upload')
 const combinedAuthenticate = require('../middleware/permission')
 
 
-const agentRoute = (app) => {
+const agentRoute = (app,io) => {
     app.post('/create-agent', combinedAuthenticate, checkRole(['admin']), (req, res) => agentController.createAgent(io, req, res));
     app.get('/get-agent',combinedAuthenticate, checkRole(['admin','agent']),  (req, res) => agentController.getAgent(io, req, res))
     app.get('/get-agent/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAgentById);
