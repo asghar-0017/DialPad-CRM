@@ -19,6 +19,8 @@ findAll: async () => {
       const result = await Promise.all(dataArray.map(async (data) => {
         const agenId = data.agenId;
         const agentData = await dataSource.getRepository('agent').findOne({ where: { agenId } });
+        console.log("agentData",agentData);
+        
   
         if (agentData) {
           return {

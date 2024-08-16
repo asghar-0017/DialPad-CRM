@@ -106,43 +106,65 @@ const leadRepository = {
     },
     
     delete: async (leadId, user) => {
-        console.log("APi Hit Delete")
-        const leadRepository = dataSource.getRepository(Lead);
-        const followUpRepository = dataSource.getRepository(FollowUp);
-        const otherRepository = dataSource.getRepository(other);
-      
-        const otherTrashRepository = dataSource.getRepository(otherTrash);
-        const leadTrashRepository = dataSource.getRepository(leadsTrash);
-        const followUpTrashRepository = dataSource.getRepository(followUpTrash);
-      
-        const leadData = await leadRepository.findOne({where:{ leadId} });
-        console.log("Lead Data",leadData)
-      let createOtherTrash;
-      let createFollowUpInTrash;
-        if (leadData) {
-          const createLeadInTrash = await leadTrashRepository.save(leadTrashRepository.create(leadData));
-          console.log("CreateOtherTrash",createLeadInTrash)
-          if(leadData.customer_feedBack=='other'){
-           createOtherTrash=  await otherTrashRepository.save(otherTrashRepository.create(leadData)) 
-           console.log("Create Other In Trash",createOtherTrash)
-          }
-            if(leadData.customer_feedBack=='followUp'){
-            createFollowUpInTrash=await followUpTrashRepository.save(followUpTrashRepository.create(leadData)) 
-            console.log("FollowUp in Trash",createFollowUpInTrash)
-            } 
-          await followUpRepository.delete({ leadId });
-          await otherRepository.delete({ leadId});
-          await leadRepository.remove(leadData);
-          
+        try {
+            console.log("API Hit Delete");
+    
+            const leadRepository = dataSource.getRepository(Lead);
+            const followUpRepository = dataSource.getRepository(FollowUp);
+            const otherRepository = dataSource.getRepository(other);  // Replace 'Other' with your actual entity class
+            const otherTrashRepository = dataSource.getRepository(otherTrash); // Ensure 'OtherTrash' is the correct class
+            const leadTrashRepository = dataSource.getRepository(leadTrash);  // Replace 'LeadsTrash' with the actual entity class
+            const followUpTrashRepository = dataSource.getRepository(followUpTrash); // Ensure 'FollowUpTrash' is correct
+    
+            const leadData = await leadRepository.findOne({ where: { leadId } });
+            console.log("Lead Data:", leadData);
+    
+            if (!leadData) {
+                console.log("No lead data found for the given leadId");
+                return { success: false, message: "No lead data found" };
+            }
+    
+            const createLeadInTrash = await leadTrashRepository.save(leadTrashRepository.create(leadData));
+            console.log("Created Lead In Trash:", createLeadInTrash);
+    
+            let createdOtherTrash = null;
+            let createdFollowUpInTrash = null;
+    
+            if (leadData.customer_feedBack === 'other') {
+                createdOtherTrash = await otherTrashRepository.save(otherTrashRepository.create(leadData));
+                console.log("Created Other In Trash:", createdOtherTrash);
+            }
+    
+            if (leadData.customer_feedBack === 'followUp') {
+                createdFollowUpInTrash = await followUpTrashRepository.save(followUpTrashRepository.create(leadData));
+                console.log("Created FollowUp In Trash:", createdFollowUpInTrash);
+            }
+    
+            await followUpRepository.delete({ leadId });
+            await otherRepository.delete({ leadId });
+            await leadRepository.remove(leadData);
+    
+            const TrashData = {
+                createdOtherTrash,
+                createdFollowUpInTrash,
+                createLeadInTrash,
+            };
+    
             return {
-            createLeadInTrash,
-            createOtherTrash,
-            createFollowUpInTrash
-          };
+                success: true,
+                TrashData,
+            };
+        } catch (error) {
+            console.error("Error deleting lead:", error);
+            return {
+                success: false,
+                message: "An error occurred while deleting the lead",
+                error,
+            };
         }
-      
-        return false; 
-      },
+    },
+    
+    
       
       
     

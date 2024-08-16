@@ -8,6 +8,22 @@ const trashService = {
     }catch(error){
         throw error
     }
+},
+    getAllOthersfromTrash:async()=>{
+    try{
+        const data= await trashRepository.findAllOthers();
+        return data
+    }catch(error){
+        throw error
+    }
+},
+    getAllFollowUps:async()=>{
+        try{
+        const data= await trashRepository.findAllFollowUps();
+            return data
+        }catch(error){
+            throw error
+        }
 }
 }
 module.exports=  trashService
