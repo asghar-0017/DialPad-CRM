@@ -7,6 +7,7 @@ const agentRoute = require('./routes/agentRoute');
 const leadRoute = require('./routes/leadRoute');
 const followUpRoute = require('./routes/followUpRoute');
 const otherRoute = require('./routes/otherRoute');
+const TrashRoute=require('./routes/trashRoute')
 const dataSource = require('./infrastructure/psql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -47,6 +48,7 @@ agentRoute(app, io);
 leadRoute(app, io);
 followUpRoute(app, io);
 otherRoute(app, io);
+TrashRoute(app)
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {

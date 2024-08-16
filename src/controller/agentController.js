@@ -91,8 +91,8 @@ const agentController = {
     
         if (result) {
             res.status(201).json({ message: 'success', data: result });
-                io.emit('agent_updated', result);
-        } else {
+            io.emit('receive_message', result);
+          } else {
             res.status(404).json({ message: 'Agent not found' });
         }
     } catch (error) {
@@ -532,7 +532,7 @@ const agentAuthController = {
 
 
 
-  updateAgentStatus: async (req, res) => {
+  updateAgentStatus: async (io,req, res) => {
     try {
         const { status } = req.body;
         const agentId = req.params.agentId;
@@ -543,6 +543,8 @@ const agentAuthController = {
         if (!data) {
             return res.status(404).json({ message: 'Agent not found or update failed.' });
         }
+        io.emit('receive_message', data);
+
         res.status(200).json({ message: 'Status updated successfully', data: data });
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
