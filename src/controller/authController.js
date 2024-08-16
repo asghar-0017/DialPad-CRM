@@ -141,25 +141,29 @@ const adminAuth = {
 
   verifyToken: async (request, response) => {
     try {
+      console.log("Aoi hit")
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return response.status(401).send({ code: 401, message: 'No token provided' });
         }
+
         const token = authHeader.split(' ')[1];
         let decoded;
+
         try {
             decoded = jwt.verify(token, secretKey);
         } catch (error) {
             console.log('Token verification error:', error);
-            return response.status(401).send({ code: 401, message: 'Invalid token' });
+            return response.status(401).send({ code: 401, message: 'Invalid or expired token' });
         }
+
         let user;
         if (decoded.role === 'admin') {
             user = await adminService.findUserById(decoded.userName);
         } else if (decoded.role === 'agent') {
             user = await authAgentRepository.findByEmail(decoded.email);
         }
-
+        console.log("User",user)
         if (!user || user.verifyToken !== token) {
             return response.status(401).send({ code: 401, message: 'Invalid token or role' });
         }
@@ -167,12 +171,11 @@ const adminAuth = {
         return response.status(200).send({ code: 200, isValid: true, role: decoded.role });
 
     } catch (error) {
-        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-            return response.status(401).send({ code: 401, message: 'Invalid token' });
-        }
+        console.error('Unexpected error:', error);
         return response.status(500).send({ code: 500, message: 'Internal Server Error', error: error.message });
     }
 },
+
 
 };
 

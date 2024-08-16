@@ -329,10 +329,12 @@ const agentAuthController = {
     try {
       const { email, password } = req.body;
       const agent = await agentAuthService.login( { email, password })
+      console.log("Agent Login ",agent)
       if(agent){
+
         res.status(200).send(agent)
       }
-      if(agent.status==false){
+      if(agent.isActivated==false){
         res.status(200).send(agent.isActivated)
 
       }
@@ -341,7 +343,7 @@ const agentAuthController = {
       }
     }
      catch (error) {
-      logger.error('Error during admin login', error);
+      logger.error('Error during agent login', error);
       throw error;
     }
   },

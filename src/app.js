@@ -11,12 +11,13 @@ const dataSource = require('./infrastructure/psql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Server } = require('socket.io');
+const socketIo = require("socket.io");
 
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
+const io = socketIo(server, {
   cors: {
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST','DELETE','PUT'],
@@ -58,6 +59,10 @@ app.use((err, req, res, next) => {
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
+  socket.on("send_message", (data) => {
+    io.emit("receive_message", data);
+
+  });
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });

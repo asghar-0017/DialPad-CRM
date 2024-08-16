@@ -146,7 +146,7 @@ const agentAuthService = {
       const agent = await authAgentRepository.findByEmail(email);
       if(agent){
       if(agent.isActivated==true){
-      console.log("agent", agent);
+      console.log("agent in Service", agent);
         if (agent && await bcrypt.compare(password, agent.password)) {
         const token = jwt.sign({ email: agent.email,role: agent.role,agenId:agent.agentId }, secretKey, { expiresIn: '10h' });
           agent.verifyToken = token;
