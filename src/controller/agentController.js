@@ -543,7 +543,7 @@ const agentAuthController = {
         if (!data) {
             return res.status(404).json({ message: 'Agent not found or update failed.' });
         }
-        io.emit('receive_message', data);
+        io.emit('send_message', data);
 
         res.status(200).json({ message: 'Status updated successfully', data: data });
     } catch (error) {
