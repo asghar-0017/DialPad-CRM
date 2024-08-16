@@ -5,9 +5,10 @@ const {checkRole}=require('../middleware/checkRole')
 const upload = require('../utils/upload')
 const combinedAuthenticate = require('../middleware/permission')
 
+
 const agentRoute = (app) => {
-    app.post('/create-agent',combinedAuthenticate, checkRole(['admin',]), agentController.createAgent);
-    app.get('/get-agent',combinedAuthenticate, checkRole(['admin','agent']),agentController.getAgent)
+    app.post('/create-agent', combinedAuthenticate, checkRole(['admin']), (req, res) => agentController.createAgent(io, req, res));
+    app.get('/get-agent',combinedAuthenticate, checkRole(['admin','agent']),  (req, res) => agentController.getAgent(io, req, res))
     app.get('/get-agent/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAgentById);
     app.put('/update-agent/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.updateAgent);
     app.delete('/delete-agent/:agentId', combinedAuthenticate, checkRole(['admin']),agentController.deleteAgent);

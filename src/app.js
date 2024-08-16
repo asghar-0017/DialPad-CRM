@@ -41,11 +41,12 @@ app.get('/', async (req, res) => {
   });
 });
 
-AdminAuthRoute(app);
-agentRoute(app);
-leadRoute(app);
-followUpRoute(app);
-otherRoute(app);
+// Routes registration
+AdminAuthRoute(app, io);
+agentRoute(app, io);
+leadRoute(app, io);
+followUpRoute(app, io);
+otherRoute(app, io);
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
@@ -55,6 +56,7 @@ app.use((err, req, res, next) => {
   next();
 });
 
+// Socket.io connection
 io.on('connection', (socket) => {
   logger.info(`A user connected: ${socket.id}`);
 

@@ -17,7 +17,7 @@ const secretKey = process.env.SCERET_KEY;
 
 const agentController = {
 
-    createAgent: async (req, res) => {
+    createAgent: async (io,req, res) => {
         try {
           const data = req.body;
           console.log("data",data)
@@ -28,13 +28,16 @@ const agentController = {
             return res.status(400).json({ message: 'User already registered' });
           }
           const agent = await agentService.agentCreateService(data);
+          io.emit('agent_created', agent);
+
           res.status(201).json({ message: 'Agent registered successfully', agent });
+
         } catch (error) {
           res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
     },
 
-    getAgent:async(req,res)=>{
+    getAgent:async(io,req,res)=>{
     try{
         const result=await agentService.agentGetInService(); 
         if(!result || result.length==0){
@@ -45,7 +48,8 @@ const agentController = {
         return {id, agentId, firstName, lastName, email, phone, role,isActivated };
      
     });
-    
+    io.emit('agentData socket', data);
+
         res.status(201).json({ message: 'success', data:data });
       }
      catch (error) {
