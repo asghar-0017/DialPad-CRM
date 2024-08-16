@@ -69,7 +69,7 @@ getFollowUpById: async (req, res) => {
       const followUpData = req.body;
       const updatedFollowUp = await followUpService.updateFollowUp(leadId, followUpData);
       if (updatedFollowUp) {
-        io.emit('send_message', updatedFollowUp);
+        io.emit('receive_message', updatedFollowUp);
         res.status(200).json({ message: 'Follow-up updated successfully', data:updatedFollowUp });
       } else {
         res.status(404).json({ message: 'Follow-up not found' });

@@ -64,7 +64,7 @@ const otherController = {
       const otherData = req.body;
       const updatedOther = await otherService.updateOtherById(leadId, otherData);
       if (updatedOther) {
-        io.emit('send_message', updatedOther);
+        io.emit('receive_message', updatedOther);
         res.status(200).json({ message: 'Other updated successfully', updatedOther });
       } else {
         res.status(404).json({ message: 'Other not found' });

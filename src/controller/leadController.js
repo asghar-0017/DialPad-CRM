@@ -68,7 +68,7 @@ const leadController = {
             if (lead && lead.customer_feedBack !== 'other') {
                 delete lead.otherDetail;
             }
-            io.emit('send_message', lead);
+            io.emit('receive_message', lead);
 
             res.status(201).json({ message: 'Lead Updated successfully', data: lead });
         } catch (error) {
