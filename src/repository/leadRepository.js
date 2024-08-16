@@ -2,6 +2,9 @@ const dataSource = require("../infrastructure/psql");
 const Lead = require('../entities/lead');
 const FollowUp = require('../entities/followUp'); // Adjust the path as needed
 const other = require('../entities/otherDetail'); // Adjust the path as needed
+const leadsTrash=require('../entities/trash/leadTrash')
+const otherTrash=require('../entities/trash/otherTrash')
+const followUpTrash=require('../entities/trash/followUpTrash')
 
 
 const leadRepository = {
@@ -102,20 +105,46 @@ const leadRepository = {
         }
     },
     
-    delete: async (id, user) => {
+    delete: async (leadId, user) => {
+        console.log("APi Hit Delete")
         const leadRepository = dataSource.getRepository(Lead);
         const followUpRepository = dataSource.getRepository(FollowUp);
         const otherRepository = dataSource.getRepository(other);
-        const leadData = await leadRepository.findOneBy({ leadId: id });
+      
+        const otherTrashRepository = dataSource.getRepository(otherTrash);
+        const leadTrashRepository = dataSource.getRepository(leadsTrash);
+        const followUpTrashRepository = dataSource.getRepository(followUpTrash);
+      
+        const leadData = await leadRepository.findOne({where:{ leadId} });
+        console.log("Lead Data",leadData)
+      let createOtherTrash;
+      let createFollowUpInTrash;
         if (leadData) {
-            await followUpRepository.delete({ leadId: id });
-            await otherRepository.delete({ leadId: id });
-            await leadRepository.remove(leadData);
-            return true;
+          const createLeadInTrash = await leadTrashRepository.save(leadTrashRepository.create(leadData));
+          console.log("CreateOtherTrash",createLeadInTrash)
+          if(leadData.customer_feedBack=='other'){
+           createOtherTrash=  await otherTrashRepository.save(otherTrashRepository.create(leadData)) 
+           console.log("Create Other In Trash",createOtherTrash)
+          }
+            if(leadData.customer_feedBack=='followUp'){
+            createFollowUpInTrash=await followUpTrashRepository.save(followUpTrashRepository.create(leadData)) 
+            console.log("FollowUp in Trash",createFollowUpInTrash)
+            } 
+          await followUpRepository.delete({ leadId });
+          await otherRepository.delete({ leadId});
+          await leadRepository.remove(leadData);
+          
+            return {
+            createLeadInTrash,
+            createOtherTrash,
+            createFollowUpInTrash
+          };
         }
-    
-        return false;
-    },
+      
+        return false; 
+      },
+      
+      
     
     
     

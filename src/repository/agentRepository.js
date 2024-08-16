@@ -2,6 +2,7 @@ const dataSource = require("../infrastructure/psql");
 const { logger } = require("../../logger");
 const agentAuth=require('../entities/agent')
 const agentTask=require('../entities/agentTask')
+const agentTrash=require('../entities/trash/agentTrash')
 
 const agentRepository = {
 findByEmail: async (email) => {
@@ -43,17 +44,26 @@ findByEmail: async (email) => {
       throw error
     }
   },
-  deleteAgentDataById:async(agentId,user)=>{
-    try{
-      const data= await dataSource.getRepository(agentAuth).findOne({where:{agentId}})
-      if(data){
-        const result = await dataSource.getRepository(agentAuth).delete({ agentId },user)
-        return result
+  deleteAgentDataById: async (agentId, user) => {
+    try {
+      const repository = dataSource.getRepository(agentAuth);
+      const trashRepository = dataSource.getRepository(agentTrash);
+      const data = await repository.findOne({ where: { agentId } });
+      if (data) {
+        const createAgentInTrash = await trashRepository.save(trashRepository.create(data));
+          const result = await repository.delete({ agentId });
+          return {
+          result,
+          dataTrash: createAgentInTrash
+        };
+      } else {
+        return null;
       }
-    }catch(error){
-      throw error
+    } catch (error) {
+      throw new Error(`Error deleting agent: ${error.message}`);
     }
   },
+  
   assignTaskToAgentById: async (agentId, task, taskId) => {
     try {
       console.log("AgentID in repo",agentId)

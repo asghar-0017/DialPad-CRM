@@ -92,8 +92,8 @@ const leadService = {
             throw error;
         }
     },
-    deleteLeadById: async (id,user) => {
-        return await leadRepository.delete(id,user);
+    deleteLeadById: async (leadId,user) => {
+        return await leadRepository.delete(leadId,user);
       },
 
 };

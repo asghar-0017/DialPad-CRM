@@ -10,20 +10,20 @@ const agentRoute = (app,io) => {
     app.post('/create-agent', combinedAuthenticate, checkRole(['admin']), (req, res) => agentController.createAgent(io, req, res));
     app.get('/get-agent',combinedAuthenticate, checkRole(['admin','agent']),  (req, res) => agentController.getAgent(io, req, res))
     app.get('/get-agent/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAgentById);
-    app.put('/update-agent/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.updateAgent);
+    app.put('/update-agent/:agentId',combinedAuthenticate, checkRole(['admin','agent']), (req, res) => agentController.updateAgent(io, req, res));
     app.delete('/delete-agent/:agentId', combinedAuthenticate, checkRole(['admin']),agentController.deleteAgent);
 
-    app.post('/assign-task/:agentId',combinedAuthenticate, checkRole(['admin']), agentController.assignTask)
-    app.get('/get-assign-task', combinedAuthenticate, checkRole(['admin','agent']),agentController.getAssignTask)
+    app.post('/assign-task/:agentId',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.assignTask(io, req, res))
+    app.get('/get-assign-task', combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignTask(io, req, res))
     app.get('/get-assign-tasks/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignTaskById);
     app.get('/get-assign-task/:taskId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignTaskByTaskId);
-    app.put('/update-assign-task/:taskId',combinedAuthenticate, checkRole(['admin']), agentController.updateAssignTaskById);
+    app.put('/update-assign-task/:taskId',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.updateAssignTaskById(io, req, res));
     app.delete('/delete-assign-task/:agentId/:taskId',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignTaskById);
     app.delete('/delete-assign-task/:taskId',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignTaskByTaskId);
 
 
-    app.post('/upload-task', combinedAuthenticate, checkRole(['admin']),upload.single('file'), agentController.saveExcelFileData)
-    app.post('/create-agent-csv', combinedAuthenticate, checkRole(['admin','agent']),upload.single('file'), agentController.saveExcelFileDataOfCreateAgent)
+    app.post('/upload-task', combinedAuthenticate, checkRole(['admin']),upload.single('file'),(req, res) => agentController.saveExcelFileData(io, req, res))
+    app.post('/create-agent-csv', combinedAuthenticate, checkRole(['admin','agent']),upload.single('file'),(req, res) => agentController.saveExcelFileDataOfCreateAgent(io, req, res))
 
 
     app.post('/login-agent',agentAuthController.login)

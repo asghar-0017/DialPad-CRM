@@ -3,7 +3,7 @@ const followUpService = require('../service/followUpService');
 
 const followUpController = {
 
-  getAllFollowUps: async (req, res) => {
+  getAllFollowUps: async (io,req, res) => {
     try {
         const followUps = await followUpService.getAllFollowUps();
         if (!followUps || followUps.length === 0) {
@@ -17,6 +17,7 @@ const followUpController = {
                 return followUp;
             }
         });
+        io.emit('receive_message', data);
         res.status(200).json({ message: 'success', data });
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -62,12 +63,13 @@ getFollowUpById: async (req, res) => {
   }
   },
 
-  updateFollowUp: async (req, res) => {
+  updateFollowUp: async (io,req, res) => {
     try {
       const { leadId } = req.params;
       const followUpData = req.body;
       const updatedFollowUp = await followUpService.updateFollowUp(leadId, followUpData);
       if (updatedFollowUp) {
+        io.emit('send_message', updatedFollowUp);
         res.status(200).json({ message: 'Follow-up updated successfully', data:updatedFollowUp });
       } else {
         res.status(404).json({ message: 'Follow-up not found' });

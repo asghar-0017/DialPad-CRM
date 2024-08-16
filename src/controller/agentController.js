@@ -82,12 +82,13 @@ const agentController = {
       }
   },
   
-    updateAgent:async(req,res)=>{
+    updateAgent:async(io,req,res)=>{
       try{
         const agentId=req.params.agentId
         const {firstName,lastName,email,phone}=req.body
         const user = req.user;
         const result=await agentService.agentUpdateByIdInService(agentId,{firstName,lastName,email,phone},user); 
+        io.emit('receive_message', result);
         res.status(201).json({ message: 'success', data:result });
       }
      catch (error) {
@@ -108,7 +109,7 @@ const agentController = {
       }
     },
 
-    assignTask: async (req, res) => {
+    assignTask: async (io,req, res) => {
       try {
         const agenId = req.params.agentId;
         const task = req.body;
@@ -118,6 +119,7 @@ const agentController = {
         const data = await agentService.assignTaskToAgent(agenId, task.task, task.taskId);
     
         if (data) {
+          io.emit('send_message', data);
           res.status(200).send({ message: "success", data: data });
         } else {
           res.status(404).send({ message: "data Not Found" });
@@ -128,10 +130,11 @@ const agentController = {
       }
     },
     
-    getAssignTask:async(req,res)=>{
+    getAssignTask:async(io,req,res)=>{
       try{
         const data=await agentService.getAssignTaskToAgent()
         if(data){
+          io.emit('receive_message', data);
           res.status(200).send({message:"success",data:data})
         }else{
           res.status(404).send({message:"data Not Found"})
@@ -172,7 +175,7 @@ const agentController = {
       }
     },
     
-    updateAssignTaskById: async (req, res) => {
+    updateAssignTaskById: async (io,req, res) => {
       try {
         const { taskId } = req.params;
         const bodyData = req.body;
@@ -182,6 +185,7 @@ const agentController = {
         if (data === 'Data Not Found') {
           res.status(404).send({ message: 'Data Not Found' });
         } else {
+          io.emit('receive_message', data);
           res.status(200).send({ message: 'Task Updated Successfully', data });
         }
       } catch (error) {
@@ -220,7 +224,7 @@ const agentController = {
       }
     },
    
-    saveExcelFileData: async (req, res) => {
+    saveExcelFileData: async (io,req, res) => {
       if (!req.file) {
           return res.status(400).json({ message: 'Please upload an Excel file.' });
       }
@@ -258,6 +262,8 @@ const agentController = {
               }
           }
           if (tasksAssigned.length > 0) {
+            io.emit('send_message', tasksAssigned);
+
               return res.status(200).json({ message: 'Tasks assigned successfully', data: tasksAssigned });
           } else {
               return res.status(400).json({ message: 'No tasks were assigned due to missing data or agent not found.' });
@@ -272,7 +278,7 @@ const agentController = {
    
 
 
-  saveExcelFileDataOfCreateAgent: async (req, res) => {
+  saveExcelFileDataOfCreateAgent: async (io,req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'Please upload an Excel file.' });
     }
@@ -313,6 +319,8 @@ const agentController = {
             }
         }
         if (createAgent.length > 0) {
+          io.emit('send_message', tasksAssigned);
+
             return res.status(201).json({ message: 'Agents registered successfully', agents: createAgent });
         } else {
             return res.status(400).json({ message: 'No agents were created.' });
@@ -337,10 +345,6 @@ const agentAuthController = {
       if(agent){
 
         res.status(200).send(agent)
-      }
-      if(agent.isActivated==false){
-        res.status(200).send(agent.isActivated)
-
       }
       else{
         res.status(404).send({message:"invalid UserName and Password"})

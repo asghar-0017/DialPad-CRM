@@ -8,7 +8,7 @@ const otherDetail = require('../entities/otherDetail');
 const followUp = require('../entities/followUp');
 
 const leadController = {
-    createLead: async (req, res) => {
+    createLead: async (io,req, res) => {
         try {
             const data = req.body;
             data.leadId = leadId();
@@ -21,6 +21,8 @@ const leadController = {
             }
             const lead = await leadService.leadCreateService(data, user);
            if(lead){
+            io.emit('send_message', lead);
+
             res.status(201).json({ message: 'Lead created successfully', lead });
            }
         } catch (error) {
@@ -28,7 +30,7 @@ const leadController = {
         }
     },
     
-    readLead: async (req, res) => {
+    readLead: async (io,req, res) => {
         try {
             const data = await leadService.leadReadService();
             if (!data || data.length === 0) {
@@ -46,13 +48,15 @@ const leadController = {
                 }
                 return lead;
             });
+            io.emit('receive_message', processedData);
+
             res.status(200).json({ message: 'Success', data: processedData }); 
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
     },
 
-    updateLead: async (req, res) => {
+    updateLead: async (io,req, res) => {
         try {
             const data = req.body;
             const leadId = req.params.leadId;
@@ -64,13 +68,15 @@ const leadController = {
             if (lead && lead.customer_feedBack !== 'other') {
                 delete lead.otherDetail;
             }
+            io.emit('send_message', lead);
+
             res.status(201).json({ message: 'Lead Updated successfully', data: lead });
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
     },
 
-    saveExcelFileData: async (req, res) => {
+    saveExcelFileData: async (io,req, res) => {
         if (!req.file) {
             return res.status(400).json({ message: 'Please upload an Excel file.' });
         }
@@ -111,6 +117,8 @@ const leadController = {
                 };
                 await leadService.leadCreateService(leadData, req.user);
             }
+            io.emit('send_message', results);
+
             res.status(200).json({ message: 'Leads created successfully', data: results });
         } catch (error) {
             console.error('Error processing the Excel file:', error);
@@ -166,6 +174,7 @@ const leadController = {
     deleteLead: async (req, res) => {
         try {
             const leadId = req.params.leadId;
+            console.log("leadId in params",leadId)
             const user = req.user;
             const result = await leadService.deleteLeadById(leadId, user);
             if (!result) {

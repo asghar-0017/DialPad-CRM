@@ -15,6 +15,7 @@ const dataSource = new DataSource({
   logging: true,
   logger: new PinoLogger(),
   entities: [path.join(__dirname, "../entities/**/*.js")],
+  trash: [path.join(__dirname, "../entities/trash/**/*.js")],
 });
 
 module.exports = dataSource;

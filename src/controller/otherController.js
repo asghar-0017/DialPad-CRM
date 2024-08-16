@@ -3,7 +3,7 @@ const otherService = require('../service/otherService');
 
 const otherController = {
 
-  getAllOthers: async (req, res) => {
+  getAllOthers: async (io,req, res) => {
     try {
       const { role } = req.user;
       const others = await otherService.getAllOthers();
@@ -15,6 +15,8 @@ const otherController = {
         });
         return res.status(200).json({ message: 'success', data });
       } 
+      io.emit('receive_message', others);
+
         return res.status(200).json({ message: 'success', data: others });
     } catch (error) {
       return res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -56,12 +58,13 @@ const otherController = {
   }
   },
 
-  updateOther: async (req, res) => {
+  updateOther: async (io,req, res) => {
     try {
       const { leadId } = req.params;
       const otherData = req.body;
       const updatedOther = await otherService.updateOtherById(leadId, otherData);
       if (updatedOther) {
+        io.emit('send_message', updatedOther);
         res.status(200).json({ message: 'Other updated successfully', updatedOther });
       } else {
         res.status(404).json({ message: 'Other not found' });
