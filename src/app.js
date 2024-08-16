@@ -11,16 +11,15 @@ const dataSource = require('./infrastructure/psql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Server } = require('socket.io');
-const socketIo = require("socket.io");
 
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
+const io = new Server(server, {
   cors: {
     origin: 'http://localhost:5173',
-    methods: ['GET', 'POST','DELETE','PUT'],
+    methods: ['GET', 'POST', 'DELETE', 'PUT'],
   },
 });
 
@@ -44,7 +43,7 @@ app.get('/', async (req, res) => {
 
 AdminAuthRoute(app);
 agentRoute(app);
-leadRoute(app);  
+leadRoute(app);
 followUpRoute(app);
 otherRoute(app);
 
@@ -57,14 +56,15 @@ app.use((err, req, res, next) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
+  logger.info(`A user connected: ${socket.id}`);
 
   socket.on("send_message", (data) => {
     io.emit("receive_message", data);
-
+    logger.info(`Message sent: ${JSON.stringify(data)}`);
   });
+
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+    logger.info(`User disconnected: ${socket.id}`);
   });
 });
 
@@ -76,7 +76,7 @@ const StartServer = async () => {
     const PORT = process.env.PORT || 4000;
     server.listen(PORT, () => {
       logger.info(`Server is listening on ${PORT}`);
-      console.log('Socket.io instance is initialized');
+      logger.info('Socket.io instance is initialized');
     });
   } catch (error) {
     logger.error(error.message);
