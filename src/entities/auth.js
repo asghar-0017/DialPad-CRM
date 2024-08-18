@@ -9,6 +9,10 @@ module.exports = new EntitySchema({
         primary: true,
         generated: true,
       },
+      adminId:{
+        type: "int",
+        unique:true
+      },
       userName: {
         type: "varchar",
       },

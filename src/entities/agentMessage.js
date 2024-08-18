@@ -2,7 +2,7 @@ const { EntitySchema } = require("typeorm");
 
 module.exports = new EntitySchema({
   name: "agentMessage",
-  tableName: "agentMessage",
+  tableName: "agent_message",
   columns: {
     id: {
       type: "int",
@@ -12,11 +12,15 @@ module.exports = new EntitySchema({
     agentId: {
       type: "varchar",
     },
+    adminId: {
+      type: "int",
+      nullable: true,
+    },
     messageId: {
-        type: "varchar",
-      },
-    message: {
       type: "varchar",
+    },
+    message: {
+      type: "text",
       nullable: true,
     },
     created_at: {
@@ -35,9 +39,19 @@ module.exports = new EntitySchema({
       target: "agent",
       joinColumn: {
         name: "agentId",
-        referencedColumnName: "agentId"
+        referencedColumnName: "agentId",
       },
       onDelete: "CASCADE",
+    },
+    admin: {
+      type: "many-to-one",
+      target: "adminauth",
+      joinColumn: {
+        name: "adminId",
+        referencedColumnName: "adminId",
+      },
+      onDelete: "CASCADE",
+      nullable: true, 
     },
   },
 });

@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs');
 const dataSource = require('./src/infrastructure/psql');
-const AdminAuth = require('./src/entities/auth'); // Adjust this import according to your entities structure
-require('dotenv').config()
+const AdminAuth = require('./src/entities/auth');
+const generateAdminId = require('./src/utils/token'); 
+require('dotenv').config();
 
 const initializeAdmin = async () => {
   try {
@@ -11,17 +12,24 @@ const initializeAdmin = async () => {
     const admin = await adminRepository.findOne({ where: { userName: 'admin' } });
 
     if (!admin) {
+      const adminId = generateAdminId();
       const hashedPassword = await bcrypt.hash('admin', 10);
-      const newAdmin = adminRepository.create({ userName: 'admin', password: hashedPassword,email:process.env.ADMIN_EMAIL });
+      const newAdmin = adminRepository.create({
+        userName: 'admin',
+        password: hashedPassword,
+        email: process.env.ADMIN_EMAIL,
+        adminId: adminId,
+      });
+
       await adminRepository.save(newAdmin);
       console.log('Initial admin user created');
     } else {
       console.log('Admin user already exists');
     }
-
-    await dataSource.destroy();
   } catch (error) {
-    console.error('Error initializing admin user:', error);
+    console.error('Error initializing admin user:', error.message);
+  } finally {
+    await dataSource.destroy();
   }
 };
 

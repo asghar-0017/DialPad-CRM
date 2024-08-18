@@ -213,10 +213,107 @@ findByEmail: async (email) => {
       console.error('Error deleting task for agent:', error.message);
       throw new Error('Error deleting task for agent');
     }
-  }
+  },
+  assignReviewToAgentById: async (agentId,review,reviewId) => {
+    try {
+      console.log("AgentID in repo",agentId)
+      const agentRepository = dataSource.getRepository('agent');
+      const agent = await agentRepository.findOne({ where: { agentId } });
   
+      if (!agent) {
+        console.log("No agent found with ID:", agentId);
+        return null;
+      }
+      console.log("Agent",agent)
+
+   
+      const agentReviewRepository = dataSource.getRepository('agentReview');
+      const reviewEntity = agentReviewRepository.create({
+        id: reviewId,
+        review: review ,
+        agent: agent, 
+        reviewId:reviewId
+      });
   
+      await agentReviewRepository.save(reviewEntity);
   
+      return reviewEntity;
+    } catch (error) {
+      console.error('Error in assignTaskToAgentById:', error.message);
+      throw new Error('Error assigning task to agent');
+    }
+  },
+  getAssignReviewsToAgentById: async (agentId) => {
+    try {
+      const agentTaskRepository = dataSource.getRepository('agentReview');
+      const review = await agentTaskRepository.find({ where: { agentId } });
+      if (review.length > 0) {
+        return review;
+      } else {
+        return []; 
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      throw new Error('Error fetching tasks');
+    }
+  },
+  
+  getAssignReviewToAgentByReviewId: async (reviewId) => {
+    try {
+      const agentReviewRepository =  dataSource.getRepository('agentReview');
+      const review = await agentReviewRepository.findOne({ where: { reviewId } })
+      if (review) {
+        return review;
+      } else {
+        return null; 
+      }
+    } catch (error) {
+      console.error('Error fetching task:', error.message);
+      throw new Error('Error fetching task');
+    }
+  },
+  updateAssignReviewToAgentById: async ( reviewId, updatedTaskData) => {
+    try {
+      const agentReviewRepository = dataSource.getRepository('agentReview');
+      const existingReview = await agentReviewRepository.findOne({
+        where: {
+          reviewId: reviewId,
+        }
+      });  
+      if (existingReview) {
+        await agentReviewRepository.update({ reviewId }, updatedTaskData);
+        const updatedTask = await agentReviewRepository.findOne({ where: { reviewId } });
+        return updatedTask;
+      } else {
+        return 'Data Not Found';
+      }
+    } catch (error) {
+      console.error('Error updating task for agent:', error.message);
+      throw new Error('Error updating task for agent');
+    }
+  },
+  deleteAssignReviewToAgentByReviewId: async (reviewId) => {
+    try {
+      const agentReviewRepository = dataSource.getRepository('agentReview');
+      
+      const existingReview = await agentReviewRepository.findOne({
+        where: {
+          reviewId: reviewId,
+  
+        }
+      });
+      
+      if (existingReview) {
+        const deleteReview = await agentReviewRepository.remove(existingReview);
+        return deleteReview;
+      } else {
+        return 'Data Not Found';
+      }
+    } catch (error) {
+      console.error('Error deleting task for agent:', error.message);
+      throw new Error('Error deleting task for agent');
+    }
+  },
   
   
 };

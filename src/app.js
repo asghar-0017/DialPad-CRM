@@ -8,6 +8,7 @@ const leadRoute = require('./routes/leadRoute');
 const followUpRoute = require('./routes/followUpRoute');
 const otherRoute = require('./routes/otherRoute');
 const TrashRoute=require('./routes/trashRoute')
+const messageRoute=require('./routes/messagingRoute')
 const dataSource = require('./infrastructure/psql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -42,13 +43,13 @@ app.get('/', async (req, res) => {
   });
 });
 
-// Routes registration
 AdminAuthRoute(app, io);
 agentRoute(app, io);
 leadRoute(app, io);
 followUpRoute(app, io);
 otherRoute(app, io);
 TrashRoute(app)
+messageRoute(app,io)
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
@@ -58,7 +59,6 @@ app.use((err, req, res, next) => {
   next();
 });
 
-// Socket.io connection
 io.on('connection', (socket) => {
   logger.info(`A user connected: ${socket.id}`);
 

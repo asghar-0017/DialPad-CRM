@@ -99,6 +99,14 @@ const agentService = {
       throw error
     }
   },
+  getAssignTaskToAgentById:async(agenId)=>{
+    try{
+      const data=await agentRepository.getAssignTaskToAgentById(agenId)
+      return data
+    }catch(error){
+      throw error
+    }
+  },
   getAssignTaskToAgentByTaskId:async(taskId)=>{
     try{
       const data=await agentRepository.getAssignTaskToAgentByTaskId(taskId)
@@ -130,7 +138,47 @@ const agentService = {
     }catch(error){
       throw error
     }
+  },
+ assignReviewToAgent:async(agentId,review,reviewId)=>{
+  try{
+    const data=await agentRepository.assignReviewToAgentById(agentId,review,reviewId)
+    return data
+  }catch(error){
+    throw error
   }
+},
+getAssignReviewToAgentById:async(agenId)=>{
+  try{
+    const data=await agentRepository.getAssignReviewsToAgentById(agenId)
+    return data
+  }catch(error){
+    throw error
+  }
+},
+getAssignReviewToAgentByReviewId:async(reviewId)=>{
+  try{
+    const data=await agentRepository.getAssignReviewToAgentByReviewId(reviewId)
+    return data
+  }catch(error){
+    throw error
+  }
+},
+updateAssignReviewToAgentById:async(reviewId, bodyData)=>{
+  try{
+    const data=await agentRepository.updateAssignReviewToAgentById(reviewId, bodyData)
+    return data
+  }catch(error){
+    throw error
+  }
+},
+deleteAssignReviewToAgentByReviewId:async(reviewId)=>{
+  try{
+    const data=await agentRepository.deleteAssignReviewToAgentByReviewId(reviewId)
+    return data
+  }catch(error){
+    throw error
+  }
+},
 }
 
 const authRepository = require('../repository/authRepository');

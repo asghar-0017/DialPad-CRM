@@ -1,6 +1,7 @@
 const {agentService,agentAuthService}= require('../service/agentService');
 const {agentRepository,authAgentRepository}=require('../repository/agentRepository')
 const agentId=require('../utils/token')
+const reviewId=require('../utils/token')
 const taskId=require('../utils/token')
 const fs = require('fs');
 const path = require('path');
@@ -227,7 +228,88 @@ const agentController = {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
-   
+    assignReview: async (io,req, res) => {
+      try {
+        const agenId = req.params.agentId;
+        const review = req.body;
+        review.reviewId = reviewId(); 
+    
+        const data = await agentService.assignReviewToAgent(agenId, review.review, review.reviewId);
+    
+        if (data) {
+          io.emit('send_message', data);
+          res.status(200).send({ message: "success", data: data });
+        } else {
+          res.status(404).send({ message: "data Not Found" });
+        }
+      } catch (error) {
+        console.error('Error in assignTask:', error.message);
+        res.status(500).send({ message: 'Error assigning task' });
+      }
+    },
+    getAssignReviewsById:async (req, res) => {
+      try {
+        const agentId = req.params.agentId;
+        console.log("AgentId",agentId)
+        const data = await agentService.getAssignReviewToAgentById(agentId);
+        if (data === 'Data Not Found') {
+          res.status(404).send({ message: 'Data Not Found' });
+        } else {
+          res.status(200).send({ message: 'Success', data });
+        }
+      } catch (error) {
+        console.error('Error fetching Reviews by agent ID:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    },
+    getAssignReviewByReviewId: async (req, res) => {
+      try {
+        const reviewId = req.params.reviewId;
+        const review = await agentService.getAssignReviewToAgentByReviewId(reviewId);
+    
+        if (review) {
+          res.status(200).send({ message: 'Success', data: review });
+        } else {
+          res.status(404).send({ message: 'Data Not Found' });
+        }
+      } catch (error) {
+        console.error('Error fetching task by task ID:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    },
+    updateAssignReviewById: async (io,req, res) => {
+      try {
+        const { reviewId } = req.params;
+        const bodyData = req.body;
+        console.log("ReviewId",reviewId)
+        console.log("Review",bodyData)
+        const data = await agentService.updateAssignReviewToAgentById(reviewId, bodyData);
+        if (data === 'Data Not Found') {
+          res.status(404).send({ message: 'Data Not Found' });
+        } else {
+          io.emit('receive_message', data);
+          res.status(200).send({ message: 'Task Updated Successfully', data });
+        }
+      } catch (error) {
+        console.error('Error Updating task:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    },
+    deleteAssignReviewByReviewId: async (req, res) => {
+      try {
+        const { reviewId } = req.params; 
+        const data = await agentService.deleteAssignReviewToAgentByReviewId(reviewId);
+        if (data === 'Data Not Found') {
+          res.status(404).send({ message: 'Data Not Found' });
+        } else {
+          res.status(200).send({ message: 'Task Deleted Successfully', data });
+        }
+      } catch (error) {
+        console.error('Error Deleting task:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    },
+
     saveExcelFileData: async (io,req, res) => {
       if (!req.file) {
           return res.status(400).json({ message: 'Please upload an Excel file.' });
