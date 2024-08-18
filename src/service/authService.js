@@ -3,9 +3,7 @@ const authRepository = require('../repository/authRepository');
 const { logger } = require('../../logger');
 const jwt = require('jsonwebtoken');
 const dataSource = require('../infrastructure/psql');
-const auth = require('../entities/auth');
 const { agentRepository } = require('../repository/agentRepository');
-const { adminAuth } = require('../controller/authController');
 const Agent=require('../entities/agent')
 const Admin=require('../entities/auth')
 require('dotenv').config(); // Ensure this line is at the top
