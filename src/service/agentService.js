@@ -200,7 +200,7 @@ const agentAuthService = {
           agent.verifyToken = token;
           const Token={
             token: agent.verifyToken,
-            agentId:agent.agentId
+            agent:agent
           }
         await agentRepository.saveAgent(agent);
   
