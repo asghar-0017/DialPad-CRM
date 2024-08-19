@@ -92,6 +92,19 @@ const messageRepository={
       throw new Error('Error assigning task to agent');
     }
   },
+  getAllMessagesFromAdminByAdminId:async(adminId)=>{
+    try {
+      const adminMessageRepository = dataSource.getRepository('admin_message');
+      const messages = await adminMessageRepository.find({
+          where: { adminId },
+          relations: ['agent']
+      });
+      return messages;
+  } catch (error) {
+      console.error('Error fetching messages sent to admin:', error.message);
+      throw new Error('Error fetching messages');
+  }
+  }
   
 }
 

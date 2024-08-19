@@ -37,7 +37,15 @@ const trashRepository = {
         const repository = dataSource.getRepository(followUpTrash);
         const followUps = await repository.find();    
         return followUps;
-    }
+    },
+    getLeadDataById: async (leadId) => {
+      try {
+          const data=  await dataSource.getRepository(leadTrash).findOne({ where: { leadId } });
+          return data 
+      } catch (error) {
+          throw error;
+      }
+  },
     
 }
 module.exports= trashRepository

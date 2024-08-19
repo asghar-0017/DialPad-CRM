@@ -12,7 +12,7 @@ const messageController = {
             const data = await messageService.assignMessageToAgent(adminId,agentId, message.message, message.messageId);
         
             if (data) {
-              io.to(agentId).emit('new_message', data); // Broadcast to the specific agent
+              io.to(agentId).emit('new_message', data);
               res.status(200).send({ message: "success", data: data });
             } else {
               res.status(404).send({ message: "data Not Found" });
@@ -92,6 +92,23 @@ const messageController = {
                 res.status(500).send({ message: 'Internal Server Error' });
               }
             },
-};
+
+           getAllMessagesFromAdmin:async(io,req,res)=>{
+            try {
+              const adminId = req.params.adminId;
+              const data = await messageService.getAllMessagesFromAdmin(adminId);
+              if (data.length > 0) {
+                  res.status(200).json({ message: 'success', data: data });
+                  io.emit('receive_message', data);
+              } else {
+                  res.status(404).json({ message: 'No messages found' });
+              }
+          } catch (error) {
+              console.error('Error fetching messages sent to admin:', error.message);
+              res.status(500).json({ message: 'Internal Server Error' });
+          }
+      },
+}
+
 
 module.exports = messageController;

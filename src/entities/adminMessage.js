@@ -20,7 +20,7 @@ module.exports = new EntitySchema({
     },
     message: {
       type: "text",
-      nullable: true,
+      // nullable: true,
     },
     created_at: {
       type: "timestamp",

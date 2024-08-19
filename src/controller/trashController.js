@@ -62,7 +62,28 @@ const trashController = {
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
-    }
+    },
+    getLeadById: async (req, res) => {
+        try {
+            const leadId = req.params.leadId;
+            console.log("LeadId",leadId)
+            const data = await trashService.leadGetServiceById(leadId);
+            if (data) {
+                if (data && data.customer_feedBack !== 'followUp') {
+                    delete data.followUpDetail;
+                }
+                if (data && data.customer_feedBack !== 'other') {
+                    delete data.otherDetail;
+                }
+                res.status(200).send({ message: "success", data: data });
+            }else{
+                res.status(200).send({ message: "Data Not Found", });
+
+            }
+        } catch (error) {
+            res.status(500).json({ message: 'Internal Server Error', error: error.message });
+        }
+    },
 };
 
 module.exports = trashController;

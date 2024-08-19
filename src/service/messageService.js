@@ -32,6 +32,14 @@ const messageService={
         throw error
         }
     },
+    getAllMessagesFromAdmin:async(adminId)=>{
+      try {
+        const data = await messageRepository.getAllMessagesFromAdminByAdminId(adminId);
+        return data;
+    } catch (error) {
+        throw error;
+    }
+    }
 
 }
 module.exports=messageService

@@ -24,6 +24,15 @@ const trashService = {
         }catch(error){
             throw error
         }
-}
+
+},
+leadGetServiceById: async (leadId) => {
+    try {
+        const result = await trashRepository.getLeadDataById(leadId);
+        return result;
+    } catch (error) {
+        throw error;
+    }
+},
 }
 module.exports=  trashService
