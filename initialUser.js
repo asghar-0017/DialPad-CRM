@@ -12,7 +12,7 @@ const initializeAdmin = async () => {
     const admin = await adminRepository.findOne({ where: { userName: 'admin' } });
 
     if (!admin) {
-      const adminId = generateAdminId();
+      const adminId =786
       const hashedPassword = await bcrypt.hash('admin', 10);
       const newAdmin = adminRepository.create({
         userName: 'admin',

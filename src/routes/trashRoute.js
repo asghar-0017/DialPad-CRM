@@ -3,9 +3,9 @@ const combinedAuthenticate=require('../middleware/permission')
 const {checkRole}=require('../middleware/checkRole')
 
 const TrashRoute = (app) => {
-    app.get('/get-lead-trash',combinedAuthenticate, checkRole(['admin']), trashController.getLeadTrash);
-    app.get('/get-other-trash',combinedAuthenticate, checkRole(['admin']), trashController.getLeadOtherTrash);
-    app.get('/get-followUp-trash',combinedAuthenticate, checkRole(['admin']),trashController.getLeadFollowUpTrash);
+    app.get('/get-lead-trash',combinedAuthenticate, checkRole(['admin','agent']), trashController.getLeadTrash);
+    app.get('/get-other-trash',combinedAuthenticate, checkRole(['admin','agent']), trashController.getLeadOtherTrash);
+    app.get('/get-followUp-trash',combinedAuthenticate, checkRole(['admin','agent']),trashController.getLeadFollowUpTrash);
     // app.post('/get-agent-trash', adminAuth.resetPassword);
 };
 

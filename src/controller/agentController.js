@@ -405,7 +405,7 @@ const agentController = {
             }
         }
         if (createAgent.length > 0) {
-          io.emit('send_message', tasksAssigned);
+          io.emit('send_message', createAgent);
 
             return res.status(201).json({ message: 'Agents registered successfully', agents: createAgent });
         } else {

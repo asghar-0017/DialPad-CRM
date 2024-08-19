@@ -111,10 +111,10 @@ const leadRepository = {
     
             const leadRepository = dataSource.getRepository(Lead);
             const followUpRepository = dataSource.getRepository(FollowUp);
-            const otherRepository = dataSource.getRepository(other);  // Replace 'Other' with your actual entity class
-            const otherTrashRepository = dataSource.getRepository(otherTrash); // Ensure 'OtherTrash' is the correct class
-            const leadTrashRepository = dataSource.getRepository(leadTrash);  // Replace 'LeadsTrash' with the actual entity class
-            const followUpTrashRepository = dataSource.getRepository(followUpTrash); // Ensure 'FollowUpTrash' is correct
+            const otherRepository = dataSource.getRepository(other);  
+            const otherTrashRepository = dataSource.getRepository(otherTrash); 
+            const leadTrashRepository = dataSource.getRepository(leadsTrash);  
+            const followUpTrashRepository = dataSource.getRepository(followUpTrash);
     
             const leadData = await leadRepository.findOne({ where: { leadId } });
             console.log("Lead Data:", leadData);
@@ -127,19 +127,19 @@ const leadRepository = {
             const createLeadInTrash = await leadTrashRepository.save(leadTrashRepository.create(leadData));
             console.log("Created Lead In Trash:", createLeadInTrash);
     
-            let createdOtherTrash = null;
-            let createdFollowUpInTrash = null;
+            let createdOtherTrash
+            let createdFollowUpInTrash
     
-            if (leadData.customer_feedBack === 'other') {
-                createdOtherTrash = await otherTrashRepository.save(otherTrashRepository.create(leadData));
+            if (createLeadInTrash.customer_feedBack === 'other') {
+                createdOtherTrash = await otherTrashRepository.save(otherTrashRepository.create(createLeadInTrash));
                 console.log("Created Other In Trash:", createdOtherTrash);
             }
     
-            if (leadData.customer_feedBack === 'followUp') {
-                createdFollowUpInTrash = await followUpTrashRepository.save(followUpTrashRepository.create(leadData));
+            if (createLeadInTrash.customer_feedBack === 'followUp') {
+                createdFollowUpInTrash = await followUpTrashRepository.save(followUpTrashRepository.create(createLeadInTrash));
                 console.log("Created FollowUp In Trash:", createdFollowUpInTrash);
             }
-    
+
             await followUpRepository.delete({ leadId });
             await otherRepository.delete({ leadId });
             await leadRepository.remove(leadData);
@@ -149,7 +149,6 @@ const leadRepository = {
                 createdFollowUpInTrash,
                 createLeadInTrash,
             };
-    
             return {
                 success: true,
                 TrashData,
@@ -162,15 +161,7 @@ const leadRepository = {
                 error,
             };
         }
-    },
-    
-    
-      
-      
-    
-    
-    
-    
+    },   
     
 };
 
