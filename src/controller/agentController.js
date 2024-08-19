@@ -124,8 +124,8 @@ const agentController = {
         const data = await agentService.assignTaskToAgent(agenId, task.task, task.taskId);
     
         if (data) {
-          io.emit('send_message', data);
           res.status(200).send({ message: "success", data: data });
+          io.emit('send_message', data);
         } else {
           res.status(404).send({ message: "data Not Found" });
         }
