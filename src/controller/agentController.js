@@ -149,13 +149,14 @@ const agentController = {
       }
     },
 
-    getAssignTaskById:async (req, res) => {
+    getAssignTaskById:async (io,req, res) => {
       try {
         const agentId = req.params.agentId;
         const data = await agentService.getAssignTaskToAgentById(agentId);
         if (data === 'Data Not Found') {
           res.status(404).send({ message: 'Data Not Found' });
         } else {
+          io.emit('receive_message', data);
           res.status(200).send({ message: 'Success', data });
         }
       } catch (error) {
