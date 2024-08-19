@@ -1,6 +1,5 @@
 const { EntitySchema } = require("typeorm");
 
-y
 module.exports = new EntitySchema({
   name: "other",
   tableName: "other",
