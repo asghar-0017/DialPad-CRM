@@ -110,12 +110,14 @@ const messageController = {
       },
       getAllMessages: async (io, req, res) => {
         try {
+          const role=req.user
             const { adminId, agentId } = req.params;
             const agentMessages = await messageService.getAssignMessagesToAgentById(agentId);
             const adminMessages = await messageService.getSendMessagesFromAdminById(agentId, adminId);
             const allMessages = {
                 agentMessages,
-                adminMessages
+                adminMessages,
+                role:role.role
             };
             io.emit('receive_message', allMessages);
             res.status(200).json({ message: 'success', data: allMessages });
