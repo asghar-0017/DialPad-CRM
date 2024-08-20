@@ -1,4 +1,8 @@
+const leadRepository = require('../repository/leadRepository');
+const leadService = require('../service/leadService');
 const trashService=require('../service/trashService')
+const trashRepository=require('../repository/trashRepository')
+const dataSource=require('../infrastructure/psql')
 const trashController = {
     getLeadTrash: async (req, res) => {
         try {
@@ -84,6 +88,31 @@ const trashController = {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
     },
+    retrieveLeadFromTrash:async(req,res)=>{
+        try{
+            console.log("Api Hit")
+            const leadId = req.params.leadId;
+            console.log("leadId",leadId)
+            const checkDataIsInLead=await trashRepository.getLeadDataById(leadId);
+            console.log("Data in Trash",checkDataIsInLead)
+            const leadTrashRepository = dataSource.getRepository('leadsTrash');  
+
+            if(checkDataIsInLead){
+                const data=checkDataIsInLead
+                const user=checkDataIsInLead.role
+                const lead = await leadService.leadCreateService(data, user);
+                if(lead){
+                //  io.emit('send_message', lead);
+                 res.status(201).json({ message: 'Lead Retrieve successfully', lead });
+                 await leadTrashRepository.delete({leadId});
+                 console.log(`Lead with ID ${leadId} removed from trash.`);
+                }
+            }
+         } catch (error) {
+            //  res.status(500).json({ message: 'Internal Server Error', error: error.message });
+            throw error
+         }
+        }
 };
 
 module.exports = trashController;

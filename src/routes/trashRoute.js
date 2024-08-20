@@ -8,7 +8,8 @@ const TrashRoute = (app) => {
     app.get('/get-followUp-trash',combinedAuthenticate, checkRole(['admin','agent']),trashController.getLeadFollowUpTrash);
     // app.post('/get-agent-trash', adminAuth.resetPassword);
     app.get('/get-lead-trash/:leadId',combinedAuthenticate, checkRole(['admin','agent']), trashController.getLeadById);
-
+    app.post('/retrieve-lead-trash/:leadId',combinedAuthenticate, checkRole(['admin','agent']), trashController.retrieveLeadFromTrash);
+    
 };
 
 module.exports = TrashRoute;
