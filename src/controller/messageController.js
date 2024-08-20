@@ -12,7 +12,7 @@ const messageController = {
             const data = await messageService.assignMessageToAgent(adminId,agentId, message.message, message.messageId);
         
             if (data) {
-              io.to(agentId).emit('new_message', data);
+              io.to(agentId).emit('send_message', data);
               res.status(200).send({ message: "success", data: data });
             } else {
               res.status(404).send({ message: "data Not Found" });
@@ -56,7 +56,7 @@ const messageController = {
                 const data = await messageService.sendMessageToAdminInService(agentId,adminId, message.message, message.messageId);
             
                 if (data) {
-                  io.to(adminId).emit('new_message', data);
+                  io.to(adminId).emit('send_message', data);
                   res.status(200).send({ message: "success", data: data });
                 } else {
 
