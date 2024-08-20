@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const redis = require('../infrastructure/redis');
 const {agentRepository,authAgentRepository} = require('../repository/agentRepository');
+const sendVerificationEmail=require('../mediater/sendMail')
 
 const { logger } = require('../../logger');
 const jwt = require('jsonwebtoken');
@@ -34,14 +35,22 @@ const agentService = {
 //       throw error;
 //     }
 //   },
-  agentCreateService: async (data) => {
-    console.log("Data in service",data)
-    const password=data.password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    data.password=hashedPassword
-    const agent =data;
-    return await agentRepository.saveAgent(agent);
-  },
+  // agentCreateService: async (data) => {
+  //   try{
+  //   console.log("Data in service",data)
+  //   const password=data.password
+  //   const hashedPassword = await bcrypt.hash(password, 10);
+  //   data.password=hashedPassword
+  //   const agent =data;
+  //   await sendVerificationEmail(agent.email,agent.agenId,agent.firstName);
+  //   if (sendVerificationEmail) {
+  //     return "Verification email sent successfully";
+  //   }
+  // }catch (error) {
+  //   logger.error("Error registering investor", error);
+  //   throw error;
+  // }
+  // },
 
   agentGetInService:async()=>{
     try{

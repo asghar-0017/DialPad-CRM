@@ -1,6 +1,6 @@
 const dataSource=require('../infrastructure/psql')
 const messageRepository={
-    assignMessageToAgentById: async (adminId,agentId,message,messageId) => {
+    assignMessageToAgentById: async (adminId,agentId,message,messageId,role) => {
     try {
       console.log("AgentID in repo",agentId)
       const agentRepository = dataSource.getRepository('agent');
@@ -18,6 +18,7 @@ const messageRepository={
         adminId:adminId,
         message,
         messageId,
+        role
       });
   
       await agentMessageRepository.save(messageEntity);
@@ -60,7 +61,7 @@ const messageRepository={
       throw new Error('Error fetching tasks');
     }
   },
-  sendMessageToAdminById: async (agentId,adminId,message,messageId) => {
+  sendMessageToAdminById: async (agentId,adminId,message,messageId,role) => {
     try {
       console.log("AgentID in repo",agentId)
       const agentRepository = dataSource.getRepository('agent');
@@ -81,7 +82,8 @@ const messageRepository={
         adminId:admin.adminId,
         agentId: agentId,
         message: message ,
-        messageId:messageId
+        messageId:messageId,
+        role:role
       });
   
       await adminMessageRepository.save(messageEntity);

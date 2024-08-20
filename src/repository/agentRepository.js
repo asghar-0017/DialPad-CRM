@@ -3,6 +3,7 @@ const { logger } = require("../../logger");
 const agentAuth=require('../entities/agent')
 const agentTask=require('../entities/agentTask')
 const agentTrash=require('../entities/trash/agentTrash')
+const tempAgent=require('../entities/tempAgent')
 
 const agentRepository = {
 findByEmail: async (email) => {
@@ -12,6 +13,22 @@ findByEmail: async (email) => {
   saveAgent: async (agent) => {
     return await dataSource.getRepository(agentAuth).save(agent);
   },
+  saveTempAgent: async (agent) => {
+    return await dataSource.getRepository(tempAgent).save(agent);
+  },
+
+  findTempAgentByEmailAndToken: async (email, token) => {
+    const repository = dataSource.getRepository('tempAgent');
+    return repository.findOne({
+      where: { email, verifyToken: token },
+    });
+  },
+
+  deleteTempAgentById: async (id) => {
+    const repository = dataSource.getRepository('tempAgent');
+    return repository.delete(id);
+  },
+  
   getAgentData:async()=>{
     try{
         return await dataSource.getRepository(agentAuth).find()

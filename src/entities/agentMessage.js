@@ -21,7 +21,9 @@ module.exports = new EntitySchema({
     },
     message: {
       type: "text",
-      // nullable: true,
+    },
+    role: {
+      type: "varchar",
     },
     created_at: {
       type: "timestamp",
@@ -51,7 +53,7 @@ module.exports = new EntitySchema({
         referencedColumnName: "adminId",
       },
       onDelete: "CASCADE",
-      nullable: true, 
+      nullable: true,
     },
   },
 });

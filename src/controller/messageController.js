@@ -8,8 +8,9 @@ const messageController = {
             adminId=req.user
             const message = req.body;
             message.messageId = messageId(); 
+            const role=req.user.role
         
-            const data = await messageService.assignMessageToAgent(adminId,agentId, message.message, message.messageId);
+            const data = await messageService.assignMessageToAgent(adminId,agentId, message.message, message.messageId,role);
         
             if (data) {
               io.to(agentId).emit('send_message', data);
@@ -32,8 +33,8 @@ const messageController = {
                 res.status(404).send({ message: 'Data Not Found' });
               } 
                 const Messagedata = data.map(newData => {
-                    const {messageId,message} = newData;
-                return {messageId,message};
+                    const {messageId,message,role} = newData;
+                return {messageId,message,role};
                 }
             )
             io.emit('receive_message', Messagedata);
@@ -52,8 +53,8 @@ const messageController = {
                 const adminId = req.params.adminId;
                 const message = req.body;
                 message.messageId = messageId(); 
-            
-                const data = await messageService.sendMessageToAdminInService(agentId,adminId, message.message, message.messageId);
+                const role=req.user.role
+                const data = await messageService.sendMessageToAdminInService(agentId,adminId, message.message, message.messageId,role);
             
                 if (data) {
                   io.to(adminId).emit('send_message', data);
@@ -110,14 +111,12 @@ const messageController = {
       },
       getAllMessages: async (io, req, res) => {
         try {
-          const role=req.user
             const { adminId, agentId } = req.params;
             const agentMessages = await messageService.getAssignMessagesToAgentById(agentId);
             const adminMessages = await messageService.getSendMessagesFromAdminById(agentId, adminId);
             const allMessages = {
                 agentMessages,
                 adminMessages,
-                role:role.role
             };
             io.emit('receive_message', allMessages);
             res.status(200).json({ message: 'success', data: allMessages });

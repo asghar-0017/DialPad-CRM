@@ -14,29 +14,58 @@ const {logger}=require('../../logger');
 const adminService = require('../service/authService');
 require('dotenv').config()
 const secretKey = process.env.SCERET_KEY;
+const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
 
+const sendVerificationEmail=require('../mediater/sendMail')
 
 const agentController = {
 
-    createAgent: async (io,req, res) => {
-        try {
-          const data = req.body;
-          console.log("data",data)
-          const email = req.body.email;
-          data.agentId=agentId()
-          const existingAgent = await agentRepository.findByEmail(email);
-          if (existingAgent) {
-            return res.status(400).json({ message: 'User already registered' });
-          }
-          const agent = await agentService.agentCreateService(data);
-          io.emit('send_message', agent);
+  createAgent: async (io, req, res) => {
+    try {
+      const data = req.body;
+      const email = data.email;
+      data.agentId=agentId()
+      const existingAgent = await agentRepository.findByEmail(email);
+      
+      if (existingAgent) {
+        return res.status(400).json({ message: 'User already registered' });
+      }
 
-          res.status(201).json({ message: 'Agent registered successfully', agent });
+      const verificationToken = uuidv4();
+      data.verifyToken = verificationToken;
+      data.isActivated = false; 
+      await agentRepository.saveTempAgent(data);
 
-        } catch (error) {
-          res.status(500).json({ message: 'Internal Server Error', error: error.message });
-        }
-    },
+      await sendVerificationEmail(email, verificationToken, data.firstName);
+
+      res.status(201).json({ message: 'Verification email sent successfully' });
+
+    } catch (error) {
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+  },
+
+  verifyEmail: async (req, res) => {
+    try {
+      const { email, verificationToken } = req.query;
+      const tempAgent = await agentRepository.findTempAgentByEmailAndToken(email, verificationToken);
+
+      if (!tempAgent) {
+        return res.status(400).json({ message: 'Invalid or expired verification token' });
+      }
+      const hashedPassword = await bcrypt.hash(tempAgent.password, 10);
+      tempAgent.password = hashedPassword;
+      tempAgent.isActivated = true;
+      await agentRepository.saveAgent(tempAgent);
+      await agentRepository.deleteTempAgentById(tempAgent.id);
+      res.status(200).send("Email Verified Successfully");
+
+    } catch (error) {
+      console.error("Error verifying email:", error.message);
+      res.status(500).send({ message: 'Internal Server Error' });
+    }
+  },
 
     getAgent:async(io,req,res)=>{
     try{
@@ -113,6 +142,7 @@ const agentController = {
         throw error
       }
     },
+
 
     assignTask: async (io,req, res) => {
       try {
@@ -398,9 +428,11 @@ const agentController = {
                     console.log(`User with email ${email} already registered.`);
                     continue;
                 }
+
                 row.agentId = agentId(); 
                 const agent = await agentService.agentCreateService(row);
                 createAgent.push(agent); 
+                
             } catch (err) {
                 console.error(`Error creating agent for email ${email}:`, err.message);
             }

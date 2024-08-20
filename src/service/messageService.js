@@ -1,8 +1,8 @@
 const messageRepository=require('../repository/messageRepository')
 const messageService={
-    assignMessageToAgent:async(adminId,agentId,message,messageId)=>{
+    assignMessageToAgent:async(adminId,agentId,message,messageId,role)=>{
         try{
-        const data=await messageRepository.assignMessageToAgentById(adminId,agentId,message,messageId)
+        const data=await messageRepository.assignMessageToAgentById(adminId,agentId,message,messageId,role)
         return data
         }catch(error){
         throw error
@@ -24,9 +24,9 @@ const messageService={
           throw error
         }
       },
-      sendMessageToAdminInService:async(agentId,adminId,message,messageId)=>{
+      sendMessageToAdminInService:async(agentId,adminId,message,messageId,role)=>{
         try{
-        const data=await messageRepository.sendMessageToAdminById(agentId,adminId,message,messageId)
+        const data=await messageRepository.sendMessageToAdminById(agentId,adminId,message,messageId,role)
         return data
         }catch(error){
         throw error

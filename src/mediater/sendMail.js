@@ -1,8 +1,7 @@
 const nodemailer = require("nodemailer");
+const agentRepository = require('../repository/agentRepository');
 
-
-
-const sendVerificationEmail = async (email, verificationToken,name) => {
+const sendVerificationEmail = async (email, verificationToken, name) => {
   try {
     const transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -17,20 +16,16 @@ const sendVerificationEmail = async (email, verificationToken,name) => {
       to: email,
       subject: "Email Verification",
       html: `<h3>Hello ${name}</h3>
-      <p>Click the Link to Verify Your Account</p>
-      <a href="http://${process.env.POSTGRES_HOST}:${process.env.PORT}/verify-email?email=${encodeURIComponent( email)}&verificationToken=${verificationToken}">Verify your email</a>`,
-   
+      <p>Click the link to verify your account</p>
+      <a href="http://${process.env.POSTGRES_HOST}:${process.env.PORT}/verify-email?email=${encodeURIComponent(email)}&verificationToken=${verificationToken}">Verify your email</a>`,
     };
 
     await transporter.sendMail(mailOptions);
-
-    logger.info(`Verification email sent successfully to ${email}.`);
+    console.log(`Verification email sent successfully to ${email}.`);
   } catch (error) {
     console.error("Error sending verification email:", error);
     throw error;
   }
 };
 
-
-
-module.exports = { sendVerificationEmail };
+module.exports=sendVerificationEmail
