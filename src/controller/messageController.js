@@ -108,6 +108,22 @@ const messageController = {
               res.status(500).json({ message: 'Internal Server Error' });
           }
       },
+      getAllMessages: async (io, req, res) => {
+        try {
+            const { adminId, agentId } = req.params;
+            const agentMessages = await messageService.getAssignMessagesToAgentById(agentId);
+            const adminMessages = await messageService.getSendMessagesFromAdminById(agentId, adminId);
+            const allMessages = {
+                agentMessages,
+                adminMessages
+            };
+            io.emit('receive_message', allMessages);
+            res.status(200).json({ message: 'success', data: allMessages });
+        } catch (error) {
+            console.error('Error fetching all messages:', error.message);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    },
 }
 
 

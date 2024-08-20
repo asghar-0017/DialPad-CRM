@@ -13,10 +13,12 @@ const dataSource = require('./infrastructure/psql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Server } = require('socket.io');
+const helmet=require('helmet')
 
 dotenv.config();
 
 const app = express();
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -28,6 +30,7 @@ const io = new Server(server, {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({ origin: '*' }));
+app.use(helmet())
 
 app.use((req, res, next) => {
   logger.info(`Received request: ${req.method} ${req.url}`);
