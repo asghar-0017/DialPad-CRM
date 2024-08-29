@@ -2,14 +2,14 @@ const express = require('express');
 const http = require('http');
 const dotenv = require('dotenv');
 const { logger } = require('../logger');
-const AdminAuthRoute = require('./routes/authRoute');
-const agentRoute = require('./routes/agentRoute');
-const leadRoute = require('./routes/leadRoute');
-const followUpRoute = require('./routes/followUpRoute');
-const otherRoute = require('./routes/otherRoute');
-const TrashRoute=require('./routes/trashRoute')
-const messageRoute=require('./routes/messagingRoute')
-const dataSource = require('./infrastructure/psql');
+// const AdminAuthRoute = require('./routes/authRoute');
+// const agentRoute = require('./routes/agentRoute');
+// const leadRoute = require('./routes/leadRoute');
+// const followUpRoute = require('./routes/followUpRoute');
+// const otherRoute = require('./routes/otherRoute');
+// const TrashRoute=require('./routes/trashRoute')
+// const messageRoute=require('./routes/messagingRoute')
+// const dataSource = require('./infrastructure/psql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Server } = require('socket.io');
@@ -46,13 +46,13 @@ app.get('/', async (req, res) => {
   });
 });
 
-AdminAuthRoute(app, io);
-agentRoute(app, io);
-leadRoute(app, io);
-followUpRoute(app, io);
-otherRoute(app, io);
-TrashRoute(app)
-messageRoute(app,io)
+// AdminAuthRoute(app, io);
+// agentRoute(app, io);
+// leadRoute(app, io);
+// followUpRoute(app, io);
+// otherRoute(app, io);
+// TrashRoute(app)
+// messageRoute(app,io)
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
@@ -77,8 +77,8 @@ io.on('connection', (socket) => {
 
 const StartServer = async () => {
   try {
-    await dataSource.initialize();
-    logger.info("Database connection has been established");
+    // await dataSource.initialize();
+    // logger.info("Database connection has been established");
 
     const PORT = process.env.PORT || 4000;
     server.listen(PORT, () => {
