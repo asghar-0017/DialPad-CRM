@@ -11,7 +11,6 @@ module.exports = new EntitySchema({
     },
     agentId: {
       type: "int",
-      unique: true,
     },
     firstName: {
       type: "varchar",

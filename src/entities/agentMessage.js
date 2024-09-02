@@ -10,7 +10,7 @@ module.exports = new EntitySchema({
       generated: true,
     },
     agentId: {
-      type: "varchar",
+      type: "int",
     },
     adminId: {
       type: "int",
