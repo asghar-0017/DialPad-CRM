@@ -20,15 +20,15 @@ services:
         image: adminer
         restart: always
         ports:
-            - "8080:8080"
+            - "8070:8080"
 
-    redis:
-        image: redis:latest
-        user: redis
-        networks:
-            - dev-network
-        ports:
-            - "6379:6379"  # Simplified port mapping
+    # redis:
+    #     image: redis:latest
+    #     user: redis
+    #     networks:
+    #         - dev-network
+    #     ports:
+    #         - "6379:6379"  # Simplified port mapping
 
     # rabbitmq:
     #     build:
