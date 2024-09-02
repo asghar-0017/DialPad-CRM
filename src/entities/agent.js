@@ -76,10 +76,10 @@ module.exports = new EntitySchema({
     //   target: "agentMessage",
     //   mappedBy: "agent",
     // },
-    adminMessages: {
-      type: "one-to-many",
-      target: "adminMessage",
-      mappedBy: "agent",
-    },
+    // adminMessages: {
+    //   type: "one-to-many",
+    //   target: "adminMessage",
+    //   mappedBy: "agent",
+    // },
   },
 });
