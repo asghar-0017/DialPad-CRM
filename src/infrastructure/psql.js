@@ -9,7 +9,7 @@ const dataSource = new DataSource({
   host: process.env.POSTGRES_HOST,
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
   username: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD || "SoftMark#2024$",
+  password: "SoftMark#2024$",
   database: process.env.POSTGRES_DB,
   synchronize: true,
   logging: true,
