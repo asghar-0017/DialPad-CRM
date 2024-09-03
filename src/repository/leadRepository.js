@@ -2,7 +2,7 @@ const dataSource = require("../infrastructure/psql");
 const Lead = require('../entities/lead');
 const FollowUp = require('../entities/followUp'); // Adjust the path as needed
 const other = require('../entities/otherDetail'); // Adjust the path as needed
-const leadsTrash=require('../entities/trash/leadTrash')
+const leadsTrash=require('../entities/leadTrash')
 const otherTrash=require('../entities/trash/otherTrash')
 const followUpTrash=require('../entities/trash/followUpTrash')
 

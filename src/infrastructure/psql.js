@@ -15,7 +15,7 @@ const dataSource = new DataSource({
   logging: true,
   logger: new PinoLogger(),
   entities: [
-    path.join(__dirname, "../entities/**/*.js"), // Ensure this includes all entities
+    path.join(__dirname, "..", "entities", "*.js"), // Adjust for Unix-like systems
   ],
 });
 

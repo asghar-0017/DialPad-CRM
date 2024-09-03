@@ -1,4 +1,4 @@
-const leadTrash = require('../entities/trash/leadTrash')
+const leadTrash = require('../entities/leadTrash')
 const dataSource=require('../infrastructure/psql')
 const otherTrash=require('../entities/trash/otherTrash')
 const followUpTrash=require('../entities/trash/followUpTrash')
