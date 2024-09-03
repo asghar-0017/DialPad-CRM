@@ -71,15 +71,16 @@ module.exports = new EntitySchema({
       target: "followUp",
       mappedBy: "agent",
     },
-    agentMessages: {
-      type: "one-to-many",
-      target: "agentMessage",
-      mappedBy: "agent",
-    },
-    adminMessages: {
-      type: "one-to-many",
-      target: "adminMessage",
-      mappedBy: "agent",
-    },
+    // agentMessages: {
+    //   type: "one-to-many",
+    //   target: "agentMessage",
+    //   mappedBy: "agent",
+    // },
+
+    // adminMessages: {
+    //   type: "one-to-many",
+    //   target: "adminMessage",
+    //   mappedBy: "agent",
+    // },
   },
 });
