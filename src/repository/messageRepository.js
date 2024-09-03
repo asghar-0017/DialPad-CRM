@@ -11,7 +11,7 @@ const messageRepository={
         throw new Error('Agent not found');
       }
 
-      const agentMessageRepository = dataSource.getRepository('agent_message');
+      const agentMessageRepository = dataSource.getRepository('agentMessage');
       const messageEntity = agentMessageRepository.create({
         agentId: agent.agentId,
         adminId,
@@ -30,7 +30,7 @@ const messageRepository={
   },
   getAssignMessagesToAgentById: async (agentId) => {
     try {
-      const agentTaskRepository = dataSource.getRepository('agent_message');
+      const agentTaskRepository = dataSource.getRepository('agentMessage');
       const review = await agentTaskRepository.find({ where: { agentId } });
       if (review.length > 0) {
         
@@ -45,7 +45,7 @@ const messageRepository={
   },
   getSendMessagesFromAdminById: async (agentId,adminId) => {
     try {
-      const agentTaskRepository = dataSource.getRepository('admin_message');
+      const agentTaskRepository = dataSource.getRepository('adminMessage');
       const adminRepository = dataSource.getRepository('adminauth');
       const AdminMessage = await agentTaskRepository.find({ where: { agentId } }); 
       const admin = await adminRepository.find({ where: { adminId } }); 
@@ -76,7 +76,7 @@ const messageRepository={
       console.log("admin",admin)
 
    
-      const adminMessageRepository = dataSource.getRepository('admin_message');
+      const adminMessageRepository = dataSource.getRepository('adminMessage');
       const messageEntity = adminMessageRepository.create({
         adminId:admin.adminId,
         agentId: agentId,
@@ -95,7 +95,7 @@ const messageRepository={
   },
   getAllMessagesFromAdminByAdminId:async(adminId)=>{
     try {
-      const adminMessageRepository = dataSource.getRepository('admin_message');
+      const adminMessageRepository = dataSource.getRepository('adminMessage');
       const messages = await adminMessageRepository.find({
           where: { adminId },
       });
