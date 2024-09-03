@@ -37,22 +37,21 @@ module.exports = new EntitySchema({
       type: "varchar",
       default: "agent",
     },
-    verifyToken:{
+    verifyToken: {
       type: "varchar",
-      default: ''
+      default: '',
     },
-    resetCode:{
+    resetCode: {
       type: "varchar",
-      default: ''
+      default: '',
     },
-    isActivated:{
-    type: Boolean,
-    default: true
+    isActivated: {
+      type: "boolean",
+      default: true,
     },
     created_at: {
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",
-      
     },
     updated_at: {
       type: "timestamp",
@@ -64,23 +63,22 @@ module.exports = new EntitySchema({
     leads: {
       type: "one-to-many",
       target: "lead",
-      mappedBy: "agent",
+      inverseSide: "agent",
     },
     followUps: {
       type: "one-to-many",
       target: "followUp",
-      mappedBy: "agent",
+      inverseSide: "agent",
     },
-    // agentMessages: {
-    //   type: "one-to-many",
-    //   target: "agentMessage",
-    //   mappedBy: "agent",
-    // },
-
-    // adminMessages: {
-    //   type: "one-to-many",
-    //   target: "adminMessage",
-    //   mappedBy: "agent",
-    // },
+    agentMessages: {
+      type: "one-to-many",
+      target: "agentMessage",
+      inverseSide: "agent",
+    },
+    adminMessages: {
+      type: "one-to-many",
+      target: "adminMessage",
+      inverseSide: "agent",
+    },
   },
 });

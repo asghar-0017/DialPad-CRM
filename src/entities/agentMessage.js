@@ -10,11 +10,10 @@ module.exports = new EntitySchema({
       generated: true,
     },
     agentId: {
-      type: "varchar",
+      type: "int",
     },
     adminId: {
       type: "int",
-      nullable: true,
     },
     messageId: {
       type: "varchar",
@@ -35,25 +34,25 @@ module.exports = new EntitySchema({
       onUpdate: "CURRENT_TIMESTAMP",
     },
   },
-//   relations: {
-//     agent: {
-//       type: "many-to-one",
-//       target: "agent",
-//       joinColumn: {
-//         name: "agentId",
-//         referencedColumnName: "id",
-//       },
-//       onDelete: "CASCADE",
-//     },
+  relations: {
+    // agent: {
+    //   type: "many-to-one",
+    //   target: "agent",
+    //   joinColumn: {
+    //     name: "agentId",
+    //     referencedColumnName: "agentId",
+    //   },
+    //   onDelete: "CASCADE",
+    // },
 //     admin: {
 //       type: "many-to-one",
-//       target: "adminauth",
+//       target: "auth",
 //       joinColumn: {
 //         name: "adminId",
-//         referencedColumnName: "id",
+//         referencedColumnName: "adminId",
 //       },
 //       onDelete: "CASCADE",
 //       nullable: true,
 //     },
-//   },
+  }
 });

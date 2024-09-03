@@ -1,28 +1,27 @@
 const dataSource=require('../infrastructure/psql')
 const messageRepository={
-    assignMessageToAgentById: async (adminId,agentId,message,messageId,role) => {
+  assignMessageToAgentById: async (adminId, agentId, message, messageId, role) => {
     try {
-      console.log("AgentID in repo",agentId)
       const agentRepository = dataSource.getRepository('agent');
       const agent = await agentRepository.findOne({ where: { agentId } });
+      console.log("Agent In Repo",agent)
+
       if (!agent) {
         console.log("No agent found with ID:", agentId);
-        return null;
+        throw new Error('Agent not found');
       }
-      console.log("Agent",agent)
 
-   
       const agentMessageRepository = dataSource.getRepository('agent_message');
       const messageEntity = agentMessageRepository.create({
         agentId: agent.agentId,
-        adminId:adminId,
+        adminId,
         message,
         messageId,
-        role
+        role,
       });
-  
+
       await agentMessageRepository.save(messageEntity);
-  
+
       return messageEntity;
     } catch (error) {
       console.error('Error in assignTaskToAgentById:', error.message);
@@ -99,8 +98,8 @@ const messageRepository={
       const adminMessageRepository = dataSource.getRepository('admin_message');
       const messages = await adminMessageRepository.find({
           where: { adminId },
-          relations: ['agent']
       });
+    
       return messages;
   } catch (error) {
       console.error('Error fetching messages sent to admin:', error.message);

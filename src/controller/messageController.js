@@ -5,11 +5,14 @@ const messageController = {
     sendMessageToAgent : async (io,req, res) => {
         try {
             const agentId = req.params.agentId;
-            adminId=req.user
+            admin=req.user
+            adminId=admin.adminId
             const message = req.body;
             message.messageId = messageId(); 
             const role=req.user.role
-        
+            console.log("messageId",message.messageId)
+            console.log("adminId",adminId)
+            console.log("agentId",agentId)
             const data = await messageService.assignMessageToAgent(adminId,agentId, message.message, message.messageId,role);
         
             if (data) {
@@ -20,7 +23,7 @@ const messageController = {
             }
           } catch (error) {
             console.error('Error in SerdingMessageToAgent:', error.message);
-            res.status(500).send({ message: 'Error assigning task' });
+            res.status(500).send({ message: 'Error sending message' });
           }
         } ,
         getAssignMessagesById:async (io,req, res) => {
