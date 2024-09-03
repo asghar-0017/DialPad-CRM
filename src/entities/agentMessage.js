@@ -41,7 +41,7 @@ module.exports = new EntitySchema({
       target: "agent",
       joinColumn: {
         name: "agentId",
-        referencedColumnName: "agentId",
+        referencedColumnName: "id",
       },
       onDelete: "CASCADE",
     },
@@ -50,7 +50,7 @@ module.exports = new EntitySchema({
       target: "adminauth",
       joinColumn: {
         name: "adminId",
-        referencedColumnName: "adminId",
+        referencedColumnName: "id",
       },
       onDelete: "CASCADE",
       nullable: true,
