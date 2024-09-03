@@ -16,6 +16,7 @@ const adminService = {
   login: async ( { userName, password }) => {
     try {
       const admin=await authRepository.findByUserName(userName)
+      console.log("Admin",admin)
       if (admin) {
         const match = await bcrypt.compare(password, admin.password);
         if (match) {
