@@ -1,4 +1,5 @@
 const agentMessage = require('../entities/agentMessage');
+const adminMessage=require('../entities/adminMessage')
 const dataSource=require('../infrastructure/psql')
 const messageRepository={
   assignMessageToAgentById: async (adminId, agentId, message, messageId, role) => {
@@ -49,7 +50,7 @@ const messageRepository={
   },
   getSendMessagesFromAdminById: async (agentId,adminId) => {
     try {
-      const agentTaskRepository = dataSource.getRepository('adminMessage');
+      const agentTaskRepository = dataSource.getRepository(adminMessage);
       const adminRepository = dataSource.getRepository('adminauth');
       const AdminMessage = await agentTaskRepository.find({ where: { agentId } }); 
       const admin = await adminRepository.find({ where: { adminId } }); 
@@ -80,7 +81,7 @@ const messageRepository={
       console.log("admin",admin)
 
    
-      const adminMessageRepository = dataSource.getRepository('adminMessage');
+      const adminMessageRepository = dataSource.getRepository(adminMessage);
       const messageEntity = adminMessageRepository.create({
         adminId:admin.adminId,
         agentId: agentId,
@@ -99,7 +100,7 @@ const messageRepository={
   },
   getAllMessagesFromAdminByAdminId:async(adminId)=>{
     try {
-      const adminMessageRepository = dataSource.getRepository('adminMessage');
+      const adminMessageRepository = dataSource.getRepository(adminMessage);
       const messages = await adminMessageRepository.find({
           where: { adminId },
       });
