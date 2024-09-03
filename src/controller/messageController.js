@@ -24,6 +24,7 @@ const messageController = {
           } catch (error) {
             console.error('Error in SerdingMessageToAgent:', error.message);
             res.status(500).send({ message: 'Error sending message' });
+            throw error
           }
         } ,
         getAssignMessagesById:async (io,req, res) => {

@@ -12,6 +12,7 @@ const messageRepository={
       }
 
       const agentMessageRepository = dataSource.getRepository('agentMessage');
+      console.log("Agent Message Repo",agentMessageRepository)
       const messageEntity = agentMessageRepository.create({
         agentId: agent.agentId,
         adminId,
@@ -19,6 +20,8 @@ const messageRepository={
         messageId,
         role,
       });
+      console.log("Agent Message Repo messageEntity",messageEntity)
+
 
       await agentMessageRepository.save(messageEntity);
 
