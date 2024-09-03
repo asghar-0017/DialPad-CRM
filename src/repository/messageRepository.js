@@ -13,7 +13,7 @@ const messageRepository={
 
       const agentMessageRepository = dataSource.getRepository('agentMessage');
       const messageEntity = agentMessageRepository.create({
-        agentId: agent.agentId,
+        agentId: agent.id,
         adminId,
         message,
         messageId,
