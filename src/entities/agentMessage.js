@@ -1,8 +1,8 @@
 const { EntitySchema } = require("typeorm");
 
 module.exports = new EntitySchema({
-  name: "agentMessage",
-  tableName: "agentMessage",
+  name: "AgentMessage",
+  tableName: "agent_message",
   columns: {
     id: {
       type: "int",
@@ -35,24 +35,24 @@ module.exports = new EntitySchema({
     },
   },
   relations: {
-    // agent: {
-    //   type: "many-to-one",
-    //   target: "agent",
-    //   joinColumn: {
-    //     name: "agentId",
-    //     referencedColumnName: "agentId",
-    //   },
-    //   onDelete: "CASCADE",
-    // },
-//     admin: {
-//       type: "many-to-one",
-//       target: "auth",
-//       joinColumn: {
-//         name: "adminId",
-//         referencedColumnName: "adminId",
-//       },
-//       onDelete: "CASCADE",
-//       nullable: true,
-//     },
+    agent: {
+      type: "many-to-one",
+      target: "agent",
+      joinColumn: {
+        name: "agentId",
+        referencedColumnName: "agentId",
+      },
+      onDelete: "CASCADE",
+    },
+    admin: {
+      type: "many-to-one",
+      target: "auth",
+      joinColumn: {
+        name: "adminId",
+        referencedColumnName: "adminId",
+      },
+      onDelete: "CASCADE",
+      nullable: true,
+    },
   }
 });

@@ -1,3 +1,4 @@
+const agentMessage = require('../entities/agentMessage');
 const dataSource=require('../infrastructure/psql')
 const messageRepository={
   assignMessageToAgentById: async (adminId, agentId, message, messageId, role) => {
@@ -11,11 +12,11 @@ const messageRepository={
         throw new Error('Agent not found');
       }
   
-      const agentMessageRepository = dataSource.getRepository('agentMessage');
+      const agentMessageRepository = dataSource.getRepository(agentMessage);
       console.log("Creating message entity with data:", { agentId: agent.id, adminId, message, messageId, role });
   
       const messageEntity = agentMessageRepository.create({
-        agentId: agent.id,
+        agentId: agent.agentId,
         adminId,
         message,
         messageId,
@@ -33,7 +34,7 @@ const messageRepository={
   
   getAssignMessagesToAgentById: async (agentId) => {
     try {
-      const agentTaskRepository = dataSource.getRepository('agentMessage');
+      const agentTaskRepository = dataSource.getRepository(agentMessage);
       const review = await agentTaskRepository.find({ where: { agentId } });
       if (review.length > 0) {
         
