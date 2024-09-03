@@ -5,13 +5,15 @@ const messageRepository={
       const agentRepository = dataSource.getRepository('agent');
       const agent = await agentRepository.findOne({ where: { agentId } });
       console.log("Agent In Repo:", agent);
-
+  
       if (!agent) {
         console.log("No agent found with ID:", agentId);
         throw new Error('Agent not found');
       }
-
+  
       const agentMessageRepository = dataSource.getRepository('agentMessage');
+      console.log("Creating message entity with data:", { agentId: agent.id, adminId, message, messageId, role });
+  
       const messageEntity = agentMessageRepository.create({
         agentId: agent.id,
         adminId,
@@ -19,14 +21,16 @@ const messageRepository={
         messageId,
         role,
       });
-
+  
       await agentMessageRepository.save(messageEntity);
+      console.log("Message successfully assigned to agent:", messageEntity);
       return messageEntity;
     } catch (error) {
-      console.error('Error in assignMessageToAgentById:', error.message);
+      console.error('Error in assignMessageToAgentById:', error);
       throw new Error('Error assigning message to agent');
     }
   },
+  
   getAssignMessagesToAgentById: async (agentId) => {
     try {
       const agentTaskRepository = dataSource.getRepository('agentMessage');
