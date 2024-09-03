@@ -35,25 +35,25 @@ module.exports = new EntitySchema({
       onUpdate: "CURRENT_TIMESTAMP",
     },
   },
-  relations: {
-    agent: {
-      type: "many-to-one",
-      target: "agent",
-      joinColumn: {
-        name: "agentId",
-        referencedColumnName: "id",
-      },
-      onDelete: "CASCADE",
-    },
-    admin: {
-      type: "many-to-one",
-      target: "adminauth",
-      joinColumn: {
-        name: "adminId",
-        referencedColumnName: "id",
-      },
-      onDelete: "CASCADE",
-      nullable: true,
-    },
-  },
+//   relations: {
+//     agent: {
+//       type: "many-to-one",
+//       target: "agent",
+//       joinColumn: {
+//         name: "agentId",
+//         referencedColumnName: "id",
+//       },
+//       onDelete: "CASCADE",
+//     },
+//     admin: {
+//       type: "many-to-one",
+//       target: "adminauth",
+//       joinColumn: {
+//         name: "adminId",
+//         referencedColumnName: "id",
+//       },
+//       onDelete: "CASCADE",
+//       nullable: true,
+//     },
+//   },
 });
