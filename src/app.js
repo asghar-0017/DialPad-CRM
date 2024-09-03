@@ -7,18 +7,17 @@ const agentRoute = require('./routes/agentRoute');
 const leadRoute = require('./routes/leadRoute');
 const followUpRoute = require('./routes/followUpRoute');
 const otherRoute = require('./routes/otherRoute');
-const TrashRoute=require('./routes/trashRoute')
-const messageRoute=require('./routes/messagingRoute')
+const TrashRoute = require('./routes/trashRoute');
+const messageRoute = require('./routes/messagingRoute');
 const dataSource = require('./infrastructure/psql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Server } = require('socket.io');
-const helmet=require('helmet')
+const helmet = require('helmet');
 
 dotenv.config();
 
 const app = express();
-
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -30,7 +29,7 @@ const io = new Server(server, {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({ origin: '*' }));
-app.use(helmet())
+app.use(helmet());
 
 app.use((req, res, next) => {
   logger.info(`Received request: ${req.method} ${req.url}`);
@@ -51,12 +50,12 @@ agentRoute(app, io);
 leadRoute(app, io);
 followUpRoute(app, io);
 otherRoute(app, io);
-TrashRoute(app)
-messageRoute(app,io)
+TrashRoute(app);
+messageRoute(app, io);
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    logger.error('Bad JSON: ', err.message);
+    logger.error('Bad JSON:', err.message);
     return res.status(400).send({ code: 400, status: 'Bad Request', message: 'Invalid JSON payload' });
   }
   next();
@@ -65,10 +64,10 @@ app.use((err, req, res, next) => {
 io.on('connection', (socket) => {
   logger.info(`A user connected: ${socket.id}`);
 
-  socket.on("send_message",(data)=>{
-    console.log("data of socket",data)
-    socket.broadcast.emit("receive_message",data)
-  })
+  socket.on("send_message", (data) => {
+    console.log("data of socket", data);
+    socket.broadcast.emit("receive_message", data);
+  });
 
   socket.on('disconnect', () => {
     logger.info(`User disconnected: ${socket.id}`);
