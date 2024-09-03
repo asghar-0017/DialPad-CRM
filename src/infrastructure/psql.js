@@ -15,8 +15,10 @@ const dataSource = new DataSource({
   logging: true,
   logger: new PinoLogger(),
   entities: [
-    path.join(__dirname, "../entities/**/*.js"),
-    path.join(__dirname, "../entities/trash/**/*.js"), // Include trash entities here
+    path.join(__dirname, "../entities/**/*.ts"), // For development
+    path.join(__dirname, "../entities/trash/**/*.ts"), // For development
+    path.join(__dirname, "../dist/entities/**/*.js"), // For production
+    path.join(__dirname, "../dist/entities/trash/**/*.js"), // For production
   ],
 });
 
