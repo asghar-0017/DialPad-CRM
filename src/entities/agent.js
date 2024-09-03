@@ -70,15 +70,15 @@ module.exports = new EntitySchema({
       target: "followUp",
       inverseSide: "agent",
     },
-    agentMessages: {
-      type: "one-to-many",
-      target: "agentMessage",
-      inverseSide: "agent",
-    },
-    adminMessages: {
-      type: "one-to-many",
-      target: "adminMessage",
-      inverseSide: "agent",
-    },
+    // agentMessages: {
+    //   type: "one-to-many",
+    //   target: "agentMessage",
+    //   inverseSide: "agent",
+    // },
+    // adminMessages: {
+    //   type: "one-to-many",
+    //   target: "adminMessage",
+    //   inverseSide: "agent",
+    // },
   },
 });
