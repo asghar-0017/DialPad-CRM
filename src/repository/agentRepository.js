@@ -4,6 +4,7 @@ const agentAuth=require('../entities/agent')
 const agentTask=require('../entities/agentTask')
 const agentTrash=require('../entities/agentTrash')
 const tempAgent=require('../entities/tempAgent')
+const agentReview=require('../entities/reviewToAgent')
 
 const agentRepository = {
 findByEmail: async (email) => {
@@ -244,7 +245,7 @@ findByEmail: async (email) => {
       console.log("Agent",agent)
 
    
-      const agentReviewRepository = dataSource.getRepository('agentReview');
+      const agentReviewRepository = dataSource.getRepository(agentReview);
       const reviewEntity = agentReviewRepository.create({
         id: reviewId,
         review: review ,
@@ -262,7 +263,7 @@ findByEmail: async (email) => {
   },
   getAssignReviewsToAgentById: async (agentId) => {
     try {
-      const agentTaskRepository = dataSource.getRepository('agentReview');
+      const agentTaskRepository = dataSource.getRepository(agentReview);
       const review = await agentTaskRepository.find({ where: { agentId } });
       if (review.length > 0) {
         return review;
@@ -277,7 +278,7 @@ findByEmail: async (email) => {
   
   getAssignReviewToAgentByReviewId: async (reviewId) => {
     try {
-      const agentReviewRepository =  dataSource.getRepository('agentReview');
+      const agentReviewRepository =  dataSource.getRepository(agentReview);
       const review = await agentReviewRepository.findOne({ where: { reviewId } })
       if (review) {
         return review;
@@ -291,7 +292,7 @@ findByEmail: async (email) => {
   },
   updateAssignReviewToAgentById: async ( reviewId, updatedTaskData) => {
     try {
-      const agentReviewRepository = dataSource.getRepository('agentReview');
+      const agentReviewRepository = dataSource.getRepository(agentReview);
       const existingReview = await agentReviewRepository.findOne({
         where: {
           reviewId: reviewId,
@@ -311,7 +312,7 @@ findByEmail: async (email) => {
   },
   deleteAssignReviewToAgentByReviewId: async (reviewId) => {
     try {
-      const agentReviewRepository = dataSource.getRepository('agentReview');
+      const agentReviewRepository = dataSource.getRepository(agentReview);
       
       const existingReview = await agentReviewRepository.findOne({
         where: {
