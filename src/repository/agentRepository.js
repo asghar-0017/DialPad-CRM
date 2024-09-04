@@ -2,7 +2,7 @@ const dataSource = require("../infrastructure/psql");
 const { logger } = require("../../logger");
 const agentAuth=require('../entities/agent')
 const agentTask=require('../entities/agentTask')
-const agentTrash=require('../entities/trash/agentTrash')
+const agentTrash=require('../entities/agentTrash')
 const tempAgent=require('../entities/tempAgent')
 
 const agentRepository = {
