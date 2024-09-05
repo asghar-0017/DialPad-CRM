@@ -15,17 +15,45 @@ module.exports = new EntitySchema({
     taskId: {
       type: "varchar",
     },
-    Name: {
-      type: 'varchar',
+    // Name: {
+    //   type: 'varchar',
+    //   nullable: true,
+    // },
+    // Address: {
+    //   type: 'varchar',
+    //   nullable: true,
+    // },
+    // PhoneNumber: {
+    //   type: "varchar",
+    //   nullable: true,
+    // },
+    // Website:{
+    //   type: "varchar",
+    //   nullable: true,
+    // },
+    // Email:{
+    //   type: "varchar",
+    //   nullable: true,
+    // },
+    // CustomerFeedBack: {
+    //   type: "enum",
+    //   enum: ['onGoing', 'voiceMail', 'hangUp', 'followUp', 'other'],
+    //   nullable: true,
+    // },
+    // FollowUpDetail: {
+    //   type: "varchar",
+    //   nullable: true,
+    // },
+    // OtherDetail: {
+    //   type: "varchar",
+    //   nullable: true,
+    // },
+    DynamicData:{
+      type: 'jsonb',
       nullable: true,
     },
-    Address: {
-      type: 'varchar',
-      nullable: true,
-    },
-    PhoneNumber: {
-      type: "varchar",
-      nullable: true,
+    taskNo: {
+      type: "int", // Changed type to int
     },
     created_at: {
       type: "timestamp",

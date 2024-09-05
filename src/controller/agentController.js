@@ -24,46 +24,23 @@ const dataSource=require('../infrastructure/psql')
 
 
 
-const alterTableSchema = async (columnNames) => {
-  const queryRunner = dataSource.createQueryRunner();
-  await queryRunner.connect();
-
+const getLatestTaskForAgent=async (agentId) => {
   try {
-    // Fetch existing columns from the agentTask table
-    const table = await queryRunner.getTable('agentTask');
-    const existingColumns = table.columns.map(column => column.name.toLowerCase());
+    const agentTaskRepository = dataSource.getRepository('agentTask');
 
-    for (const columnName of columnNames) {
-      if (!existingColumns.includes(columnName.toLowerCase())) {
-        let columnType = 'varchar';
+    // Find the highest taskNo for the given agentId
+    const latestTask = await agentTaskRepository
+      .createQueryBuilder('agentTask')
+      .where('agentTask.agentId = :agentId', { agentId })
+      .orderBy('agentTask.taskNo', 'DESC')
+      .getOne();
 
-        // Custom logic for determining column type
-        if (columnName.toLowerCase().includes('phone')) {
-          columnType = 'varchar';
-        } else if (columnName.toLowerCase().includes('date')) {
-          columnType = 'timestamp';
-        } else if (columnName.toLowerCase().includes('id')) {
-          columnType = 'varchar';
-        } else {
-          columnType = 'varchar'; // Default type
-        }
-
-        // Add new column to the table
-        await queryRunner.addColumn('agentTask', new TableColumn({
-          name: columnName,
-          type: columnType,
-          isNullable: true,
-        }));
-      }
-    }
+    return latestTask;
   } catch (error) {
-    console.error('Error altering table schema:', error.message);
-    throw new Error('Error altering table schema');
-  } finally {
-    await queryRunner.release();
+    console.error('Error fetching latest task for agent:', error.message);
+    throw new Error('Error fetching latest task number');
   }
 };
-
 
 
 const toPascalCase = (str) => {
@@ -221,11 +198,11 @@ const agentController = {
     assignTask: async (io,req, res) => {
       try {
         const agenId = req.params.agentId;
-        const task = req.body;
-        task.taskId = taskId(); 
+        const taskData = req.body;
+        taskData.taskId = taskId(); 
         console.log("agent Id", agenId);
     
-        const data = await agentService.assignTaskToAgent(agenId, task.task, task.taskId);
+        const data = await agentService.assignTaskToAgent(agenId, taskData, taskData.taskId);
     
         if (data) {
           res.status(200).send({ message: "success", data: data });
@@ -239,36 +216,56 @@ const agentController = {
       }
     },
     
-    getAssignTask:async(io,req,res)=>{
-      try{
-        const data=await agentService.getAssignTaskToAgent()
-        if(data){
-          io.emit('receive_message', data);
-          res.status(200).send({message:"success",data:data})
-        }else{
-          res.status(404).send({message:"data Not Found"})
+    getAssignTask: async (io, req, res) => {
+      try {
+        const data = await agentService.getAssignTaskToAgent();
+        console.log("Data in controller", data);
+    
+        if (data && data.agentTasks && data.agentTasks.length > 0) {
+          // Filter out null or undefined values from each task
+          const filteredData = data.agentTasks.map(task => {
+            return Object.fromEntries(
+              Object.entries(task).filter(([key, value]) => value !== null && value !== undefined)
+            );
+          });
+              io.emit('receive_message', filteredData);
+    
+          res.status(200).send({ message: "Success", data: filteredData });
+        } else {
+          res.status(404).send({ message: "Data Not Found" });
         }
-      }catch(error){
-        throw error
+      } catch (error) {
+        console.error('Error fetching tasks:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
       }
     },
+    
+    
 
-    getAssignTaskById:async (io,req, res) => {
+    getAssignTaskById: async (io, req, res) => {
       try {
         const agentId = req.params.agentId;
         const data = await agentService.getAssignTaskToAgentById(agentId);
-        if (data === 'Data Not Found') {
-          res.status(404).send({ message: 'Data Not Found' });
-        } else {
-          io.emit('receive_message', data);
-          res.status(200).send({ message: 'Success', data });
+        
+        if (!data || data.length === 0) {
+          return res.status(404).send({ message: 'No tasks found for this agent.' });
         }
+        
+        const filteredData = data.map(task => {
+          return Object.fromEntries(
+            Object.entries(task).filter(([key, value]) => value !== null && value !== undefined)
+          );
+        });
+    
+        io.emit('receive_message', filteredData);
+        res.status(200).send({ message: 'Success', data: filteredData });
       } catch (error) {
         console.error('Error fetching tasks by agent ID:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
-
+    
+    
     getAssignTaskByTaskId: async (req, res) => {
       try {
         const taskId = req.params.taskId;
@@ -419,7 +416,7 @@ const agentController = {
     
 
 
-    saveExcelFileData :async (io, req, res) => {
+    saveExcelFileData: async (io, req, res) => {
       if (!req.file) {
         return res.status(400).json({ message: 'Please upload an Excel file.' });
       }
@@ -437,25 +434,22 @@ const agentController = {
           return res.status(400).json({ message: 'No data found in the Excel file.' });
         }
     
-        const columnNames = [...new Set(results.flatMap(row => Object.keys(row).map(toPascalCase)))];
-        console.log("Columns in controller", columnNames);
-    
-        // Alter table schema to add new columns
-        await alterTableSchema(columnNames);
-    
         const tasksAssigned = [];
+    
+        // Find the highest taskNo for the agent
+        const latestTask = await getLatestTaskForAgent(agentId);
+        let taskNo = latestTask ? latestTask.taskNo + 1 : 1; // Increment taskNo for new upload
+    
+        const taskid = taskId(); // Generate a new taskId for the current upload
     
         for (const row of results) {
           const convertedRow = convertKeysToPascalCase(row);
-    
           const agent = await agentRepository.getAgentDataById(agentId);
     
           if (agent) {
-            const taskid = taskId(); // Generate a unique task ID
-    
             const taskData = {
               agentId,
-              taskid,
+              taskId: taskid,
               ...convertedRow,
             };
     
@@ -463,8 +457,8 @@ const agentController = {
               taskData.PhoneNumber = String(taskData.PhoneNumber);
             }
     
-            // Save the task to the database with the dynamic columns
-            const assignedTask = await agentRepository.assignTaskToAgentById(agentId, taskData, taskid);
+            // Assign incremented taskNo for each CSV upload
+            const assignedTask = await agentRepository.assignTaskToAgentById(agentId, taskData, taskid, taskNo);
             tasksAssigned.push(assignedTask);
           } else {
             console.error("Agent not found for agentId:", agentId);
@@ -483,8 +477,9 @@ const agentController = {
       } finally {
         fs.unlinkSync(filePath); // Clean up the uploaded file
       }
-    }
-  ,
+    },
+    
+    
   
   
   

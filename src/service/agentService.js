@@ -110,14 +110,16 @@ const agentService = {
       throw error
     }
   },
-  getAssignTaskToAgentById:async(agenId)=>{
-    try{
-      const data=await agentRepository.getAssignTaskToAgentById(agenId)
-      return data
-    }catch(error){
-      throw error
+  getAssignTaskToAgentById: async (agentId) => {
+    try {
+      const data = await agentRepository.getAssignTaskToAgentById(agentId);
+      return data; // Return the data or empty array if no tasks are found
+    } catch (error) {
+      console.error('Error in service:', error);
+      throw new Error('Error retrieving tasks');
     }
   },
+  
   getAssignTaskToAgentByTaskId:async(taskId)=>{
     try{
       const data=await agentRepository.getAssignTaskToAgentByTaskId(taskId)

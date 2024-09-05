@@ -31,7 +31,7 @@ const agentRoute = (app,io) => {
 
 
 
-    // app.post('/upload-task/:agentId', combinedAuthenticate, checkRole(['admin','agent']),upload.single('file'),(req, res) => agentController.saveExcelFileData(io, req, res))
+    app.post('/upload-task/:agentId', combinedAuthenticate, checkRole(['admin','agent']),upload.single('file'),(req, res) => agentController.saveExcelFileData(io, req, res))
 
     app.post('/create-agent-csv', combinedAuthenticate, checkRole(['admin','agent']),upload.single('file'),(req, res) => agentController.saveExcelFileDataOfCreateAgent(io, req, res))
 
