@@ -19,11 +19,14 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+
+// Use polling transport for Socket.IO
 const io = new Server(server, {
   cors: {
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
   },
+  transports: ['polling'], // Force the use of polling transport
 });
 
 app.use(bodyParser.json());

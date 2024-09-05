@@ -31,7 +31,8 @@ const agentRoute = (app,io) => {
 
 
 
-    app.post('/upload-task', combinedAuthenticate, checkRole(['admin']),upload.single('file'),(req, res) => agentController.saveExcelFileData(io, req, res))
+    // app.post('/upload-task/:agentId', combinedAuthenticate, checkRole(['admin','agent']),upload.single('file'),(req, res) => agentController.saveExcelFileData(io, req, res))
+
     app.post('/create-agent-csv', combinedAuthenticate, checkRole(['admin','agent']),upload.single('file'),(req, res) => agentController.saveExcelFileDataOfCreateAgent(io, req, res))
 
 
@@ -41,6 +42,7 @@ const agentRoute = (app,io) => {
     app.post('/reset-password-agent', agentAuthController.resetPassword);
     app.post('/logout', adminAuth.logout);
     app.post('/verify-token',adminAuth.verifyToken);
+
     app.put('/update-status/:agentId',combinedAuthenticate, checkRole(['admin']),(req, res) =>agentAuthController.updateAgentStatus(io, req, res))
 
 };

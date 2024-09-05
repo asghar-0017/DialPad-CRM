@@ -84,14 +84,16 @@ const agentService = {
       throw error
     }
   },
-  assignTaskToAgent:async(agentId,task,taskId)=>{
-    try{
-      const data=await agentRepository.assignTaskToAgentById(agentId,task,taskId)
-      return data
-    }catch(error){
-      throw error
+  assignTaskToAgent: async (agentId, taskData, taskId) => {
+    try {
+      console.log("Task Data in Service",taskData)
+        const data = await agentRepository.assignTaskToAgentById(agentId, taskData, taskId);
+        return data;
+    } catch (error) {
+        throw error;
     }
-  },
+},
+
   getAssignTaskToAgent:async()=>{
     try{
       const data=await agentRepository.getAssignTaskToAgent()

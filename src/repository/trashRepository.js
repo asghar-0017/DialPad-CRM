@@ -15,7 +15,7 @@ const trashRepository = {
     },
     findAllOthers: async () => {
         try {
-          const repository = dataSource.getRepository('otherTrash'); 
+          const repository = dataSource.getRepository(otherTrash); 
           const dataArray = await repository.find(); 
           console.log('data',dataArray)
           const result = await Promise.all(dataArray.map(async (data) => {

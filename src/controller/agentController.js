@@ -4,8 +4,10 @@ const agentId=require('../utils/token')
 const reviewId=require('../utils/token')
 const taskId=require('../utils/token')
 const fs = require('fs');
+const agentTask=require('../entities/agentTask')
 const path = require('path');
 const xlsx = require('xlsx');
+const { TableColumn, Table } = require("typeorm");
 
 const generateResetCode = require('../utils/token');
 const { sendResetEmail } = require('../service/resetEmail');
@@ -18,6 +20,78 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 
 const sendVerificationEmail=require('../mediater/sendMail')
+const dataSource=require('../infrastructure/psql')
+
+
+
+const alterTableSchema = async (columnNames) => {
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+
+  try {
+    // Fetch existing columns from the agentTask table
+    const table = await queryRunner.getTable('agentTask');
+    const existingColumns = table.columns.map(column => column.name.toLowerCase());
+
+    for (const columnName of columnNames) {
+      if (!existingColumns.includes(columnName.toLowerCase())) {
+        let columnType = 'varchar';
+
+        // Custom logic for determining column type
+        if (columnName.toLowerCase().includes('phone')) {
+          columnType = 'varchar';
+        } else if (columnName.toLowerCase().includes('date')) {
+          columnType = 'timestamp';
+        } else if (columnName.toLowerCase().includes('id')) {
+          columnType = 'varchar';
+        } else {
+          columnType = 'varchar'; // Default type
+        }
+
+        // Add new column to the table
+        await queryRunner.addColumn('agentTask', new TableColumn({
+          name: columnName,
+          type: columnType,
+          isNullable: true,
+        }));
+      }
+    }
+  } catch (error) {
+    console.error('Error altering table schema:', error.message);
+    throw new Error('Error altering table schema');
+  } finally {
+    await queryRunner.release();
+  }
+};
+
+
+
+const toPascalCase = (str) => {
+  return str
+    .replace(/\s(.)/g, function (match, group1) {
+      return group1.toUpperCase();
+    })
+    .replace(/^(.)/, function (match, group1) {
+      return group1.toUpperCase();
+    })
+    .replace(/\s+/g, ''); // Remove remaining spaces
+};
+
+const convertKeysToPascalCase = (data) => {
+  const result = {};
+  for (const key in data) {
+    if (data.hasOwnProperty(key)) {
+      // Convert the column name to PascalCase
+      const pascalCaseKey = toPascalCase(key);
+
+      // Set the value for the PascalCase key
+      result[pascalCaseKey] = data[key];
+    }
+  }
+  return result;
+};
+
+
 
 const agentController = {
 
@@ -341,57 +415,79 @@ const agentController = {
       }
     },
 
-    saveExcelFileData: async (io,req, res) => {
-      if (!req.file) {
-          return res.status(400).json({ message: 'Please upload an Excel file.' });
-      }
-      const filePath = path.join(__dirname, '../uploads/', req.file.filename);
-      try {
-          const workbook = xlsx.readFile(filePath);
-          const sheetName = workbook.SheetNames[0];
-          const sheet = workbook.Sheets[sheetName];
-          const results = xlsx.utils.sheet_to_json(sheet);
-  
-          if (results.length === 0) {
-              return res.status(400).json({ message: 'No data found in the Excel file.' });
-          }
-          const requiredColumns = ['agentId', 'task'];
-          const sampleRow = results[0];
-          const missingColumns = requiredColumns.filter(col => !sampleRow.hasOwnProperty(col));
-  
-          if (missingColumns.length > 0) {
-              return res.status(400).json({ message: `Missing required columns: ${missingColumns.join(', ')}` });
-          }
-          const tasksAssigned = [];
-          for (const row of results) {
-              if (!row.agentId || !row.task) {
-                  console.error("Missing required fields in row:", row);
-                  continue;
-              }
-              const agent = await agentRepository.getAgentDataById(row.agentId);
-              if (agent) {
-                  row.taskId = taskId();   
-                  const assignedTask = await agentService.assignTaskToAgent(row.agentId, row.task, row.taskId);
-                  tasksAssigned.push(assignedTask);
-              } else {
-                  console.error("Agent not found for agentId:", row.agentId);
-                  continue; 
-              }
-          }
-          if (tasksAssigned.length > 0) {
-            io.emit('send_message', tasksAssigned);
+ 
+    
 
-              return res.status(200).json({ message: 'Tasks assigned successfully', data: tasksAssigned });
-          } else {
-              return res.status(400).json({ message: 'No tasks were assigned due to missing data or agent not found.' });
-          }
-      } catch (error) {
-          console.error('Error processing the Excel file:', error);
-          res.status(500).json({ message: 'Internal Server Error', error: error.message });
-      } finally {
-          fs.unlinkSync(filePath); 
+
+    saveExcelFileData :async (io, req, res) => {
+      if (!req.file) {
+        return res.status(400).json({ message: 'Please upload an Excel file.' });
       }
-  },
+    
+      const agentId = req.params.agentId;
+      const filePath = path.join(__dirname, '../uploads/', req.file.filename);
+    
+      try {
+        const workbook = xlsx.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const results = xlsx.utils.sheet_to_json(sheet);
+    
+        if (results.length === 0) {
+          return res.status(400).json({ message: 'No data found in the Excel file.' });
+        }
+    
+        const columnNames = [...new Set(results.flatMap(row => Object.keys(row).map(toPascalCase)))];
+        console.log("Columns in controller", columnNames);
+    
+        // Alter table schema to add new columns
+        await alterTableSchema(columnNames);
+    
+        const tasksAssigned = [];
+    
+        for (const row of results) {
+          const convertedRow = convertKeysToPascalCase(row);
+    
+          const agent = await agentRepository.getAgentDataById(agentId);
+    
+          if (agent) {
+            const taskid = taskId(); // Generate a unique task ID
+    
+            const taskData = {
+              agentId,
+              taskid,
+              ...convertedRow,
+            };
+    
+            if (taskData.PhoneNumber) {
+              taskData.PhoneNumber = String(taskData.PhoneNumber);
+            }
+    
+            // Save the task to the database with the dynamic columns
+            const assignedTask = await agentRepository.assignTaskToAgentById(agentId, taskData, taskid);
+            tasksAssigned.push(assignedTask);
+          } else {
+            console.error("Agent not found for agentId:", agentId);
+          }
+        }
+    
+        if (tasksAssigned.length > 0) {
+          io.emit('send_message', tasksAssigned);
+          return res.status(200).json({ message: 'Tasks assigned successfully', data: tasksAssigned });
+        } else {
+          return res.status(400).json({ message: 'No tasks were assigned due to missing data or agent not found.' });
+        }
+      } catch (error) {
+        console.error('Error processing the Excel file:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+      } finally {
+        fs.unlinkSync(filePath); // Clean up the uploaded file
+      }
+    }
+  ,
+  
+  
+  
    
 
 

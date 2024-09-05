@@ -13,9 +13,17 @@ module.exports = new EntitySchema({
       type: "varchar",
     },
     taskId: {
-        type: "varchar",
-      },
-    task: {
+      type: "varchar",
+    },
+    Name: {
+      type: 'varchar',
+      nullable: true,
+    },
+    Address: {
+      type: 'varchar',
+      nullable: true,
+    },
+    PhoneNumber: {
       type: "varchar",
       nullable: true,
     },
@@ -35,7 +43,7 @@ module.exports = new EntitySchema({
       target: "agent",
       joinColumn: {
         name: "agentId",
-        referencedColumnName: "agentId"
+        referencedColumnName: "agentId",
       },
       onDelete: "CASCADE",
     },
