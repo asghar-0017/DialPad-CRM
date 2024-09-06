@@ -191,6 +191,20 @@ findByEmail: async (email) => {
       throw new Error('Error fetching tasks');
     }
   },
+
+  getAssignTaskToAgentByTaskNo: async (agentId,taskNo) => {
+    try {
+      const agentTaskRepository = dataSource.getRepository(agentTask);
+      const tasks = await agentTaskRepository.find({ where: { agentId,taskNo } });
+    
+      return tasks.length > 0 ? tasks : [];
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      throw new Error('Error fetching tasks');
+    }
+  },
+
+
   
   
   getAssignTaskToAgentByTaskId: async (taskId) => {

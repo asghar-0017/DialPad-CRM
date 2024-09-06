@@ -266,6 +266,32 @@ const agentController = {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
+
+
+    getAssignTaskByTaskNo: async (io, req, res) => {
+      try {
+        const agentId = req.params.agentId;
+        const taskNo=req.params.taskNo
+        console.log("Task No",taskNo)
+        const data = await agentService.getAssignTaskToAgentByTaskNO(agentId,taskNo);
+        
+        if (!data || data.length === 0) {
+          return res.status(404).send({ message: 'No tasks found for this agent.' });
+        }
+        
+        const filteredData = data.map(task => {
+          return Object.fromEntries(
+            Object.entries(task).filter(([key, value]) => value !== null && value !== undefined)
+          );
+        });
+    
+        io.emit('receive_message', filteredData);
+        res.status(200).send({ message: 'Success', data: filteredData });
+      } catch (error) {
+        console.error('Error fetching tasks by agent ID:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    },
     
     
     getAssignTaskByTaskId: async (req, res) => {
