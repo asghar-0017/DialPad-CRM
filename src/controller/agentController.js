@@ -367,6 +367,20 @@ const agentController = {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
+    deleteAssignTaskByAgentId: async (req, res) => {
+      try {
+        const { agentId,taskNo } = req.params; 
+        const data = await agentService.deleteAssignTaskToAgentByAgentId(agentId,taskNo);
+        if (data === 'Data Not Found') {
+          res.status(404).send({ message: 'Data Not Found' });
+        } else {
+          res.status(200).send({ message: 'Task Deleted Successfully', data });
+        }
+      } catch (error) {
+        console.error('Error Deleting task:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    },
     assignReview: async (io,req, res) => {
       try {
         const agenId = req.params.agentId;
@@ -473,20 +487,21 @@ const agentController = {
     
         const tasksAssigned = [];
     
-        // Find the highest taskNo for the agent
+        // Get the latest task number for the agent
         const latestTask = await getLatestTaskForAgent(agentId);
-        let taskNo = latestTask ? latestTask.taskNo + 1 : 1; // Increment taskNo for new upload
-    
-        const taskid = taskId(); // Generate a new taskId for the current upload
+        let initialTaskNo = latestTask ? latestTask.taskNo + 1 : 1;
     
         for (const row of results) {
           const convertedRow = convertKeysToPascalCase(row);
           const agent = await agentRepository.getAgentDataById(agentId);
     
           if (agent) {
+            // Generate a unique taskId for each task
+            const taskId = reviewId(); // Use uuid to generate a unique taskId
+    
             const taskData = {
               agentId,
-              taskId: taskid,
+              taskId,
               ...convertedRow,
             };
     
@@ -494,8 +509,8 @@ const agentController = {
               taskData.PhoneNumber = String(taskData.PhoneNumber);
             }
     
-            // Assign incremented taskNo for each CSV upload
-            const assignedTask = await agentRepository.assignTaskToAgentById(agentId, taskData, taskid, taskNo);
+            // Assign the task to the agent
+            const assignedTask = await agentRepository.assignTaskToAgentById(agentId, taskData, taskId, initialTaskNo);
             tasksAssigned.push(assignedTask);
           } else {
             console.error("Agent not found for agentId:", agentId);

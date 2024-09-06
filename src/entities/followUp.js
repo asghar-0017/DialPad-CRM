@@ -9,28 +9,29 @@ module.exports = new EntitySchema({
       primary: true,
       generated: true,
     },
-    followUpDetail: {
+    // leadId: {
+    //   type: "int",
+    // },
+    // leadName: {
+    //   type: "varchar",
+    // },
+    // phone: {
+    //   type: "varchar",
+    // },
+    // email: {
+    //   type: "varchar",
+    // },
+    leadId:{
+        type: "varchar",
+      nullable:'true'
+    },
+    agentId:{
       type: "varchar",
-      nullable: true,
-    },
-    leadId: {
-      type: "int",
-    },
-    leadName: {
-      type: "varchar",
-    },
-    phone: {
-      type: "varchar",
-    },
-    email: {
-      type: "varchar",
-    },
-    role: {
-      type: "varchar",
-    },
-    agentId: {
-      type: "int",
-      nullable: true,
+    nullable: true,
+  },
+    dynamicLead:{
+      type:'jsonb',
+      nullable: true
     },
     created_at: {
       type: "timestamp",
@@ -43,12 +44,12 @@ module.exports = new EntitySchema({
     },
   },
   relations: {
-    lead: {
-      type: "many-to-one",
-      target: "lead",
-      joinColumn: { name: "leadId", referencedColumnName: "leadId" },
-      onDelete: "CASCADE",
-    },
+    // lead: {
+    //   type: "many-to-one",
+    //   target: "lead",
+    //   joinColumn: { name: "leadId", referencedColumnName: "leadId" },
+    //   onDelete: "CASCADE",
+    // },
     // createdByAdmin: {
     //   type: "many-to-one",
     //   target: "auth",

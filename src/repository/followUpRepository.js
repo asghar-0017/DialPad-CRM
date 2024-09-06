@@ -5,7 +5,9 @@ const followUp = require("../entities/followUp");
 
 const followUpRepository = {
   createFollowUp: async (followUpData) => {
-    try {
+    try {   
+      
+       
         return await dataSource.getRepository(FollowUp).save(followUpData);
     } catch (error) {
         throw error;

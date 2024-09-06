@@ -162,6 +162,14 @@ const agentService = {
       throw error
     }
   },
+  deleteAssignTaskToAgentByAgentId:async(agentId,taskNo)=>{
+    try{
+      const data=await agentRepository.deleteAssignTaskToAgentByTaskId(agentId,taskNo)
+      return data
+    }catch(error){
+      throw error
+    }
+  },
  assignReviewToAgent:async(agentId,review,reviewId)=>{
   try{
     const data=await agentRepository.assignReviewToAgentById(agentId,review,reviewId)

@@ -13,38 +13,39 @@ module.exports = new EntitySchema({
       type: "int",
       unique: true,
     },
-    leadName: {
-      type: "varchar",
-    },
-    address: {
-      type: "text",
-    },
-    phone: {
-      type: "varchar",
-    },
-    website: {
-      type: "varchar",
-    },
-    email: {
-      type: "varchar",
-    },
-    customer_feedBack: {
-      type: "enum",
-      enum: ['onGoing', 'voiceMail', 'hangUp', 'followUp', 'other'],
-    },
-    followUpDetail: {
-      type: "varchar",
+    // leadName: {
+    //   type: "varchar",
+    // },
+    // address: {
+    //   type: "text",
+    // },
+    // phone: {
+    //   type: "varchar",
+    // },
+    // website: {
+    //   type: "varchar",
+    // },
+    // email: {
+    //   type: "varchar",
+    // },
+    // customer_feedBack: {
+    //   type: "enum",
+    //   enum: ['onGoing', 'voiceMail', 'hangUp', 'followUp', 'other'],
+    // },
+    // followUpDetail: {
+    //   type: "varchar",
+    //   nullable: true,
+    // },
+    // otherDetail: {
+    //   type: "varchar",
+    //   nullable: true,
+    // },
+    dynamicLead: {
+      type: 'jsonb',
       nullable: true,
     },
-    otherDetail: {
-      type: "varchar",
-      nullable: true,
-    },
-    role: {
+    agentId:{
         type: "varchar",
-    },
-    agentId: {
-      type: 'int',
       nullable: true,
     },
  
@@ -58,12 +59,12 @@ module.exports = new EntitySchema({
       onUpdate: "CURRENT_TIMESTAMP",
     },
   },
-  relations: {
-    agent: {
-      type: "many-to-one",
-      target: "agent",
-      joinColumn: { name: "agentId", referencedColumnName: "agentId" },
-      onDelete: "SET NULL",
-    },
-  },
+  // relations: {
+  //   agent: {
+  //     type: "many-to-one",
+  //     target: "agent",
+  //     joinColumn: { name: "agentId", referencedColumnName: "agentId" },
+  //     onDelete: "SET NULL",
+  //   },
+  // },
 });

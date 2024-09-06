@@ -86,48 +86,7 @@ findByEmail: async (email) => {
   },
   
 
-  // assignTaskToAgentById: async (agentId, taskData, taskId) => {
-  //   try {
-  //     console.log("AgentID in repo:", agentId);
-  //     console.log("Task Id in Repo:", taskId);
-  //     console.log("Task Data in Repo:", taskData);
-  
-  //     // Get the agent repository
-  //     const agentRepository = dataSource.getRepository('agent');
-      
-  //     // Find the agent by ID
-  //     const agent = await agentRepository.findOne({ where: { agentId } });
-  
-  //     if (!agent) {
-  //       console.log("No agent found with ID:", agentId);
-  //       return null;
-  //     }
-  
-  //     console.log("Agent:", agent);
-  
-  //     // Get the agentTask repository
-  //     const agentTaskRepository = dataSource.getRepository(agentTask);
-  
-      
-  //     let taskEntity = {
-  //       agentId,
-  //       taskId,
-  //       ...taskData
-  //     };
-  
-  //     console.log("Task Entity before saving:", taskEntity);
-  
-  //     // Create and save the task entity to the database
-  //     taskEntity = agentTaskRepository.create(taskEntity);
-  //     await agentTaskRepository.save(taskEntity);
-  
-  
-  //     return taskEntity;
-  //   } catch (error) {
-  //     console.error('Error in assignTaskToAgentById:', error.message);
-  //     throw new Error('Error assigning task to agent');
-  //   }
-  // },
+
 
   assignTaskToAgentById: async (agentId, taskData, taskId, taskNo) => {
     try {
@@ -221,16 +180,29 @@ findByEmail: async (email) => {
     }
   },
 
-  updateAssignTaskToAgentById: async ( taskId, updatedTaskData) => {
+  updateAssignTaskToAgentById: async (taskId, updatedTaskData) => {
     try {
       const agentTaskRepository = dataSource.getRepository(agentTask);
+  
+      // Find the existing task
       const existingTask = await agentTaskRepository.findOne({
-        where: {
-          taskId: taskId,
-        }
-      });  
+        where: { taskId },
+      });
+  
       if (existingTask) {
-        await agentTaskRepository.update({ taskId }, updatedTaskData);
+        // Extract existing DynamicData
+        const { DynamicData } = existingTask;
+  
+        // Merge the existing DynamicData with the new updates
+        const newDynamicData = {
+          ...DynamicData,
+          ...updatedTaskData,
+        };
+  
+        // Update the task with merged DynamicData and current timestamp
+        await agentTaskRepository.update({ taskId }, { DynamicData: newDynamicData, updated_at: new Date() });
+  
+        // Retrieve and return the updated task
         const updatedTask = await agentTaskRepository.findOne({ where: { taskId } });
         return updatedTask;
       } else {
@@ -241,6 +213,7 @@ findByEmail: async (email) => {
       throw new Error('Error updating task for agent');
     }
   },
+  
   
   deleteAssignTaskToAgentById: async (agentId, taskId) => {
     try {
@@ -285,6 +258,32 @@ findByEmail: async (email) => {
       throw new Error('Error deleting task for agent');
     }
   },
+
+  deleteAssignTaskToAgentByTaskId: async (agentId, taskNo) => {
+    try {
+      const agentTaskRepository = dataSource.getRepository(agentTask);
+  
+      // Find all tasks with the given taskNo and agentId
+      const tasksToDelete = await agentTaskRepository.find({
+        where: {
+          agentId,
+          taskNo
+        }
+      });
+  
+      if (tasksToDelete.length > 0) {
+        // Remove all found tasks
+        const deleteResult = await agentTaskRepository.remove(tasksToDelete);
+        return deleteResult;
+      } else {
+        return 'Data Not Found';
+      }
+    } catch (error) {
+      console.error('Error deleting task for agent:', error.message);
+      throw new Error('Error deleting task for agent');
+    }
+  },
+  
   assignReviewToAgentById: async (agentId,review,reviewId) => {
     try {
       console.log("AgentID in repo",agentId)

@@ -3,26 +3,44 @@ const followUpService = require('../service/followUpService');
 
 const followUpController = {
 
-  getAllFollowUps: async (io,req, res) => {
+  getAllFollowUps: async (io, req, res) => {
     try {
-        const followUps = await followUpService.getAllFollowUps();
-        if (!followUps || followUps.length === 0) {
-            return res.status(404).json({ message: 'No follow-ups found' });
+      const followUps = await followUpService.getAllFollowUps();
+  
+      if (!followUps || followUps.length === 0) {
+        return res.status(404).json({ message: 'No follow-ups found' });
+      }
+  
+      const data = followUps.map(followUp => {
+        // Spread the followUp object and dynamicLead (if exists) into one object
+        const { dynamicLead = {}, ...otherDetails } = followUp;
+  
+        // Merge dynamicLead fields with other details
+        const mergedFollowUp = {
+          ...dynamicLead, // Spread dynamicLead properties
+          ...otherDetails, // Spread other properties
+        };
+  
+        // If the role is 'admin', remove agentId
+        if (mergedFollowUp.role === 'admin') {
+          delete mergedFollowUp.agentId; // Remove agentId for admins
         }
-        const data = followUps.map(followUp => {
-            if (followUp.role === 'admin') {
-                const { id, leadId, leadName, phone, email, role, followUpDetail } = followUp;
-                return { id, leadId, leadName, phone, email, role, followUpDetail };
-            } else {
-                return followUp;
-            }
-        });
-        io.emit('receive_message', data);
-        res.status(200).json({ message: 'success', data });
+  
+        // Return the merged object
+        return mergedFollowUp;
+      });
+  
+      // Emit the processed data via socket
+      io.emit('receive_message', data);
+  
+      // Send the response
+      res.status(200).json({ message: 'success', data });
     } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+      // Handle any errors
+      res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
-},
+  },
+  
 
 getFollowUpById: async (req, res) => {
   try {
@@ -48,20 +66,40 @@ getFollowUpById: async (req, res) => {
       res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 },
-  getallSpecifiFollowUpByAgentId:async(req,res)=>{
-    try {
-      const agentId = req.params.agentId;
-      const data = await followUpService.followUpAllGetServiceByAgentId(agentId);   
-      if (data && data.length > 0) {
-          res.status(200).send({ message: "success", data: data });
-      } else {
-          res.status(404).send({ message: `No leads found for agentId ${agentId}` });
-      }
+getallSpecifiFollowUpByAgentId: async (req, res) => {
+  try {
+    const agentId = req.params.agentId;
+    const data = await followUpService.followUpAllGetServiceByAgentId(agentId); 
+
+    if (data && data.length > 0) {
+      const processedData = data.map(followUp => {
+        // Spread dynamicLead and other followUp details
+        const { dynamicLead = {}, ...otherDetails } = followUp;
+
+        // Merge dynamicLead fields with other followUp details
+        const mergedFollowUp = {
+          ...dynamicLead,
+          ...otherDetails,
+        };
+
+        delete mergedFollowUp.CustomerFeedBack;
+
+
+        // Return the processed followUp data
+        return mergedFollowUp;
+      });
+
+      // Send the processed data as response
+      res.status(200).send({ message: "success", data: processedData });
+    } else {
+      res.status(404).send({ message: `No leads found for agentId ${agentId}` });
+    }
   } catch (error) {
-      console.error('Error fetching leads:', error);
-      res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    console.error('Error fetching leads:', error);
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
-  },
+},
+
 
   updateFollowUp: async (io,req, res) => {
     try {

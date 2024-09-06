@@ -7,6 +7,7 @@ const agent = require("../entities/agent");
 const followUpRepository = {
   createOther: async (otherData) => {
     try {
+   
         return await dataSource.getRepository(other).save(otherData);
     } catch (error) {
         throw error;
