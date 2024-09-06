@@ -274,22 +274,24 @@ const agentController = {
         const taskNo = req.params.taskNo;
         console.log("Task No", taskNo);
     
-        // Fetch tasks using the service method
         const data = await agentService.getAssignTaskToAgentByTaskNO(agentId, taskNo);
     
         if (!data || data.length === 0) {
           return res.status(404).send({ message: 'No tasks found for this agent.' });
         }
-            const formattedData = data.map(task => {
-          const { agentId, id, taskId, taskNo, created_at, updated_at, ...dynamicData } = task;
+        console.log("Data", data);
     
-          return {
-            DynamicData: dynamicData
-          };
+        // Transform the data
+        const filteredData = data.map(task => {
+          // Extract DynamicData as it is
+          const dynamicData = task.DynamicData || {};
+          return dynamicData;
         });
     
-        io.emit('receive_message', formattedData);
-        res.status(200).send({ message: 'Success', data: formattedData });
+        console.log(filteredData);
+    
+        io.emit('receive_message', filteredData);
+        res.status(200).send({ message: 'Success', data: filteredData });
       } catch (error) {
         console.error('Error fetching tasks by agent ID:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
