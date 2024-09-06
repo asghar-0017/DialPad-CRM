@@ -281,7 +281,7 @@ const agentController = {
         
         const filteredData = data.map(task => {
           return Object.fromEntries(
-            Object.entries(task).filter(([key, value]) => value !== null && value !== undefined)
+            Object.entries(task).filter(([key]) => key !== 'agentId')
           );
         });
     
