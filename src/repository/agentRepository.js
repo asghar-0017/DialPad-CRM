@@ -185,8 +185,6 @@ findByEmail: async (email) => {
       const agentTaskRepository = dataSource.getRepository(agentTask);
       const tasks = await agentTaskRepository.find({ where: { agentId } });
     
-  
-      // Return empty array if no tasks are found
       return tasks.length > 0 ? tasks : [];
     } catch (error) {
       console.error('Error fetching tasks:', error);

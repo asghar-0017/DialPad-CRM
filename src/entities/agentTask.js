@@ -15,15 +15,15 @@ module.exports = new EntitySchema({
     taskId: {
       type: "varchar",
     },
-    // Name: {
+    // name: {
     //   type: 'varchar',
     //   nullable: true,
     // },
-    // Address: {
+    // address: {
     //   type: 'varchar',
     //   nullable: true,
     // },
-    // PhoneNumber: {
+    // phoneNumber: {
     //   type: "varchar",
     //   nullable: true,
     // },
@@ -31,7 +31,7 @@ module.exports = new EntitySchema({
     //   type: "varchar",
     //   nullable: true,
     // },
-    // Email:{
+    // email:{
     //   type: "varchar",
     //   nullable: true,
     // },

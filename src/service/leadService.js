@@ -27,7 +27,7 @@ const leadService = {
                 throw new Error('Failed to create lead');
             }
     
-            if (data.customer_feedBack === 'followUp') {
+            if (data.customerFeedBack === 'followUp') {
                 const followUpData = {
                     followUpDetail: data.followUpDetail,
                     leadId: lead.leadId,
@@ -39,7 +39,7 @@ const leadService = {
                 };
                 await followUpRepository.createFollowUp(followUpData);
             }
-                if (data.customer_feedBack === 'other') {
+                if (data.customerFeedBack === 'other') {
                 const otherData = {
                     otherDetail: data.otherDetail,
                     leadId: lead.leadId,

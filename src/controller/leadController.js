@@ -7,6 +7,33 @@ const dataSource = require('../infrastructure/psql');
 const otherDetail = require('../entities/otherDetail');
 const followUp = require('../entities/followUp');
 
+const toPascalCase = (str) => {
+    return str
+      .replace(/\s(.)/g, function (match, group1) {
+        return group1.toUpperCase();
+      })
+      .replace(/^(.)/, function (match, group1) {
+        return group1.toUpperCase();
+      })
+      .replace(/\s+/g, ''); // Remove remaining spaces
+  };
+  
+  const convertKeysToPascalCase = (data) => {
+    const result = {};
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        // Convert the column name to PascalCase
+        const pascalCaseKey = toPascalCase(key);
+  
+        // Set the value for the PascalCase key
+        result[pascalCaseKey] = data[key];
+      }
+    }
+    return result;
+  };
+  
+
+
 const leadController = {
     createLead: async (io,req, res) => {
         try {
@@ -127,6 +154,63 @@ const leadController = {
             fs.unlinkSync(filePath);
         }
     },
+
+
+    // saveExcelFileData: async (io, req, res) => {
+
+    //     if (!req.file) {
+    //       return res.status(400).json({ message: 'Please upload an Excel file.' });
+    //     }
+      
+    //     const filePath = path.join(__dirname, '../uploads/', req.file.filename);
+      
+    //     try {
+    //       const workbook = xlsx.readFile(filePath);
+    //       const sheetName = workbook.SheetNames[0];
+    //       const sheet = workbook.Sheets[sheetName];
+    //       const results = xlsx.utils.sheet_to_json(sheet);
+      
+    //       if (results.length === 0) {
+    //         return res.status(400).json({ message: 'No data found in the Excel file.' });
+    //       }
+      
+    //       const leadCreate = [];
+
+      
+    //       const leadid = leadId(); // Generate a new taskId for the current upload
+    //       console.log("Leadid",leadid)
+      
+    //       for (const row of results) {
+    //         const convertedRow = convertKeysToPascalCase(row);
+      
+    //           const leadData = {
+    //             leadId: leadid,
+    //             ...convertedRow,
+    //           };
+      
+    //           const assignedLead = await leadService.leadCreateService(leadData, req.user);
+
+    //               leadCreate.push(assignedLead);
+            
+            
+    //       }
+      
+    //       if (tasksAssigned.length > 0) {
+    //         io.emit('send_message', tasksAssigned);
+    //         return res.status(200).json({ message: 'Tasks assigned successfully', data: tasksAssigned });
+    //       } else {
+    //         return res.status(400).json({ message: 'No tasks were assigned due to missing data or agent not found.' });
+    //       }
+    //     } catch (error) {
+    //       console.error('Error processing the Excel file:', error);
+    //       res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    //     } finally {
+    //       fs.unlinkSync(filePath); // Clean up the uploaded file
+    //     }
+    //   },
+
+
+
 
     getLeadById: async (req, res) => {
         try {

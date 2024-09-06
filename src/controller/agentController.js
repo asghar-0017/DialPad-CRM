@@ -18,7 +18,6 @@ require('dotenv').config()
 const secretKey = process.env.SCERET_KEY;
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
-
 const sendVerificationEmail=require('../mediater/sendMail')
 const dataSource=require('../infrastructure/psql')
 
@@ -197,12 +196,15 @@ const agentController = {
 
     assignTask: async (io,req, res) => {
       try {
-        const agenId = req.params.agentId;
+        const agentId = req.params.agentId;
         const taskData = req.body;
         taskData.taskId = taskId(); 
-        console.log("agent Id", agenId);
+        console.log("agent Id", agentId);
+
+        const latestTask = await getLatestTaskForAgent(agentId);
+        let taskNo = latestTask ? latestTask.taskNo + 1 : 1; // Increment taskNo for new upload
     
-        const data = await agentService.assignTaskToAgent(agenId, taskData, taskData.taskId);
+        const data = await agentService.assignTaskToAgent(agentId, taskData, taskData.taskId,taskNo);
     
         if (data) {
           res.status(200).send({ message: "success", data: data });
