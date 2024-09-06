@@ -123,7 +123,7 @@ const agentService = {
   getAssignTaskToAgentByTaskNO: async (agentId,taskNo) => {
     try {
       const data = await agentRepository.getAssignTaskToAgentByTaskNo(agentId,taskNo);
-      return data; // Return the data or empty array if no tasks are found
+      return data; 
     } catch (error) {
       console.error('Error in service:', error);
       throw new Error('Error retrieving tasks');
