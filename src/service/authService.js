@@ -6,9 +6,9 @@ const dataSource = require('../infrastructure/psql');
 const { agentRepository } = require('../repository/agentRepository');
 const Agent=require('../entities/agent')
 const Admin=require('../entities/auth')
-require('dotenv').config(); // Ensure this line is at the top
+require('dotenv').config();
 
-const secretKey = process.env.SCERET_KEY; // Fixed typo
+const secretKey = process.env.SCERET_KEY; 
 if (!secretKey) {
   throw new Error('SECRET_KEY environment variable is not set.');
 }

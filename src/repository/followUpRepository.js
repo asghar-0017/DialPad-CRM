@@ -35,44 +35,37 @@ const followUpRepository = {
   update: async (id, data) => {
     const followUpRepository = dataSource.getRepository(followUp);
     const leadRepository = dataSource.getRepository(Lead);
-    const followUpEntity = await followUpRepository.findOneBy({ leadId: id });
-
+  
+    console.log("Searching for followUp with leadId:", id);
+    const followUpEntity = await followUpRepository.findOneBy({ leadId: String(id) });
+  
     if (followUpEntity) {
-        const updatedFollowUpData = {
-            ...followUpEntity,
-            followUpDetail: data.followUpDetail,
-            leadName: data.leadName,
-            phone: data.phone,
-            email: data.email,
-            updated_at: new Date() 
-        };
-
-        const leadEntity = await leadRepository.findOneBy({ leadId: id });
-        if (leadEntity) {
-            const updatedLeadData = {
-                ...leadEntity,
-                otherDetail: data.otherDetail,
-                leadName: data.leadName,
-                customerFeedBack:data.customerFeedBack,
-                phone: data.phone,
-                email: data.email,
-                updated_at: new Date()  
-            };
-
-            await followUpRepository.save(updatedFollowUpData);
-            await leadRepository.save(updatedLeadData);
-
-            console.log("Update successful");
-            return true;
-        } else {
-            console.log("No corresponding lead entity found for update.");
-            return false;
-        }
-    } else {
-        console.log("No 'other' entity found with leadId:", id);
+      const existingFollowUpData = followUpEntity.dynamicLead || {};
+      const updatedFollowUpData = { ...existingFollowUpData, ...data };
+  
+      const leadEntity = await leadRepository.findOneBy({ leadId: String(id) });
+      if (leadEntity) {
+        const existingLeadData = leadEntity.dynamicLead || {};
+        const updatedLeadData = { ...existingLeadData, ...data };
+  
+        await followUpRepository.update({ leadId: String(id) }, { dynamicLead: updatedFollowUpData, updated_at: new Date() });
+        await leadRepository.update({ leadId: String(id) }, { dynamicLead: updatedLeadData, updated_at: new Date() });
+  
+        console.log("Update successful");
+        return true;
+      } else {
+        console.log("No corresponding lead entity found for update.");
         return false;
+      }
+    } else {
+      console.log("No 'followUp' entity found with leadId:", id);
+      return false;
     }
-},
+  },
+  
+  
+  
+  
 
   
 delete: async (id, user) => {

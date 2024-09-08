@@ -1,4 +1,3 @@
-// controllers/followUpController.js
 const otherService = require('../service/otherService');
 
 const otherController = {

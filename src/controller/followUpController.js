@@ -73,23 +73,15 @@ getallSpecifiFollowUpByAgentId: async (req, res) => {
 
     if (data && data.length > 0) {
       const processedData = data.map(followUp => {
-        // Spread dynamicLead and other followUp details
         const { dynamicLead = {}, ...otherDetails } = followUp;
-
-        // Merge dynamicLead fields with other followUp details
         const mergedFollowUp = {
           ...dynamicLead,
           ...otherDetails,
         };
 
         delete mergedFollowUp.CustomerFeedBack;
-
-
-        // Return the processed followUp data
         return mergedFollowUp;
       });
-
-      // Send the processed data as response
       res.status(200).send({ message: "success", data: processedData });
     } else {
       res.status(404).send({ message: `No leads found for agentId ${agentId}` });

@@ -10,9 +10,6 @@ const messageController = {
             const message = req.body;
             message.messageId = messageId(); 
             const role=req.user.role
-            console.log("messageId",message.messageId)
-            console.log("adminId",adminId)
-            console.log("agentId",agentId)
             const data = await messageService.assignMessageToAgent(adminId,agentId, message.message, message.messageId,role);
         
             if (data) {

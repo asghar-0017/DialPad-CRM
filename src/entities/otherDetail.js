@@ -9,18 +9,7 @@ module.exports = new EntitySchema({
       primary: true,
       generated: true,
     },
-    // leadId: {
-    //   type: "int",
-    // },
-    // leadName: {
-    //   type: "varchar",
-    // },
-    // phone: {
-    //   type: "varchar",
-    // },
-    // email: {
-    //   type: "varchar",
-    // },
+    
     dynamicLead:{
       type:'jsonb',
       nullable:true

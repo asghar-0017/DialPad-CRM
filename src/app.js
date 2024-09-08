@@ -20,25 +20,23 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 app.use(cors({
-  origin: '*', // Change this to your actual client URL
+  origin: '*', 
   methods: ['GET', 'POST', 'DELETE', 'PUT'],
   credentials: true,
 }));
 
 
-// Use polling transport for Socket.IO
 const io = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
   },
-  transports: ['websocket', 'polling'], // Allow both WebSocket and polling
+  transports: ['websocket', 'polling'], 
 });
 
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(cors({ origin: '*' }));
 app.use(helmet());
 
 app.use((req, res, next) => {

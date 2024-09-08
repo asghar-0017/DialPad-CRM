@@ -1,25 +1,22 @@
 const dataSource = require("../infrastructure/psql");
 const Lead = require('../entities/lead');
-const FollowUp = require('../entities/followUp'); // Adjust the path as needed
-const other = require('../entities/otherDetail'); // Adjust the path as needed
+const FollowUp = require('../entities/followUp');
+const other = require('../entities/otherDetail'); 
 const leadsTrash=require('../entities/leadTrash')
-const otherTrash=require('../entities/trash/otherTrash')
-const followUpTrash=require('../entities/trash/followUpTrash')
+const otherTrash=require('../entities/otherTrash')
+const followUpTrash=require('../entities/followUpTrash')
 
 
 const leadRepository = {
      saveLead :async (role, leadId, lead) => {
         try {
-        //   console.log("Lead in Repo", lead);
-      
-          let leadEntity = {
+                let leadEntity = {
             agentId:lead.agentId,
             role,
             leadId,
 
-            dynamicLead: lead.dynamicLead,  // Ensure dynamic lead data is correctly assigned
+            dynamicLead: lead.dynamicLead, 
           };
-        //   console.log("Lead in Repo after modification", leadEntity);
       
           return await dataSource.getRepository(Lead).save(leadEntity);
         } catch (error) {
@@ -43,60 +40,131 @@ const leadRepository = {
             if (!leadId) {
                 throw new Error('leadId is required');
             }
+    
+            const leadRepository = dataSource.getRepository(Lead);
+            const followUpRepository = dataSource.getRepository(FollowUp);
+            const otherRepository = dataSource.getRepository(other);
+
+            const leadData= await otherRepository.findOne({where:{leadId}})
+            console.log("Lead Data in Rpo",leadData)
             let lead;
             if (user.role === 'agent') {
-                lead = await dataSource.getRepository(Lead).findOne({ where: { leadId, agent: user.id } });
+                lead = await leadRepository.findOne({ where: { leadId, agent: user.id } });
             } else if (user.role === 'admin') {
-                lead = await dataSource.getRepository(Lead).findOne({ where: { leadId } });
+                lead = await leadRepository.findOne({ where: { leadId } });
             }
+    
             if (!lead) {
                 throw new Error('Lead not found or does not belong to the agent');
-            }    
-            if (data.customer_feedBack === 'followUp') {
-                const followUpData = {
-                    followUpDetail: data.followUpDetail,
-                    leadId: lead.leadId, 
-                    address: data.address,
-                    leadName: data.leadName,
-                    phone: data.phone,
-                    email: data.email,
-                    role:user.role
-                };
-                const existingFollowUp = await dataSource.getRepository(FollowUp).findOne({ where: { leadId } });
+            }
+            console.log("Lead Data in Rpo",lead)
+
+    
+            const customerFeedBack = lead.dynamicLead.CustomerFeedBack;
+            console.log('CustomerFeedBack from lead:', customerFeedBack);
+    
+            if (customerFeedBack === 'followUp') {
+                const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
+                const updatedFollowUpData = existingFollowUp
+                    ? { ...existingFollowUp.dynamicLead, ...data }
+                    : { ...data };
+    
                 if (existingFollowUp) {
-                    await dataSource.getRepository(FollowUp).update({ leadId }, followUpData);
+                    await followUpRepository.update({ leadId }, { dynamicLead: updatedFollowUpData });
                 } else {
-                    await dataSource.getRepository(FollowUp).save(followUpData);
+                    await followUpRepository.save({
+                        leadId: lead.leadId,
+                        dynamicLead: leadData,
+                        agentId: user.agentId,
+                    });
                 }
-            } else if (data.customer_feedBack === 'other') {
-                const otherData = {
-                    otherDetail: data.otherDetail,
-                    leadId: lead.leadId,
-                    leadName: data.leadName,
-                    phone: data.phone,
-                    email: data.email,
-                    role:user.role
-                };
-                const existingOther = await dataSource.getRepository(other).findOne({ where: { leadId } });
+            }
+
+            else if (customerFeedBack === 'other') {
+                const existingOther = await otherRepository.findOne({ where: { leadId } });
+                const updatedOtherData = existingOther
+                    ? { ...existingOther.dynamicLead, ...data }
+                    : { ...data };
+    
                 if (existingOther) {
-                    await dataSource.getRepository(other).update({ leadId }, otherData);
+                    await otherRepository.update({ leadId }, { dynamicLead: updatedOtherData });
                 } else {
-                    await dataSource.getRepository(other).save(otherData);
+                    await otherRepository.save({
+                        leadId: lead.leadId,
+                        dynamicLead: leadData,
+                        agentId: user.agentId,
+                    });
                 }
-            } else {
-                await dataSource.getRepository(FollowUp).delete({ leadId });
-                await dataSource.getRepository(other).delete({ leadId });
-                data.followUpDetail = null; 
+            }
+    
+            if (data.CustomerFeedBack ==='onGoing' || data.CustomerFeedBack ==='voiceMail' || data.CustomerFeedBack ==='hangUp' ||  data.CustomerFeedBack ==='other' ) {
+                const existingFollowUp = await followUpRepository.findOneBy({  leadId  });
+                console.log("Existing followUp",existingFollowUp)
+                if (existingFollowUp) {
+                    await followUpRepository.delete({ leadId });
+                }
+                    const existingOther = await otherRepository.findOne({ where: { leadId } });
+                if (existingOther) {
+                    await otherRepository.delete({ leadId });
+                }
+            }
+       
+                const updatedLeadData = { ...lead.dynamicLead, ...data };
+                if (updatedLeadData.CustomerFeedBack === 'onGoing' || updatedLeadData.CustomerFeedBack === 'hangUp'|| updatedLeadData.CustomerFeedBack=== 'voiceMail' || updatedLeadData.CustomerFeedBack=== 'other' ) {
+                    if ('followUpDetail' in updatedLeadData) {
+                        delete updatedLeadData.followUpDetail;
+                    }
+                    if ('FollowUpDetail' in updatedLeadData) {
+                        delete updatedLeadData.FollowUpDetail;
+                    }
+                }
+                if (updatedLeadData.CustomerFeedBack === 'onGoing' || updatedLeadData.CustomerFeedBack === 'hangUp'|| updatedLeadData.CustomerFeedBack=== 'voiceMail' || updatedLeadData.CustomerFeedBack=== 'other' ) {
+                    if ('otherDetail' in updatedLeadData) {
+                        delete updatedLeadData.otherDetail;
+                    }
+                    if ('otherDetail' in updatedLeadData) {
+                        delete updatedLeadData.otherDetail;
+                    }
+                }
+                
+            await leadRepository.update({ leadId }, { dynamicLead: updatedLeadData });
+            console.log("Updated Lead ........................",updatedLeadData)
+
+         
+    
+            if (data.deleteOther) {
+                await otherRepository.delete({ leadId });
                 data.otherDetail = null; 
             }
-            await dataSource.getRepository(Lead).update({ leadId }, data);
-            const updatedLead = await dataSource.getRepository(Lead).findOne({ where: { leadId } });
+
+    
+            const updatedLead = await leadRepository.findOne({ where: { leadId } })
+            const updateFeedBack = updatedLead.dynamicLead.CustomerFeedBack;
+            console.log('CustomerFeedBack from lead:', updateFeedBack);
+            if(updateFeedBack==='followUp'){
+                const followUpInsert=await followUpRepository.save(followUpRepository.create(updatedLead))
+                 console.log("Insert into FollowUp",followUpInsert)
+            }
+            if(updateFeedBack==='other'){
+                const otherInsert=await otherRepository.save(otherRepository.create(updatedLead))
+                 console.log("Insert into FollowUp",otherInsert)
+            }
             return updatedLead;
+    
         } catch (error) {
-            console.error('Error updating lead data:', error);
-            throw error;
+            console.error('Error updating lead data:', error.message);
+            throw new Error('Failed to update lead data.');
         }
     },
+    
+    
+    
+    
+    
+    
+      
+
+
     
     getLeadDataById: async (leadId) => {
         try {
@@ -136,25 +204,48 @@ const leadRepository = {
                 return { success: false, message: "No lead data found" };
             }
     
-            const createLeadInTrash = await leadTrashRepository.save(leadTrashRepository.create(leadData));
+            const leadEntity = {
+                agentId: leadData.agentId,
+                role: user.role,
+                leadId: leadData.leadId,
+                dynamicLead: leadData.dynamicLead,  
+            };
+            const leadDataDynamic= {...leadEntity.dynamicLead}
+            console.log("Lead Dynamic Data",leadDataDynamic)
+    
+            const createLeadInTrash = await leadTrashRepository.save(leadTrashRepository.create(leadEntity));
             console.log("Created Lead In Trash:", createLeadInTrash);
     
-            let createdOtherTrash
-            let createdFollowUpInTrash
+            let createdOtherTrash = null;
+            let createdFollowUpInTrash = null;
     
-            if (createLeadInTrash.customer_feedBack === 'other') {
-                createdOtherTrash = await otherTrashRepository.save(otherTrashRepository.create(createLeadInTrash));
+            if (leadDataDynamic.CustomerFeedBack === 'other') {
+                const otherEntity={
+                agentId: leadData.agentId,
+                role: user.role,
+                leadId: leadData.leadId,
+                dynamicLead: leadDataDynamic,  
+                }
+                console.log("OtherEntity",otherEntity)
+                createdOtherTrash = await otherTrashRepository.save(otherTrashRepository.create(otherEntity))
                 console.log("Created Other In Trash:", createdOtherTrash);
             }
     
-            if (createLeadInTrash.customer_feedBack === 'followUp') {
-                createdFollowUpInTrash = await followUpTrashRepository.save(followUpTrashRepository.create(createLeadInTrash));
+            if (leadDataDynamic.CustomerFeedBack === 'followUp') {
+                const followUpEntiry={
+                    agentId: leadData.agentId,
+                    role: user.role,
+                    leadId: leadData.leadId,
+                    dynamicLead: leadDataDynamic, 
+                }
+                console.log("FollowUp Entity",followUpEntiry)
+                createdFollowUpInTrash = await followUpTrashRepository.save(followUpTrashRepository.create(followUpEntiry));
                 console.log("Created FollowUp In Trash:", createdFollowUpInTrash);
             }
-
+    
             await followUpRepository.delete({ leadId });
             await otherRepository.delete({ leadId });
-            await leadRepository.remove(leadData);
+            await leadRepository.remove(leadData);  
     
             const TrashData = {
                 createdOtherTrash,
@@ -173,7 +264,8 @@ const leadRepository = {
                 error,
             };
         }
-    },   
+    },
+     
     
 };
 

@@ -11,62 +11,96 @@ const trashController = {
                 return res.status(404).json({ message: 'Data Not Found' });
             }
             const processedData = data.map(lead => {
-                if (lead.customer_feedBack !== 'followUp') {
-                    delete lead.followUpDetail;
+                const { dynamicLead = {}, ...otherDetails } = lead;
+                const mergedLead = {
+                  ...dynamicLead, 
+                  ...otherDetails, 
+                };
+          
+                if (mergedLead.customer_feedBack !== 'followUp') {
+                  delete mergedLead.followUpDetail;
                 }
-                if (lead.customer_feedBack !== 'other') {
-                    delete lead.otherDetail;
+                if (mergedLead.customer_feedBack !== 'other') {
+                  delete mergedLead.otherDetail;
                 }
-                if (lead.role === 'admin') {
-                    delete lead.agentId;
+                if (mergedLead.role === 'admin') {
+                  delete mergedLead.agentId;
                 }
-                return lead;
-            });
+          
+                return mergedLead; 
+              });
             return res.status(200).send({ message: "success", data: processedData });
 
         } catch (error) {
             return res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
     },
-    getLeadOtherTrash:async(req,res)=>{
+    getLeadOtherTrash: async (req, res) => {
         try {
-            const { role } = req.user;
-            const others = await trashService.getAllOthersfromTrash();
-        
-            if (role === 'admin') {
-              const data = others.map(other => {
-                const { id, leadId, leadName, phone, email, role, otherDetail } = other;
-                return { id, leadId, leadName, phone, email, role, otherDetail };
-              });
-              return res.status(200).json({ message: 'success', data });
-            } 
-            // io.emit('receive_message', others);
+          const { role } = req.user;
+          const others = await trashService.getAllOthersfromTrash();
       
-              return res.status(200).json({ message: 'success', data: others });
-          } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error', error: error.message });
-          }
-    },
-    getLeadFollowUpTrash:async(req,res)=>{
-        try {
-            const followUps = await trashService.getAllFollowUps();
-            if (!followUps || followUps.length === 0) {
-                return res.status(404).json({ message: 'No follow-ups found' });
+          const data = others.map(other => {
+            const { dynamicLead, agentId, ...rest } = other;
+                  const flattenedLead = dynamicLead ? { ...dynamicLead } : {};
+      
+            if (role === 'admin') {
+              return {
+                ...rest,
+                ...flattenedLead,
+              };
+            } else {
+              return {
+                ...rest,
+                agentId,
+                ...flattenedLead,  
+              };
             }
-            const data = followUps.map(followUp => {
-                if (followUp.role === 'admin') {
-                    const { id, leadId, leadName, phone, email, role, followUpDetail } = followUp;
-                    return { id, leadId, leadName, phone, email, role, followUpDetail };
-                } else {
-                    return followUp;
-                }
-            });
-            // io.emit('receive_message', data);
-            res.status(200).json({ message: 'success', data });
+          });
+      
+          return res.status(200).json({ message: 'success', data });
         } catch (error) {
-            res.status(500).json({ message: 'Internal Server Error', error: error.message });
+          console.error("Error fetching lead other trash:", error);
+          return res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
-    },
+      },
+      
+
+      getLeadFollowUpTrash: async (req, res) => {
+        try {
+          const followUps = await trashService.getAllFollowUps();
+          
+          if (!followUps || followUps.length === 0) {
+            return res.status(404).json({ message: 'No follow-ups found' });
+          }
+      
+          const data = followUps.map(followUp => {
+            const { followUpDetail, agentId, ...rest } = followUp;
+                  const flattenedFollowUp = followUpDetail ? { ...followUpDetail } : {};
+      
+            if (followUp.role === 'admin') {
+              return {
+                ...rest,
+                ...flattenedFollowUp, 
+              };
+            } else {
+              return {
+                ...rest,
+                agentId,
+                ...flattenedFollowUp,
+              };
+            }
+          });
+      
+        //   io.emit('receive_message', data);
+      
+          return res.status(200).json({ message: 'success', data });
+        } catch (error) {
+          console.error("Error fetching follow-ups:", error);
+          return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+        }
+      },
+      
     getLeadById: async (req, res) => {
         try {
             const leadId = req.params.leadId;
@@ -109,7 +143,6 @@ const trashController = {
                 }
             }
          } catch (error) {
-            //  res.status(500).json({ message: 'Internal Server Error', error: error.message });
             throw error
          }
         }

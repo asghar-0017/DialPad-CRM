@@ -3,11 +3,11 @@ const {agentRepository,authAgentRepository}=require('../repository/agentReposito
 const agentId=require('../utils/token')
 const reviewId=require('../utils/token')
 const taskId=require('../utils/token')
+const generateAgentId=require('../utils/token')
 const fs = require('fs');
 const agentTask=require('../entities/agentTask')
 const path = require('path');
 const xlsx = require('xlsx');
-const { TableColumn, Table } = require("typeorm");
 
 const generateResetCode = require('../utils/token');
 const { sendResetEmail } = require('../service/resetEmail');
@@ -27,7 +27,6 @@ const getLatestTaskForAgent=async (agentId) => {
   try {
     const agentTaskRepository = dataSource.getRepository('agentTask');
 
-    // Find the highest taskNo for the given agentId
     const latestTask = await agentTaskRepository
       .createQueryBuilder('agentTask')
       .where('agentTask.agentId = :agentId', { agentId })
@@ -50,17 +49,14 @@ const toPascalCase = (str) => {
     .replace(/^(.)/, function (match, group1) {
       return group1.toUpperCase();
     })
-    .replace(/\s+/g, ''); // Remove remaining spaces
+    .replace(/\s+/g, ''); 
 };
 
 const convertKeysToPascalCase = (data) => {
   const result = {};
   for (const key in data) {
     if (data.hasOwnProperty(key)) {
-      // Convert the column name to PascalCase
       const pascalCaseKey = toPascalCase(key);
-
-      // Set the value for the PascalCase key
       result[pascalCaseKey] = data[key];
     }
   }
@@ -98,24 +94,47 @@ const agentController = {
 
   verifyEmail: async (req, res) => {
     try {
-      const { email, verificationToken } = req.query;
-      const tempAgent = await agentRepository.findTempAgentByEmailAndToken(email, verificationToken);
+        const { email, verificationToken } = req.query;
+        
+        // Find the temporary agent record with the given email and verification token
+        const tempAgent = await agentRepository.findTempAgentByEmailAndToken(email, verificationToken);
 
-      if (!tempAgent) {
-        return res.status(400).json({ message: 'Invalid or expired verification token' });
-      }
-      const hashedPassword = await bcrypt.hash(tempAgent.password, 10);
-      tempAgent.password = hashedPassword;
-      tempAgent.isActivated = true;
-      await agentRepository.saveAgent(tempAgent);
-      await agentRepository.deleteTempAgentById(tempAgent.id);
-      res.status(200).send("Email Verified Successfully");
+        if (!tempAgent) {
+            return res.status(400).json({ message: 'Invalid or expired verification token' });
+        }
+
+        // Check if the agent is already activated to avoid re-processing
+        if (tempAgent.isActivated) {
+            return res.status(400).json({ message: 'Email already verified' });
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(tempAgent.password, 10);
+        tempAgent.password = hashedPassword;
+        tempAgent.isActivated = true;
+
+        // Save the agent in the main table
+        try {
+            await agentRepository.saveAgent(tempAgent);
+        } catch (error) {
+            // Handle unique constraint violation
+            if (error.code === '23505') {
+                return res.status(400).json({ message: 'Agent already exists' });
+            }
+            throw error; // Re-throw unexpected errors
+        }
+
+        // Delete the temporary record
+        await agentRepository.deleteTempAgentById(tempAgent.id);
+
+        res.status(200).send("Email Verified Successfully");
 
     } catch (error) {
-      console.error("Error verifying email:", error.message);
-      res.status(500).send({ message: 'Internal Server Error' });
+        console.error("Error verifying email:", error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
     }
-  },
+},
+
 
     getAgent:async(io,req,res)=>{
     try{
@@ -338,20 +357,7 @@ const agentController = {
       }
     },
     
-    deleteAssignTaskById: async (req, res) => {
-      try {
-        const { agentId, taskId } = req.params; 
-        const data = await agentService.deleteAssignTaskToAgentById(agentId, taskId);
-        if (data === 'Data Not Found') {
-          res.status(404).send({ message: 'Data Not Found' });
-        } else {
-          res.status(200).send({ message: 'Task Deleted Successfully', data });
-        }
-      } catch (error) {
-        console.error('Error Deleting task:', error.message);
-        res.status(500).send({ message: 'Internal Server Error' });
-      }
-    },
+  
 
     deleteAssignTaskByTaskId: async (req, res) => {
       try {
@@ -538,65 +544,70 @@ const agentController = {
    
 
 
-  saveExcelFileDataOfCreateAgent: async (io,req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ message: 'Please upload an Excel file.' });
-    }
-    const filePath = path.join(__dirname, '../uploads/', req.file.filename);
-    try {
-        const workbook = xlsx.readFile(filePath);
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const results = xlsx.utils.sheet_to_json(sheet);
-        if (results.length === 0) {
-            return res.status(400).json({ message: 'No data found in the Excel file.' });
-        }
-        const requiredColumns = ['firstName', 'lastName', 'email', 'phone', 'password'];
-        const sampleRow = results[0];
-        const missingColumns = requiredColumns.filter(col => !sampleRow.hasOwnProperty(col));
-
-        if (missingColumns.length > 0) {
-            return res.status(400).json({ message: `Missing required columns: ${missingColumns.join(', ')}` });
-        }
-        const createAgent = [];
-        for (const row of results) {
-            if (!row.firstName || !row.lastName || !row.email || !row.phone || !row.password) {
-                console.error("Missing required fields in row:", row);
-                continue; 
-            }
-            const email = row.email;
-            try {
-                const existingAgent = await agentRepository.findByEmail(email);
-                if (existingAgent) {
-                    console.log(`User with email ${email} already registered.`);
-                    continue;
-                }
-
-                row.agentId = agentId(); 
-                const agent = await agentService.agentCreateService(row);
-                createAgent.push(agent); 
-                
-            } catch (err) {
-                console.error(`Error creating agent for email ${email}:`, err.message);
-            }
-        }
-        if (createAgent.length > 0) {
-          io.emit('send_message', createAgent);
-
-            return res.status(201).json({ message: 'Agents registered successfully', agents: createAgent });
-        } else {
-            return res.status(400).json({ message: 'No agents were created.' });
-        }
-    } catch (error) {
-        console.error('Error processing the Excel file:', error);
-        res.status(500).json({ message: 'Internal Server Error', error: error.message });
-    } finally {
-        fs.unlinkSync(filePath); 
-    }
-}
-
-};
+    saveExcelFileDataOfCreateAgent :async (io, req, res) => {
+      if (!req.file) {
+          return res.status(400).json({ message: 'Please upload a CSV file.' });
+      }
   
+      const filePath = path.join(__dirname, '../uploads/', req.file.filename);
+      try {
+          const workbook = xlsx.readFile(filePath);
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const results = xlsx.utils.sheet_to_json(sheet);
+  
+          if (results.length === 0) {
+              return res.status(400).json({ message: 'No data found in the file.' });
+          }
+  
+          const agents = [];
+          for (const row of results) {
+              const { email, firstName, lastName, phone, password } = row; // Extract required fields
+  
+              if (!email) {
+                  console.error("Email is missing in row:", row);
+                  continue;
+              }
+  
+              const existingAgent = await agentRepository.findByEmail(email);
+              if (existingAgent) {
+                  console.log(`User with email ${email} is already in the system.`);
+                  continue;
+              }
+  
+              const verificationToken = uuidv4(); 
+              const agentId = generateAgentId(); // Generate unique agent ID
+
+              const agentTemp = {
+                
+                 agentId,
+                  email,
+                  firstName,
+                  lastName,
+                  phone,
+                  password,
+                  verifyToken: verificationToken,
+                  isActivated: false, // Set to false initially
+              };
+  
+              // Save in the temp table
+              await agentRepository.saveTempAgent(agentTemp);
+  
+              // Send verification email
+              await sendVerificationEmail(email, verificationToken, firstName || 'User');
+  
+              agents.push({ email, status: 'Verification Email Sent' });
+          }
+  
+          return res.status(200).json({ message: 'Emails sent', agents });
+      } catch (error) {
+          console.error('Error processing the CSV file:', error);
+          return res.status(500).json({ message: 'Internal Server Error' });
+      } finally {
+          fs.unlinkSync(filePath); // Clean up file
+      }
+    }
+  }
 
 const agentAuthController = {
   login: async (req,res) => {

@@ -183,27 +183,18 @@ findByEmail: async (email) => {
   updateAssignTaskToAgentById: async (taskId, updatedTaskData) => {
     try {
       const agentTaskRepository = dataSource.getRepository(agentTask);
-  
-      // Find the existing task
-      const existingTask = await agentTaskRepository.findOne({
+        const existingTask = await agentTaskRepository.findOne({
         where: { taskId },
       });
   
       if (existingTask) {
-        // Extract existing DynamicData
         const { DynamicData } = existingTask;
-  
-        // Merge the existing DynamicData with the new updates
-        const newDynamicData = {
+          const newDynamicData = {
           ...DynamicData,
           ...updatedTaskData,
         };
-  
-        // Update the task with merged DynamicData and current timestamp
-        await agentTaskRepository.update({ taskId }, { DynamicData: newDynamicData, updated_at: new Date() });
-  
-        // Retrieve and return the updated task
-        const updatedTask = await agentTaskRepository.findOne({ where: { taskId } });
+          await agentTaskRepository.update({ taskId }, { DynamicData: newDynamicData, updated_at: new Date() });
+          const updatedTask = await agentTaskRepository.findOne({ where: { taskId } });
         return updatedTask;
       } else {
         return 'Data Not Found';
@@ -215,27 +206,6 @@ findByEmail: async (email) => {
   },
   
   
-  deleteAssignTaskToAgentById: async (agentId, taskId) => {
-    try {
-      const agentTaskRepository = dataSource.getRepository(agentTask);
-      
-      const existingTask = await agentTaskRepository.findOne({
-        where: {
-          taskId: taskId,
-          agentId: agentId
-        }
-      });
-      if (existingTask) {
-        const deleteTask = await agentTaskRepository.remove(existingTask);
-        return deleteTask;
-      } else {
-        return 'Data Not Found';
-      }
-    } catch (error) {
-      console.error('Error deleting task for agent:', error.message);
-      throw new Error('Error deleting task for agent');
-    }
-  },
   deleteAssignTaskToAgentByTaskId: async (taskId) => {
     try {
       const agentTaskRepository = dataSource.getRepository(agentTask);

@@ -9,18 +9,6 @@ module.exports = new EntitySchema({
       primary: true,
       generated: true,
     },
-    // leadId: {
-    //   type: "int",
-    // },
-    // leadName: {
-    //   type: "varchar",
-    // },
-    // phone: {
-    //   type: "varchar",
-    // },
-    // email: {
-    //   type: "varchar",
-    // },
     leadId:{
         type: "varchar",
       nullable:'true'
@@ -44,23 +32,17 @@ module.exports = new EntitySchema({
     },
   },
   relations: {
-    // lead: {
-    //   type: "many-to-one",
-    //   target: "lead",
-    //   joinColumn: { name: "leadId", referencedColumnName: "leadId" },
-    //   onDelete: "CASCADE",
-    // },
-    // createdByAdmin: {
-    //   type: "many-to-one",
-    //   target: "auth",
-    //   joinColumn: { name: "createdByAdmin", referencedColumnName: "id" },
-    //   onDelete: "SET NULL",
-    // },
-    // agent: {
-    //   type: "many-to-one",
-    //   target: "agent",
-    //   joinColumn: { name: "agentId", referencedColumnName: "agentId" },
-    //   onDelete: "SET NULL",
-    // },
+    lead: {
+      type: "many-to-one",
+      target: "lead",
+      joinColumn: { name: "leadId", referencedColumnName: "leadId" },
+      onDelete: "CASCADE",
+    },
+    agent: {
+      type: "many-to-one",
+      target: "agent",
+      joinColumn: { name: "agentId", referencedColumnName: "agentId" },
+      onDelete: "SET NULL",
+    },
   },
 });
