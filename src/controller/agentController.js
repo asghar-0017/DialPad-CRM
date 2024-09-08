@@ -92,46 +92,972 @@ const agentController = {
     }
   },
 
-  verifyEmail: async (req, res) => {
+//   verifyEmail: async (req, res) => {
+//     try {
+//         const { email, verificationToken } = req.query;
+//                 const tempAgent = await agentRepository.findTempAgentByEmailAndToken(email, verificationToken);
+
+//         if (!tempAgent) {
+//             return res.status(400).json({ message: 'Invalid or expired verification token' });
+//         }
+//         if (tempAgent.isActivated) {
+//             return res.status(400).json({ message: 'Email already verified' });
+//         }
+//         const hashedPassword = await bcrypt.hash(tempAgent.password, 10);
+//         tempAgent.password = hashedPassword;
+//         tempAgent.isActivated = true;
+
+//         try {
+//             await agentRepository.saveAgent(tempAgent);
+//         } catch (error) {
+//             if (error.code === '23505') {
+//                 return res.status(400).json({ message: 'Agent already exists' });
+//             }
+//             throw error;
+//         }
+//         await agentRepository.deleteTempAgentById(tempAgent.id);
+
+//         res.status(200).send("Email Verified Successfully");
+
+//     } catch (error) {
+//         console.error("Error verifying email:", error.message);
+//         res.status(500).send({ message: 'Internal Server Error' });
+//     }
+// },
+
+// const bcrypt = require('bcrypt');
+// const agentRepository = require('../repository/agentRepository');
+
+// verifyEmail: async (req, res) => {
+//   try {
+//     const { email, verificationToken } = req.query;
+//     const tempAgent = await agentRepository.findTempAgentByEmailAndToken(email, verificationToken);
+
+//     if (!tempAgent) {
+//       return res.status(400).send(`
+//         <html>
+//           <head>
+//             <style>
+//               body {
+//                 font-family: Arial, sans-serif;
+//                 margin: 0;
+//                 padding: 0;
+//                 background-color: #f4f4f4;
+//                 text-align: center;
+//               }
+//               .container {
+//                 max-width: 600px;
+//                 margin: auto;
+//                 background-color: #ffffff;
+//                 padding: 20px;
+//                 border-radius: 8px;
+//                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+//               }
+//               .header {
+//                 background-color: #007bff;
+//                 color: #ffffff;
+//                 padding: 20px;
+//                 border-radius: 8px 8px 0 0;
+//               }
+//               .content {
+//                 padding: 20px;
+//               }
+//               .btn {
+//                 display: inline-block;
+//                 padding: 10px 20px;
+//                 font-size: 16px;
+//                 color: #fff;
+//                 background-color: #28a745;
+//                 text-decoration: none;
+//                 border-radius: 5px;
+//                 margin-top: 20px;
+//               }
+//               .footer {
+//                 background-color: #333;
+//                 color: #ffffff;
+//                 padding: 10px;
+//                 font-size: 12px;
+//                 border-radius: 0 0 8px 8px;
+//               }
+//               img {
+//                 max-width: 100%;
+//                 height: auto;
+//                 border-radius: 8px;
+//               }
+//             </style>
+//           </head>
+//           <body>
+//             <div class="container">
+//               <div class="header">
+//                 <h1>Email Verification</h1>
+//               </div>
+//               <div class="content">
+//                 <h2>Oops!</h2>
+//                 <p>It seems your verification link is invalid or expired.</p>
+//                 <a href="https://www.softmarksolutions.com" class="btn">Back to Login</a>
+//               </div>
+//               <div class="footer">
+//                 <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
+//               </div>
+//             </div>
+//           </body>
+//         </html>
+//       `);
+//     }
+
+//     if (tempAgent.isActivated) {
+//       return res.status(400).send(`
+//         <html>
+//           <head>
+//             <style>
+//               body {
+//                 font-family: Arial, sans-serif;
+//                 margin: 0;
+//                 padding: 0;
+//                 background-color: #f4f4f4;
+//                 text-align: center;
+//               }
+//               .container {
+//                 max-width: 600px;
+//                 margin: auto;
+//                 background-color: #ffffff;
+//                 padding: 20px;
+//                 border-radius: 8px;
+//                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+//               }
+//               .header {
+//                 background-color: #007bff;
+//                 color: #ffffff;
+//                 padding: 20px;
+//                 border-radius: 8px 8px 0 0;
+//               }
+//               .content {
+//                 padding: 20px;
+//               }
+//               .btn {
+//                 display: inline-block;
+//                 padding: 10px 20px;
+//                 font-size: 16px;
+//                 color: #fff;
+//                 background-color: #28a745;
+//                 text-decoration: none;
+//                 border-radius: 5px;
+//                 margin-top: 20px;
+//               }
+//               .footer {
+//                 background-color: #333;
+//                 color: #ffffff;
+//                 padding: 10px;
+//                 font-size: 12px;
+//                 border-radius: 0 0 8px 8px;
+//               }
+//             </style>
+//           </head>
+//           <body>
+//             <div class="container">
+//               <div class="header">
+//                 <h1>Email Verification</h1>
+//               </div>
+//               <div class="content">
+//                 <h2>Already Verified</h2>
+//                 <p>Your email has already been verified.</p>
+//                 <a href="https://www.softmarksolutions.com" class="btn">Proceed to Login</a>
+//               </div>
+//               <div class="footer">
+//                 <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
+//               </div>
+//             </div>
+//           </body>
+//         </html>
+//       `);
+//     }
+
+//     const hashedPassword = await bcrypt.hash(tempAgent.password, 10);
+//     tempAgent.password = hashedPassword;
+//     tempAgent.isActivated = true;
+
+//     try {
+//       await agentRepository.saveAgent(tempAgent);
+//     } catch (error) {
+//       if (error.code === '23505') {
+//         return res.status(400).send(`
+//           <html>
+//             <head>
+//               <style>
+//                 body {
+//                   font-family: Arial, sans-serif;
+//                   margin: 0;
+//                   padding: 0;
+//                   background-color: #f4f4f4;
+//                   text-align: center;
+//                 }
+//                 .container {
+//                   max-width: 600px;
+//                   margin: auto;
+//                   background-color: #ffffff;
+//                   padding: 20px;
+//                   border-radius: 8px;
+//                   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+//                 }
+//                 .header {
+//                   background-color: #007bff;
+//                   color: #ffffff;
+//                   padding: 20px;
+//                   border-radius: 8px 8px 0 0;
+//                 }
+//                 .content {
+//                   padding: 20px;
+//                 }
+//                 .btn {
+//                   display: inline-block;
+//                   padding: 10px 20px;
+//                   font-size: 16px;
+//                   color: #fff;
+//                   background-color: #28a745;
+//                   text-decoration: none;
+//                   border-radius: 5px;
+//                   margin-top: 20px;
+//                 }
+//                 .footer {
+//                   background-color: #333;
+//                   color: #ffffff;
+//                   padding: 10px;
+//                   font-size: 12px;
+//                   border-radius: 0 0 8px 8px;
+//                 }
+//               </style>
+//             </head>
+//             <body>
+//               <div class="container">
+//                 <div class="header">
+//                   <h1>Email Verification</h1>
+//                 </div>
+//                 <div class="content">
+//                   <h2>Error</h2>
+//                   <p>It seems there was an issue verifying your email. Please try again later.</p>
+//                   <a href="https://www.softmarksolutions.com" class="btn">Back to Login</a>
+//                 </div>
+//                 <div class="footer">
+//                   <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
+//                 </div>
+//               </div>
+//             </body>
+//           </html>
+//         `);
+//       }
+//       throw error;
+//     }
+
+//     await agentRepository.deleteTempAgentById(tempAgent.id);
+
+//     res.status(200).send(`
+//       <html>
+//         <head>
+//           <style>
+//             body {
+//               font-family: Arial, sans-serif;
+//               margin: 0;
+//               padding: 0;
+//               background-color: #f4f4f4;
+//               text-align: center;
+//             }
+//             .container {
+//               max-width: 600px;
+//               margin: auto;
+//               background-color: #ffffff;
+//               padding: 20px;
+//               border-radius: 8px;
+//               box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+//             }
+//             .header {
+//               background-color: #007bff;
+//               color: #ffffff;
+//               padding: 20px;
+//               border-radius: 8px 8px 0 0;
+//             }
+//             .content {
+//               padding: 20px;
+//             }
+//             .btn {
+//               display: inline-block;
+//               padding: 10px 20px;
+//               font-size: 16px;
+//               color: #fff;
+//               background-color: #28a745;
+//               text-decoration: none;
+//               border-radius: 5px;
+//               margin-top: 20px;
+//             }
+//             .footer {
+//               background-color: #333;
+//               color: #ffffff;
+//               padding: 10px;
+//               font-size: 12px;
+//               border-radius: 0 0 8px 8px;
+//             }
+//             img {
+//               max-width: 100%;
+//               height: auto;
+//               border-radius: 8px;
+//             }
+//           </style>
+//         </head>
+//         <body>
+//           <div class="container">
+//             <div class="header">
+//               <h1>Email Verification</h1>
+//             </div>
+//             <div class="content">
+//               <img src="https://www.shutterstock.com/image-vector/opened-envelope-document-green-check-mark-2181017119" alt="Success">
+//               <h2>Email Verified Successfully!</h2>
+//               <p>Your email has been successfully verified.</p>
+//               <a href="https://www.softmarksolutions.com" class="btn">Proceed to Login</a>
+//             </div>
+//             <div class="footer">
+//               <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
+//             </div>
+//           </div>
+//         </body>
+//       </html>
+//     `);
+
+//   } catch (error) {
+//     console.error('Error verifying email:', error.message);
+//     res.status(500).send(`
+//       <html>
+//         <head>
+//           <style>
+//             body {
+//               font-family: Arial, sans-serif;
+//               margin: 0;
+//               padding: 0;
+//               background-color: #f4f4f4;
+//               text-align: center;
+//             }
+//             .container {
+//               max-width: 600px;
+//               margin: auto;
+//               background-color: #ffffff;
+//               padding: 20px;
+//               border-radius: 8px;
+//               box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+//             }
+//             .header {
+//               background-color: #007bff;
+//               color: #ffffff;
+//               padding: 20px;
+//               border-radius: 8px 8px 0 0;
+//             }
+//             .content {
+//               padding: 20px;
+//             }
+//             .btn {
+//               display: inline-block;
+//               padding: 10px 20px;
+//               font-size: 16px;
+//               color: #fff;
+//               background-color: #28a745;
+//               text-decoration: none;
+//               border-radius: 5px;
+//               margin-top: 20px;
+//             }
+//             .footer {
+//               background-color: #333;
+//               color: #ffffff;
+//               padding: 10px;
+//               font-size: 12px;
+//               border-radius: 0 0 8px 8px;
+//             }
+//           </style>
+//         </head>
+//         <body>
+//           <div class="container">
+//             <div class="header">
+//               <h1>Email Verification</h1>
+//             </div>
+//             <div class="content">
+//               <h2>Oops!</h2>
+//               <p>There was an issue verifying your email. Please try again later.</p>
+//               <a href="https://www.softmarksolutions.com" class="btn">Back to Login</a>
+//             </div>
+//             <div class="footer">
+//               <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
+//             </div>
+//           </div>
+//         </body>
+//       </html>
+//     `);
+//   }
+// },
+
+
+
+verifyEmail: async (req, res) => {
+  try {
+    const { email, verificationToken } = req.query;
+    const tempAgent = await agentRepository.findTempAgentByEmailAndToken(email, verificationToken);
+
+    if (!tempAgent) {
+      return res.status(400).send(`
+        <html>
+          <head>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+                text-align: center;
+              }
+              .container {
+                max-width: 600px;
+                margin: auto;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+              }
+              .header {
+                background-color: #007bff;
+                color: #ffffff;
+                padding: 20px;
+                border-radius: 8px 8px 0 0;
+              }
+              .content {
+                padding: 20px;
+              }
+              .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #fff;
+                background-color: #28a745;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 20px;
+                text-align: center;
+              }
+              .footer {
+                background-color: #333;
+                color: #ffffff;
+                padding: 10px;
+                font-size: 12px;
+                border-radius: 0 0 8px 8px;
+              }
+              img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 8px;
+              }
+              @media (max-width: 768px) {
+                .container {
+                  padding: 15px;
+                }
+                .btn {
+                  font-size: 14px;
+                  padding: 8px 16px;
+                }
+              }
+              @media (max-width: 480px) {
+                .header {
+                  font-size: 18px;
+                  padding: 15px;
+                }
+                .content {
+                  padding: 15px;
+                }
+                .btn {
+                  font-size: 12px;
+                  padding: 6px 12px;
+                }
+                img {
+                  width: 100%;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Email Verification</h1>
+              </div>
+              <div class="content">
+                <h2>Invalid or Expired Token</h2>
+                <p>It seems that the verification link is invalid or expired. Please try again.</p>
+                <a href="htts://www.softmarksolutions.com" class="btn">Back to Login</a>
+              </div>
+              <div class="footer">
+                <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+    }
+
+    if (tempAgent.isActivated) {
+      return res.status(400).send(`
+        <html>
+          <head>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+                text-align: center;
+              }
+              .container {
+                max-width: 600px;
+                margin: auto;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+              }
+              .header {
+                background-color: #007bff;
+                color: #ffffff;
+                padding: 20px;
+                border-radius: 8px 8px 0 0;
+              }
+              .content {
+                padding: 20px;
+              }
+              .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #fff;
+                background-color: #28a745;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 20px;
+                text-align: center;
+              }
+              .footer {
+                background-color: #333;
+                color: #ffffff;
+                padding: 10px;
+                font-size: 12px;
+                border-radius: 0 0 8px 8px;
+              }
+              @media (max-width: 768px) {
+                .container {
+                  padding: 15px;
+                }
+                .btn {
+                  font-size: 14px;
+                  padding: 8px 16px;
+                }
+              }
+              @media (max-width: 480px) {
+                .header {
+                  font-size: 18px;
+                  padding: 15px;
+                }
+                .content {
+                  padding: 15px;
+                }
+                .btn {
+                  font-size: 12px;
+                  padding: 6px 12px;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Email Verification</h1>
+              </div>
+              <div class="content">
+                <h2>User Already Registered</h2>
+                <p>Your email has already been verified. You can proceed to login.</p>
+                <a href="htts://www.softmarksolutions.com" class="btn">Proceed to Login</a>
+              </div>
+              <div class="footer">
+                <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+    }
+
+    const hashedPassword = await bcrypt.hash(tempAgent.password, 10);
+    tempAgent.password = hashedPassword;
+    tempAgent.isActivated = true;
+
     try {
-        const { email, verificationToken } = req.query;
-        
-        // Find the temporary agent record with the given email and verification token
-        const tempAgent = await agentRepository.findTempAgentByEmailAndToken(email, verificationToken);
+      await agentRepository.saveAgent(tempAgent);
+      await agentRepository.deleteTempAgentById(tempAgent.id);
 
-        if (!tempAgent) {
-            return res.status(400).json({ message: 'Invalid or expired verification token' });
-        }
-
-        // Check if the agent is already activated to avoid re-processing
-        if (tempAgent.isActivated) {
-            return res.status(400).json({ message: 'Email already verified' });
-        }
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(tempAgent.password, 10);
-        tempAgent.password = hashedPassword;
-        tempAgent.isActivated = true;
-
-        // Save the agent in the main table
-        try {
-            await agentRepository.saveAgent(tempAgent);
-        } catch (error) {
-            // Handle unique constraint violation
-            if (error.code === '23505') {
-                return res.status(400).json({ message: 'Agent already exists' });
-            }
-            throw error; // Re-throw unexpected errors
-        }
-
-        // Delete the temporary record
-        await agentRepository.deleteTempAgentById(tempAgent.id);
-
-        res.status(200).send("Email Verified Successfully");
+      res.status(200).send(`
+        <html>
+          <head>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+                text-align: center;
+              }
+              .container {
+                max-width: 600px;
+                margin: auto;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+              }
+              .header {
+                background-color: #007bff;
+                color: #ffffff;
+                padding: 20px;
+                border-radius: 8px 8px 0 0;
+              }
+              .content {
+                padding: 20px;
+              }
+              .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #fff;
+                background-color: #28a745;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 20px;
+                text-align: center;
+              }
+              .footer {
+                background-color: #333;
+                color: #ffffff;
+                padding: 10px;
+                font-size: 12px;
+                border-radius: 0 0 8px 8px;
+              }
+              img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 8px;
+              }
+              @media (max-width: 768px) {
+                .container {
+                  padding: 15px;
+                }
+                .btn {
+                  font-size: 14px;
+                  padding: 8px 16px;
+                }
+              }
+              @media (max-width: 480px) {
+                .header {
+                  font-size: 18px;
+                  padding: 15px;
+                }
+                .content {
+                  padding: 15px;
+                }
+                .btn {
+                  font-size: 12px;
+                  padding: 6px 12px;
+                }
+                img {
+                  width: 100%;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Email Verification</h1>
+              </div>
+              <div class="content">
+              <img src="https://www.softmarksolutions.com/images/Logo.png" alt="Success" class="success-image">
+                <h2>Email Verified Successfully!</h2>
+                <p>Your email has been successfully verified.</p>
+                <a href="https://www.softmarksolutions.com" class="btn">Proceed to Login</a>
+              </div>
+              <div class="footer">
+                <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
 
     } catch (error) {
-        console.error("Error verifying email:", error.message);
-        res.status(500).send({ message: 'Internal Server Error' });
+      if (error.code === '23505') {
+        return res.status(400).send(`
+          <html>
+            <head>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 0;
+                  background-color: #f4f4f4;
+                  text-align: center;
+                }
+                .container {
+                  max-width: 600px;
+                  margin: auto;
+                  background-color: #ffffff;
+                  padding: 20px;
+                  border-radius: 8px;
+                  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }
+                .header {
+                  background-color: #007bff;
+                  color: #ffffff;
+                  padding: 20px;
+                  border-radius: 8px 8px 0 0;
+                }
+                .content {
+                  padding: 20px;
+                }
+                .btn {
+                  display: inline-block;
+                  padding: 10px 20px;
+                  font-size: 16px;
+                  color: #fff;
+                  background-color: #28a745;
+                  text-decoration: none;
+                  border-radius: 5px;
+                  margin-top: 20px;
+                  text-align: center;
+                }
+                .footer {
+                  background-color: #333;
+                  color: #ffffff;
+                  padding: 10px;
+                  font-size: 12px;
+                  border-radius: 0 0 8px 8px;
+                }
+                @media (max-width: 768px) {
+                  .container {
+                    padding: 15px;
+                  }
+                  .btn {
+                    font-size: 14px;
+                    padding: 8px 16px;
+                  }
+                }
+                @media (max-width: 480px) {
+                  .header {
+                    font-size: 18px;
+                    padding: 15px;
+                  }
+                  .content {
+                    padding: 15px;
+                  }
+                  .btn {
+                    font-size: 12px;
+                    padding: 6px 12px;
+                  }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>Email Verification</h1>
+                </div>
+                <div class="content">
+                  <h2>User Already Registered</h2>
+                  <p>Your email is already registered. Please proceed to login.</p>
+                  <a href="https://www.softmarksolutions.com" class="btn">Back to Login</a>
+                </div>
+                <div class="footer">
+                  <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
+                </div>
+              </div>
+            </body>
+          </html>
+        `);
+      }
+      console.error("Error verifying email:", error.message);
+      res.status(500).send(`
+        <html>
+          <head>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+                text-align: center;
+              }
+              .container {
+                max-width: 600px;
+                margin: auto;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+              }
+              .header {
+                background-color: #007bff;
+                color: #ffffff;
+                padding: 20px;
+                border-radius: 8px 8px 0 0;
+              }
+              .content {
+                padding: 20px;
+              }
+              .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #fff;
+                background-color: #28a745;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 20px;
+                text-align: center;
+              }
+              .footer {
+                background-color: #333;
+                color: #ffffff;
+                padding: 10px;
+                font-size: 12px;
+                border-radius: 0 0 8px 8px;
+              }
+              @media (max-width: 768px) {
+                .container {
+                  padding: 15px;
+                }
+                .btn {
+                  font-size: 14px;
+                  padding: 8px 16px;
+                }
+              }
+              @media (max-width: 480px) {
+                .header {
+                  font-size: 18px;
+                  padding: 15px;
+                }
+                .content {
+                  padding: 15px;
+                }
+                .btn {
+                  font-size: 12px;
+                  padding: 6px 12px;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Email Verification</h1>
+              </div>
+              <div class="content">
+                <h2>Oops!</h2>
+                <p>There was an issue verifying your email. Please try again later.</p>
+                <a href="https://www.softmarksolutions.com" class="btn">Back to Login</a>
+              </div>
+              <div class="footer">
+                <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+    }
+  } catch (error) {
+    console.error('Error verifying email:', error.message);
+    res.status(500).send(`
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 0;
+              background-color: #f4f4f4;
+              text-align: center;
+            }
+            .container {
+              max-width: 600px;
+              margin: auto;
+              background-color: #ffffff;
+              padding: 20px;
+              border-radius: 8px;
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+              background-color: #007bff;
+              color: #ffffff;
+              padding: 20px;
+              border-radius: 8px 8px 0 0;
+            }
+            .content {
+              padding: 20px;
+            }
+            .btn {
+              display: inline-block;
+              padding: 10px 20px;
+              font-size: 16px;
+              color: #fff;
+              background-color: #28a745;
+              text-decoration: none;
+              border-radius: 5px;
+              margin-top: 20px;
+              text-align: center;
+            }
+            .footer {
+              background-color: #333;
+              color: #ffffff;
+              padding: 10px;
+              font-size: 12px;
+              border-radius: 0 0 8px 8px;
+            }
+            @media (max-width: 768px) {
+              .container {
+                padding: 15px;
+              }
+              .btn {
+                font-size: 14px;
+                padding: 8px 16px;
+              }
+            }
+            @media (max-width: 480px) {
+              .header {
+                font-size: 18px;
+                padding: 15px;
+              }
+              .content {
+                padding: 15px;
+              }
+              .btn {
+                font-size: 12px;
+                padding: 6px 12px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Email Verification</h1>
+            </div>
+            <div class="content">
+              <h2>Oops!</h2>
+              <p>There was an issue verifying your email. Please try again later.</p>
+              <a href="https://www.softmarksolutions.com" class="btn">Back to Login</a>
+            </div>
+            <div class="footer">
+              <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
     }
 },
 
