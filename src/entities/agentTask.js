@@ -21,7 +21,7 @@ module.exports = new EntitySchema({
       nullable: true,
     },
     taskNo: {
-      type: "int", 
+      type: "int", // Changed type to int
     },
     created_at: {
       type: "timestamp",
@@ -42,11 +42,6 @@ module.exports = new EntitySchema({
         referencedColumnName: "agentId",
       },
       onDelete: "CASCADE",
-    },
-    reviews: {
-      type: "one-to-many",
-      target: "agentReview",
-      inverseSide: "task", // Connects reviews with the task
     },
   },
 });

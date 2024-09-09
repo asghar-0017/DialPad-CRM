@@ -171,14 +171,14 @@ const agentService = {
 //     throw error
 //   }
 // },
-getAssignReviewToAgentById:async(agenId)=>{
-  try{
-    const data=await agentRepository.getAssignReviewsToAgentById(agenId)
-    return data
-  }catch(error){
-    throw error
-  }
-},
+// getAssignReviewToAgentById:async(agenId)=>{
+//   try{
+//     const data=await agentRepository.getAssignReviewsToAgentById(agenId)
+//     return data
+//   }catch(error){
+//     throw error
+//   }
+// },
 getAssignReviewToAgentByReviewId:async(reviewId)=>{
   try{
     const data=await agentRepository.getAssignReviewToAgentByReviewId(reviewId)
@@ -214,6 +214,14 @@ assignReviewToAgent:async(agentId,review,reviewId,taskNo)=>{
   }
 },
 
+getAssignReviewToAgentById:async(agenId,taskNo)=>{
+  try{
+    const data=await agentRepository.getAssignReviewsToAgentById(agenId,taskNo)
+    return data
+  }catch(error){
+    throw error
+  }
+},
 
 
 

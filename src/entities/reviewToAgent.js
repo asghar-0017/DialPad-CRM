@@ -19,6 +19,11 @@ module.exports = new EntitySchema({
       type: "varchar",
       nullable: true,
     },
+    taskNo: {
+      type: "varchar",
+      nullable: true,
+    },
+
     created_at: {
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",

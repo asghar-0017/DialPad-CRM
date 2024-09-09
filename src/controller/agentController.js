@@ -1332,21 +1332,21 @@ verifyEmail: async (req, res) => {
     //     res.status(500).send({ message: 'Error assigning task' });
     //   }
     // },
-    getAssignReviewsById:async (req, res) => {
-      try {
-        const agentId = req.params.agentId;
-        console.log("AgentId",agentId)
-        const data = await agentService.getAssignReviewToAgentById(agentId);
-        if (data === 'Data Not Found') {
-          res.status(404).send({ message: 'Data Not Found' });
-        } else {
-          res.status(200).send({ message: 'Success', data });
-        }
-      } catch (error) {
-        console.error('Error fetching Reviews by agent ID:', error.message);
-        res.status(500).send({ message: 'Internal Server Error' });
-      }
-    },
+    // getAssignReviewsById:async (req, res) => {
+    //   try {
+    //     const agentId = req.params.agentId;
+    //     console.log("AgentId",agentId)
+    //     const data = await agentService.getAssignReviewToAgentById(agentId);
+    //     if (data === 'Data Not Found') {
+    //       res.status(404).send({ message: 'Data Not Found' });
+    //     } else {
+    //       res.status(200).send({ message: 'Success', data });
+    //     }
+    //   } catch (error) {
+    //     console.error('Error fetching Reviews by agent ID:', error.message);
+    //     res.status(500).send({ message: 'Internal Server Error' });
+    //   }
+    // },
     getAssignReviewByReviewId: async (req, res) => {
       try {
         const reviewId = req.params.reviewId;
@@ -1417,6 +1417,22 @@ verifyEmail: async (req, res) => {
       }
     },
  
+    getAssignReviewsById:async (req, res) => {
+      try {
+        const agentId = req.params.agentId;
+        const taskNo=req.params.taskNo
+        console.log("AgentId",agentId)
+        const data = await agentService.getAssignReviewToAgentById(agentId,taskNo);
+        if (data === 'Data Not Found') {
+          res.status(404).send({ message: 'Data Not Found' });
+        } else {
+          res.status(200).send({ message: 'Success', data });
+        }
+      } catch (error) {
+        console.error('Error fetching Reviews by agent ID:', error.message);
+        res.status(500).send({ message: 'Internal Server Error' });
+      }
+    },
     
 
 

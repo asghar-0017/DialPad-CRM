@@ -283,20 +283,20 @@ findByEmail: async (email) => {
   //     throw new Error('Error assigning task to agent');
   //   }
   // },
-  getAssignReviewsToAgentById: async (agentId) => {
-    try {
-      const agentTaskRepository = dataSource.getRepository(agentReview);
-      const review = await agentTaskRepository.find({ where: { agentId } });
-      if (review.length > 0) {
-        return review;
-      } else {
-        return []; 
-      }
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-      throw new Error('Error fetching tasks');
-    }
-  },
+  // getAssignReviewsToAgentById: async (agentId) => {
+  //   try {
+  //     const agentTaskRepository = dataSource.getRepository(agentReview);
+  //     const review = await agentTaskRepository.find({ where: { agentId } });
+  //     if (review.length > 0) {
+  //       return review;
+  //     } else {
+  //       return []; 
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching tasks:', error);
+  //     throw new Error('Error fetching tasks');
+  //   }
+  // },
   
   getAssignReviewToAgentByReviewId: async (reviewId) => {
     try {
@@ -384,7 +384,7 @@ findByEmail: async (email) => {
         id: reviewId,
         review: review,
         agent: agent,
-        task: task, 
+        taskNo: taskNo, 
         reviewId: reviewId,
       });
 
@@ -398,7 +398,25 @@ findByEmail: async (email) => {
   },
 
 
-
+  getAssignReviewsToAgentById: async (agentId, taskNo) => {
+    try {
+      const agentReviewRepository = dataSource.getRepository('agentReview');
+      
+      // Fetch reviews based on both agentId and taskNo
+      const reviews = await agentReviewRepository.find({
+        where: { 
+           agentId ,  // Using relation to agent
+           taskNo     // Using relation to task
+        },
+      });
+  
+      return reviews.length > 0 ? reviews : []; // Return reviews or an empty array
+    } catch (error) {
+      console.error('Error fetching reviews by taskNo:', error.message);
+      throw new Error('Error fetching reviews');
+    }
+  },
+  
   
 };
 const agent = require('../entities/agent');
