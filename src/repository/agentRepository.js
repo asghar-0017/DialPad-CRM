@@ -254,35 +254,35 @@ findByEmail: async (email) => {
     }
   },
   
-  assignReviewToAgentById: async (agentId,review,reviewId) => {
-    try {
-      console.log("AgentID in repo",agentId)
-      const agentRepository = dataSource.getRepository('agent');
-      const agent = await agentRepository.findOne({ where: { agentId } });
+  // assignReviewToAgentById: async (agentId,review,reviewId) => {
+  //   try {
+  //     console.log("AgentID in repo",agentId)
+  //     const agentRepository = dataSource.getRepository('agent');
+  //     const agent = await agentRepository.findOne({ where: { agentId } });
   
-      if (!agent) {
-        console.log("No agent found with ID:", agentId);
-        return null;
-      }
-      console.log("Agent",agent)
+  //     if (!agent) {
+  //       console.log("No agent found with ID:", agentId);
+  //       return null;
+  //     }
+  //     console.log("Agent",agent)
 
    
-      const agentReviewRepository = dataSource.getRepository(agentReview);
-      const reviewEntity = agentReviewRepository.create({
-        id: reviewId,
-        review: review ,
-        agent: agent, 
-        reviewId:reviewId
-      });
+  //     const agentReviewRepository = dataSource.getRepository(agentReview);
+  //     const reviewEntity = agentReviewRepository.create({
+  //       id: reviewId,
+  //       review: review ,
+  //       agent: agent, 
+  //       reviewId:reviewId
+  //     });
   
-      await agentReviewRepository.save(reviewEntity);
+  //     await agentReviewRepository.save(reviewEntity);
   
-      return reviewEntity;
-    } catch (error) {
-      console.error('Error in assignTaskToAgentById:', error.message);
-      throw new Error('Error assigning task to agent');
-    }
-  },
+  //     return reviewEntity;
+  //   } catch (error) {
+  //     console.error('Error in assignTaskToAgentById:', error.message);
+  //     throw new Error('Error assigning task to agent');
+  //   }
+  // },
   getAssignReviewsToAgentById: async (agentId) => {
     try {
       const agentTaskRepository = dataSource.getRepository(agentReview);
@@ -355,6 +355,50 @@ findByEmail: async (email) => {
     }
   },
   
+  assignReviewToAgentById: async (agentId, review, reviewId, taskNo) => {
+    try {
+      console.log("AgentID in repo:", agentId);
+      
+      const agentRepository = dataSource.getRepository('agent');
+      const agent = await agentRepository.findOne({ where: { agentId } });
+
+      if (!agent) {
+        console.log("No agent found with ID:", agentId);
+        return null;
+      }
+      
+      console.log("Agent:", agent);
+
+      const agentTaskRepository = dataSource.getRepository(agentTask);
+      const task = await agentTaskRepository.findOne({ where: { taskNo } });
+
+      if (!task) {
+        console.log("No task found with taskNo:", taskNo);
+        return null;
+      }
+      
+      console.log("Task:", task);
+
+      const agentReviewRepository = dataSource.getRepository(agentReview);
+      const reviewEntity = agentReviewRepository.create({
+        id: reviewId,
+        review: review,
+        agent: agent,
+        task: task, 
+        reviewId: reviewId,
+      });
+
+      await agentReviewRepository.save(reviewEntity);
+
+      return reviewEntity;
+    } catch (error) {
+      console.error('Error in assignReviewToAgentById:', error.message);
+      throw new Error('Error assigning review to agent');
+    }
+  },
+
+
+
   
 };
 const agent = require('../entities/agent');

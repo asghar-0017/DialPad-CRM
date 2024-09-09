@@ -26,11 +26,19 @@ const agentRoute = (app,io) => {
     app.delete('/delete-assign-tasks/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignTaskByAgentId);
 
 
-    app.post('/assign-review/:agentId',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.assignReview(io, req, res))
+    // app.post('/assign-review/:agentId',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.assignReview(io, req, res))
+    // app.get('/get-assign-reviews/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignReviewsById);
+    // app.get('/get-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignReviewByReviewId);
+    // app.put('/update-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.updateAssignReviewById(io, req, res));
+    // app.delete('/delete-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignReviewByReviewId);
+
+
+    app.post('/assign-review/:agentId/taskNo',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.assignReview(io, req, res))
     app.get('/get-assign-reviews/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignReviewsById);
     app.get('/get-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignReviewByReviewId);
     app.put('/update-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.updateAssignReviewById(io, req, res));
     app.delete('/delete-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignReviewByReviewId);
+
 
     app.post('/upload-task/:agentId', combinedAuthenticate, checkRole(['admin','agent']),upload.single('file'),(req, res) => agentController.saveExcelFileData(io, req, res))
     

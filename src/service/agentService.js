@@ -163,14 +163,14 @@ const agentService = {
       throw error
     }
   },
- assignReviewToAgent:async(agentId,review,reviewId)=>{
-  try{
-    const data=await agentRepository.assignReviewToAgentById(agentId,review,reviewId)
-    return data
-  }catch(error){
-    throw error
-  }
-},
+//  assignReviewToAgent:async(agentId,review,reviewId)=>{
+//   try{
+//     const data=await agentRepository.assignReviewToAgentById(agentId,review,reviewId)
+//     return data
+//   }catch(error){
+//     throw error
+//   }
+// },
 getAssignReviewToAgentById:async(agenId)=>{
   try{
     const data=await agentRepository.getAssignReviewsToAgentById(agenId)
@@ -203,6 +203,20 @@ deleteAssignReviewToAgentByReviewId:async(reviewId)=>{
     throw error
   }
 },
+
+
+assignReviewToAgent:async(agentId,review,reviewId,taskNo)=>{
+  try{
+    const data=await agentRepository.assignReviewToAgentById(agentId,review,reviewId,taskNo)
+    return data
+  }catch(error){
+    throw error
+  }
+},
+
+
+
+
 }
 
 const authRepository = require('../repository/authRepository');

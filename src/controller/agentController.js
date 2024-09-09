@@ -1199,9 +1199,9 @@ verifyEmail: async (req, res) => {
         }
         
         const filteredData = data.map(task => {
-          return Object.fromEntries(
-            Object.entries(task).filter(([key, value]) => value !== null && value !== undefined)
-          );
+          // Extract DynamicData as it is
+          const dynamicData = task.DynamicData || {};
+          return dynamicData;
         });
     
         io.emit('receive_message', filteredData);
@@ -1313,25 +1313,25 @@ verifyEmail: async (req, res) => {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
-    assignReview: async (io,req, res) => {
-      try {
-        const agenId = req.params.agentId;
-        const review = req.body;
-        review.reviewId = reviewId(); 
+    // assignReview: async (io,req, res) => {
+    //   try {
+    //     const agenId = req.params.agentId;
+    //     const review = req.body;
+    //     review.reviewId = reviewId(); 
     
-        const data = await agentService.assignReviewToAgent(agenId, review.review, review.reviewId);
+    //     const data = await agentService.assignReviewToAgent(agenId, review.review, review.reviewId);
     
-        if (data) {
-          io.emit('send_message', data);
-          res.status(200).send({ message: "success", data: data });
-        } else {
-          res.status(404).send({ message: "data Not Found" });
-        }
-      } catch (error) {
-        console.error('Error in assignTask:', error.message);
-        res.status(500).send({ message: 'Error assigning task' });
-      }
-    },
+    //     if (data) {
+    //       io.emit('send_message', data);
+    //       res.status(200).send({ message: "success", data: data });
+    //     } else {
+    //       res.status(404).send({ message: "data Not Found" });
+    //     }
+    //   } catch (error) {
+    //     console.error('Error in assignTask:', error.message);
+    //     res.status(500).send({ message: 'Error assigning task' });
+    //   }
+    // },
     getAssignReviewsById:async (req, res) => {
       try {
         const agentId = req.params.agentId;
@@ -1395,6 +1395,27 @@ verifyEmail: async (req, res) => {
       }
     },
 
+
+    assignReview: async (io,req, res) => {
+      try {
+        const agenId = req.params.agentId;
+        const taskNo=req.params.taskNo
+        const review = req.body;
+        review.reviewId = reviewId(); 
+    
+        const data = await agentService.assignReviewToAgent(agenId, review.review, review.reviewId,taskNo);
+    
+        if (data) {
+          io.emit('send_message', data);
+          res.status(200).send({ message: "success", data: data });
+        } else {
+          res.status(404).send({ message: "data Not Found" });
+        }
+      } catch (error) {
+        console.error('Error in assignTask:', error.message);
+        res.status(500).send({ message: 'Error assigning task' });
+      }
+    },
  
     
 

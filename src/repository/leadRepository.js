@@ -10,7 +10,7 @@ const followUpTrash=require('../entities/followUpTrash')
 const leadRepository = {
      saveLead :async (role, leadId, lead) => {
         try {
-                let leadEntity = {
+            let leadEntity = {
             agentId:lead.agentId,
             role,
             leadId,

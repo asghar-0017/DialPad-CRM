@@ -13,8 +13,8 @@ module.exports = new EntitySchema({
       type: "varchar",
     },
     reviewId: {
-        type: "varchar",
-      },
+      type: "varchar",
+    },
     review: {
       type: "varchar",
       nullable: true,
@@ -35,9 +35,18 @@ module.exports = new EntitySchema({
       target: "agent",
       joinColumn: {
         name: "agentId",
-        referencedColumnName: "agentId"
+        referencedColumnName: "agentId",
       },
       onDelete: "CASCADE",
     },
+    // task: { // Add relation to agentTask based on taskNo
+    //   type: "many-to-one",
+    //   target: "agentTask", // Reference agentTask entity
+    //   joinColumn: {
+    //     name: "taskNo", // Reference the taskNo field in agentReview
+    //     referencedColumnName: "taskNo", // Reference the taskNo column in agentTask
+    //   },
+    //   onDelete: "SET NULL", // Optional: Handle task deletion
+    // },
   },
 });
