@@ -370,12 +370,12 @@ findByEmail: async (email) => {
       console.log("Agent:", agent);
 
       const agentTaskRepository = dataSource.getRepository(agentTask);
-      const task = await agentTaskRepository.findOne({ where: { taskNo } });
+      const task = await agentTaskRepository.findOne({ where: { taskNo, agentId } });
 
-      if (!task) {
-        console.log("No task found with taskNo:", taskNo);
-        return null;
-      }
+    if (!task || task.status !== 'complete') {
+      console.log("Task is not complete or task not found.");
+      return null;
+    }
       
       console.log("Task:", task);
 
@@ -394,6 +394,16 @@ findByEmail: async (email) => {
     } catch (error) {
       console.error('Error in assignReviewToAgentById:', error.message);
       throw new Error('Error assigning review to agent');
+    }
+  },
+  getTaskByTaskNo: async (agentId, taskNo) => {
+    try {
+      const taskRepository = dataSource.getRepository('agentTask');
+      const task = await taskRepository.findOne({ where: { agentId, taskNo } });
+      return task;
+    } catch (error) {
+      console.error('Error fetching task:', error.message);
+      throw error;
     }
   },
 
@@ -416,6 +426,31 @@ findByEmail: async (email) => {
       throw new Error('Error fetching reviews');
     }
   },
+
+  updateTaskStatus: async (agentId, taskNo, status) => {
+    try {
+      const agentTaskRepository = dataSource.getRepository(agentTask);
+  
+      const tasks = await agentTaskRepository.find({ where: { agentId, taskNo } });
+  
+      if (tasks.length === 0) {
+        return null;
+      }
+  
+      await agentTaskRepository.update({ agentId, taskNo }, { status });
+  
+      const updatedTasks = await agentTaskRepository.find({ where: { agentId, taskNo } });
+  
+      if (updatedTasks.length > 0) {
+        return updatedTasks;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Error in updateTaskStatus:', error.message);
+      throw error;
+    }
+  }
   
   
 };

@@ -1313,6 +1313,31 @@ verifyEmail: async (req, res) => {
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
+
+    updateTaskStatus: async (io, req, res) => {
+      try {
+        const agentId = req.params.agentId;
+        const taskNo = req.params.taskNo;
+        const { status } = req.body;
+    
+        const data = await agentRepository.updateTaskStatus(agentId, taskNo, status);
+    
+        if (data) {
+          io.emit('send_message', data);
+          res.status(200).send({ message: "Task status updated successfully", data: data });
+        } else {
+          res.status(404).send({ message: "Task not found" });
+        }
+      } catch (error) {
+        console.error('Error in updateTaskStatus:', error.message);
+        res.status(500).send({ message: 'Error updating task status' });
+      }
+    },
+    
+  
+
+
+
     // assignReview: async (io,req, res) => {
     //   try {
     //     const agenId = req.params.agentId;
@@ -1398,12 +1423,16 @@ verifyEmail: async (req, res) => {
 
     assignReview: async (io,req, res) => {
       try {
-        const agenId = req.params.agentId;
+        const agentId = req.params.agentId;
         const taskNo=req.params.taskNo
         const review = req.body;
         review.reviewId = reviewId(); 
+    const task = await agentRepository.getTaskByTaskNo(agentId, taskNo);
     
-        const data = await agentService.assignReviewToAgent(agenId, review.review, review.reviewId,taskNo);
+    if (!task || task.status !== 'complete') {
+      return res.status(400).send({ message: "Task must be complete before adding a review." });
+    }
+        const data = await agentService.assignReviewToAgent(agentId, review.review, review.reviewId,taskNo);
     
         if (data) {
           io.emit('send_message', data);

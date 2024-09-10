@@ -20,20 +20,18 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 app.use(cors({
-  origin: '*', 
+  origin: '*',
   methods: ['GET', 'POST', 'DELETE', 'PUT'],
   credentials: true,
 }));
-
 
 const io = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST', 'DELETE', 'PUT'],
   },
-  transports: ['websocket', 'polling'], 
+  transports: ['websocket', 'polling'],
 });
-
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -69,15 +67,40 @@ app.use((err, req, res, next) => {
   next();
 });
 
+// Track online agents
+const onlineAgents = new Map(); // Map to store agentId and their socketId
+
+// Socket.io connection
 io.on('connection', (socket) => {
   logger.info(`A user connected: ${socket.id}`);
 
-  socket.on("send_message", (data) => {
-    console.log("data of socket", data);
-    socket.broadcast.emit("receive_message", data);
+  // Listen for agent connection with their agent ID
+  socket.on('agent_connected', (agentId) => {
+    onlineAgents.set(agentId, socket.id); // Store agent ID with socket ID
+    logger.info(`Agent ${agentId} is online`);
+    
+    // Broadcast the updated list of online agents
+    io.emit('online_agents', Array.from(onlineAgents.keys())); // Emit list of agent IDs
   });
 
+  socket.on('send_message', (data) => {
+    console.log('data of socket', data);
+    socket.broadcast.emit('receive_message', data);
+  });
+
+  // On agent disconnect
   socket.on('disconnect', () => {
+    // Find and remove the agent by their socket ID
+    for (const [agentId, socketId] of onlineAgents.entries()) {
+      if (socketId === socket.id) {
+        onlineAgents.delete(agentId); // Remove agent from the list
+        logger.info(`Agent ${agentId} is offline`);
+        break;
+      }
+    }
+
+    // Broadcast the updated list of online agents
+    io.emit('online_agents', Array.from(onlineAgents.keys()));
     logger.info(`User disconnected: ${socket.id}`);
   });
 });
