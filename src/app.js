@@ -76,31 +76,30 @@ const onlineAdmins = new Map(); // Map to store adminId and their socketId
 
 io.on('connection', (socket) => {
   console.log(`A user connected: ${socket.id}`);
-
   socket.on('agent_connected', (agentId) => {
     onlineAgents.set(agentId, socket.id); // Store agent ID with socket ID
     console.log(`Agent ${agentId} is online`);
+    // Notify all connected clients about online agents
     io.emit('online_agents', Array.from(onlineAgents.keys()));
-  });
+  }); 
 
+  // Listen for admin connection with their admin ID
   socket.on('admin_connected', (adminId) => {
     onlineAdmins.set(adminId, socket.id); // Store admin ID with socket ID
     logger.info(`Admin ${adminId} is online`);
+
+    // Notify all agents that the admin is online
     io.emit('admin_online', { adminId, online: true });
   });
 
   socket.on('send_message', (data) => {
-    const { recipientId, message } = data;
-    const recipientSocketId = onlineAgents.get(recipientId) || onlineAdmins.get(recipientId);
-
-    if (recipientSocketId) {
-      socket.to(recipientSocketId).emit('receive_message', message);
-    } else {
-      console.log('Recipient is offline');
-    }
+    console.log('data of socket', data);
+    socket.broadcast.emit('receive_message', data);
   });
 
+  // On user disconnect (both agent or admin)
   socket.on('disconnect', () => {
+    // Handle agent disconnection
     for (const [agentId, socketId] of onlineAgents.entries()) {
       if (socketId === socket.id) {
         onlineAgents.delete(agentId); // Remove agent from the list
@@ -108,21 +107,23 @@ io.on('connection', (socket) => {
         break;
       }
     }
-
+  
+    // Handle admin disconnection
     for (const [adminId, socketId] of onlineAdmins.entries()) {
       if (socketId === socket.id) {
         onlineAdmins.delete(adminId); // Remove admin from the list
         logger.info(`Admin ${adminId} is offline`);
-        io.emit('admin_online', { adminId, online: false });
+        io.emit('admin_online', { adminId, online: false }); // Notify that admin is offline
         break;
       }
     }
-
+  
+    // Broadcast the updated list of online agents
     io.emit('online_agents', Array.from(onlineAgents.keys()));
     console.log(`User disconnected: ${socket.id}`);
   });
-});
-
+  
+})
 const StartServer = async () => {
   try {
     await dataSource.initialize();
