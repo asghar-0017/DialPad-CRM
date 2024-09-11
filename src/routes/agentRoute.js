@@ -14,7 +14,6 @@ const agentRoute = (app,io) => {
     app.put('/update-agent/:agentId',combinedAuthenticate, checkRole(['admin','agent']), (req, res) => agentController.updateAgent(io, req, res));
     app.delete('/delete-agent/:agentId', combinedAuthenticate, checkRole(['admin']),agentController.deleteAgent);
 
-
     app.post('/assign-task/:agentId',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.assignTask(io, req, res))
     app.get('/get-assign-task', combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignTask(io, req, res))
     app.get('/get-assign-tasks/:agentId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignTaskById(io, req, res));

@@ -15,17 +15,19 @@ module.exports = new EntitySchema({
     taskId: {
       type: "varchar",
     },
-  
-    DynamicData:{
+    DynamicData: {
       type: 'jsonb',
       nullable: true,
     },
     taskNo: {
       type: "int", 
     },
-     taskNo: {
-      type: "int", 
-    },
+    // deadLine: {
+    //   type: "timestamp",
+    // },
+    // priority: {
+    //   type: "int", 
+    // },
     status: {
       type: "enum",
       enum: ["pending", "progress", "complete"], 

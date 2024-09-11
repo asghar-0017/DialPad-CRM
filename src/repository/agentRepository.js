@@ -206,7 +206,7 @@ findByEmail: async (email) => {
   },
   
   
-  deleteAssignTaskToAgentByTaskId: async (taskId) => {
+  deleteAssignTaskToAgentByTaskIds: async (taskId) => {
     try {
       const agentTaskRepository = dataSource.getRepository(agentTask);
       
