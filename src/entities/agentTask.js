@@ -23,6 +23,9 @@ module.exports = new EntitySchema({
     taskNo: {
       type: "int", 
     },
+     taskNo: {
+      type: "int", 
+    },
     status: {
       type: "enum",
       enum: ["pending", "progress", "complete"], 

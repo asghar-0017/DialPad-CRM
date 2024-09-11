@@ -1224,24 +1224,24 @@ verifyEmail: async (req, res) => {
         if (!data || data.length === 0) {
           return res.status(404).send({ message: 'No tasks found for this agent.' });
         }
-        console.log("Data", data);
-    
-        // Transform the data
-        const filteredData = data.map(task => {
-          // Extract DynamicData as it is
-          const dynamicData = task.DynamicData || {};
-          return dynamicData;
+            const transformedData = data.map(task => {
+          if (task.DynamicData) {
+            return {
+              taskNo,
+              ...task.DynamicData,
+            };
+          }
+          return task; 
         });
     
-        console.log(filteredData);
-    
-        io.emit('receive_message', filteredData);
-        res.status(200).send({ message: 'Success', data: filteredData });
+        io.emit('receive_message', transformedData);
+        res.status(200).send({ message: 'Success', taskNo:taskNo,data: transformedData });
       } catch (error) {
         console.error('Error fetching tasks by agent ID:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
+    
     
     
     
