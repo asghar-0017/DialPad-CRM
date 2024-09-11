@@ -9,7 +9,7 @@ const followUpRoute = require('./routes/followUpRoute');
 const otherRoute = require('./routes/otherRoute');
 const TrashRoute = require('./routes/trashRoute');
 const messageRoute = require('./routes/messagingRoute');
-const cloudnaryRoute=require('./routes/cloudnaryRoute')
+const cloudnaryRoute = require('./routes/cloudnaryRoute');
 const dataSource = require('./infrastructure/psql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -20,6 +20,7 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'DELETE', 'PUT'],
@@ -69,8 +70,9 @@ app.use((err, req, res, next) => {
   next();
 });
 
-// Track online agents
+// Track online agents and admins
 const onlineAgents = new Map(); // Map to store agentId and their socketId
+const onlineAdmins = new Map(); // Map to store adminId and their socketId
 
 // Socket.io connection
 io.on('connection', (socket) => {
@@ -80,9 +82,18 @@ io.on('connection', (socket) => {
   socket.on('agent_connected', (agentId) => {
     onlineAgents.set(agentId, socket.id); // Store agent ID with socket ID
     logger.info(`Agent ${agentId} is online`);
-    
-    // Broadcast the updated list of online agents
+
+    // Notify all connected users about online agents
     io.emit('online_agents', Array.from(onlineAgents.keys())); // Emit list of agent IDs
+  });
+
+  // Listen for admin connection with their admin ID
+  socket.on('admin_connected', (adminId) => {
+    onlineAdmins.set(adminId, socket.id); // Store admin ID with socket ID
+    logger.info(`Admin ${adminId} is online`);
+
+    // Notify all agents that the admin is online
+    io.emit('admin_online', { adminId, online: true });
   });
 
   socket.on('send_message', (data) => {
@@ -90,9 +101,9 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('receive_message', data);
   });
 
-  // On agent disconnect
+  // On user disconnect (both agent or admin)
   socket.on('disconnect', () => {
-    // Find and remove the agent by their socket ID
+    // Remove agent if they are in the online agents list
     for (const [agentId, socketId] of onlineAgents.entries()) {
       if (socketId === socket.id) {
         onlineAgents.delete(agentId); // Remove agent from the list
@@ -101,8 +112,21 @@ io.on('connection', (socket) => {
       }
     }
 
+    // Remove admin if they are in the online admins list
+    for (const [adminId, socketId] of onlineAdmins.entries()) {
+      if (socketId === socket.id) {
+        onlineAdmins.delete(adminId); // Remove admin from the list
+        logger.info(`Admin ${adminId} is offline`);
+
+        // Notify all agents that the admin is offline
+        io.emit('admin_online', { adminId, online: false });
+        break;
+      }
+    }
+
     // Broadcast the updated list of online agents
     io.emit('online_agents', Array.from(onlineAgents.keys()));
+
     logger.info(`User disconnected: ${socket.id}`);
   });
 });
