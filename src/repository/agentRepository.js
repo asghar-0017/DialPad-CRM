@@ -124,62 +124,71 @@ findByEmail: async (email) => {
   //   }
   // },
 
-  // assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
-  //   try {
-  //       const agentRepository = dataSource.getRepository('agent');
-  //       const agentTaskRepository = dataSource.getRepository('agentTask');
-  //       const followUpRepository = dataSource.getRepository(FollowUp);
-  //       const otherRepository = dataSource.getRepository(Other);
+  assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
+    try {
+        const agentRepository = dataSource.getRepository('agent');
+        const agentTaskRepository = dataSource.getRepository('agentTask');
+        const followUpRepository = dataSource.getRepository(FollowUp);
+        const otherRepository = dataSource.getRepository(Other);
 
-  //       // Check if agent exists
-  //       const agent = await agentRepository.findOne({ where: { agentId } });
-  //       if (!agent) {
-  //           console.log("No agent found with ID:", agentId);
-  //           return null;
-  //       }
+        // Check if agent exists
+        const agent = await agentRepository.findOne({ where: { agentId } });
+        if (!agent) {
+            console.log("No agent found with ID:", agentId);
+            return null;
+        }
 
-  //       // Create task entity with dynamic data
-  //       let taskEntity = {
-  //           agentId,
-  //           leadId,
-  //           taskNo, // Task number passed from the controller
-  //           DynamicData: taskData, // Dynamic data passed in taskData
-  //       };
+        // Create task entity with dynamic data
+        let taskEntity = {
+            agentId,
+            leadId:leadId,
+            taskNo, // Task number passed from the controller
+            DynamicData: taskData, // Dynamic data passed in taskData
+        };
+        console.log("TaskEntity:", taskEntity);
+        console.log("Task Data:", taskData);
 
-  //       taskEntity = agentTaskRepository.create(taskEntity);
-  //       await agentTaskRepository.save(taskEntity);
+        // Save task in agentTask repository
+        taskEntity = agentTaskRepository.create(taskEntity);
+        await agentTaskRepository.save(taskEntity);
 
-  //       // Conditionally save dynamic data in respective repositories
-  //       if (taskData.CustomerFeedBack === 'followUp') {
-  //         const followUpData = {
-  //           dynamicLead: taskData,  
-  //           agentId: taskData.agentId,
-  //           leadId:leadId,
+        // Conditionally save dynamic data in respective repositories
+        if (taskData.CustomerFeedBack === 'followUp') {
+            const followUpData = {
+                dynamicLead: taskData,
+                agentId: taskData.agentId,
+                leadId: leadId,
+            };
+            console.log("FollowUp Data:", followUpData);
 
-  //         };
-  //         console.log("FollouYP",followUpData)
-        
-  //         await followUpRepository.createFollowUp(followUpData); 
-  //       }
-  //           console.log("Task saved in FollowUp repository");
-  //           if (taskData.CustomerFeedBack === 'other') {
-  //             const otherData = {
-  //                 dynamicLead: taskData, 
-  //                 agentId: taskData.agentId,
-  //                 leadId:leadId,
-  
-  //             };
-  //             console.log("Other",otherData)
-  //             await otherRepository.createOther(otherData); 
-  //           }
-        
+            // Save follow-up data in FollowUp repository
+            const followUpEntity = followUpRepository.create(followUpData);
+            await followUpRepository.save(followUpEntity);
+            console.log("Task saved in FollowUp repository");
+        }
 
-  //       return taskEntity;
-  //   } catch (error) {
-  //       console.error('Error in assignTaskToAgentById:', error.message);
-  //       throw new Error('Error assigning task to agent');
-  //   }
-  // },
+        if (taskData.CustomerFeedBack === 'other') {
+            const otherData = {
+                dynamicLead: taskData,
+                agentId: taskData.agentId,
+                leadId: leadId,
+            };
+            console.log("Other Data:", otherData);
+
+            // Save other data in Other repository
+            const otherEntity = otherRepository.create(otherData);
+            await otherRepository.save(otherEntity);
+            console.log("Task saved in Other repository");
+        }
+
+        return taskEntity;
+
+    } catch (error) {
+        console.error('Error in assignTaskToAgentById:', error.message);
+        throw new Error('Error assigning task to agent');
+    }
+},
+
 
 
   
