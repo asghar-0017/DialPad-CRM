@@ -1233,6 +1233,7 @@ verifyEmail: async (req, res) => {
         console.log("Task No", taskNo);
     
         const data = await agentService.getAssignTaskToAgentByTaskNO(agentId, taskNo);
+        console.log("Data",data)
     
         if (!data || data.length === 0) {
           return res.status(404).send({ message: 'No tasks found for this agent.' });
@@ -1248,7 +1249,7 @@ verifyEmail: async (req, res) => {
         });
     
         io.emit('receive_message', transformedData);
-        res.status(200).send({ message: 'Success', taskNo:taskNo,data: transformedData });
+        res.status(200).send({ message: 'Success', taskNo:taskNo, status:data[0].status, transformedData });
       } catch (error) {
         console.error('Error fetching tasks by agent ID:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
@@ -1277,24 +1278,35 @@ verifyEmail: async (req, res) => {
       }
     },
     
-    updateAssignTaskById: async (io,req, res) => {
+    updateAssignTaskById: async (io, req, res) => {
       try {
-        const { taskId } = req.params;
-        const bodyData = req.body;
-        console.log("TaskId",taskId)
-        console.log("task",bodyData)
-        const data = await agentService.updateAssignTaskToAgentById(taskId, bodyData);
-        if (data === 'Data Not Found') {
-          res.status(404).send({ message: 'Data Not Found' });
-        } else {
-          io.emit('receive_message', data);
-          res.status(200).send({ message: 'Task Updated Successfully', data });
-        }
+        
+        const data = req.body;
+          const leadId = req.params.leadId;
+          const user = req.user;
+  
+  
+          const lead = await agentService.updateAssignTaskToAgentById({ data, leadId, user });
+      const formattedLead = {
+        ...lead.dynamicLead,
+     
+    };
+
+            console.log("lead.CustomerFeedBack",formattedLead.CustomerFeedBack)
+          if (formattedLead && formattedLead.CustomerFeedBack !== 'followUp') {
+              delete formattedLead.FollowUpDetail;
+          }
+          if (formattedLead && formattedLead.CustomerFeedBack !== 'other') {
+              delete formattedLead.otherDetail;
+          }
+          
+          io.emit('receive_message', lead);
+          res.status(201).json({ message: 'Lead Updated successfully', data: formattedLead });
       } catch (error) {
-        console.error('Error Updating task:', error.message);
-        res.status(500).send({ message: 'Internal Server Error' });
+          res.status(500).json({ message: 'Internal Server Error', error: error.message });
       }
-    },
+  },
+
     
   
 
@@ -1346,6 +1358,26 @@ verifyEmail: async (req, res) => {
         res.status(500).send({ message: 'Error updating task status' });
       }
     },
+
+    getTaskStatus: async (io, req, res) => {
+      try {
+        const agentId = req.params.agentId;
+        const taskNo = req.params.taskNo;
+            const task = await agentRepository.getTaskStatusByTaskNo(agentId, taskNo);
+    
+        if (task) {
+          io.emit('send_message', task);  
+          res.status(200).send({status: task.status });  
+        } else {
+          res.status(404).send({ message: "Task not found" });  
+        }
+      } catch (error) {
+        console.error('Error in getTaskStatus:', error.message); 
+        res.status(500).send({ message: 'Error retrieving task status' });  
+      }
+    },
+    
+    
     
   
 

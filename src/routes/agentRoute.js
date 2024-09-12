@@ -18,12 +18,14 @@ const agentRoute = (app,io) => {
     app.get('/get-assign-task', combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignTask(io, req, res))
     app.get('/get-assign-tasks/:agentId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignTaskById(io, req, res));
     app.get('/get-assign-task/:taskId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignTaskByTaskId);
-    app.put('/update-assign-task/:taskId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.updateAssignTaskById(io, req, res));
+    app.put('/update-assign-task/:leadId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.updateAssignTaskById(io, req, res));
 
     app.delete('/delete-assign-task/:taskId',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignTaskByTaskId);
     app.get('/get-assign-task-taskNo/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignTaskByTaskNo(io, req, res))
     app.delete('/delete-assign-tasks/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignTaskByAgentId);
     app.put('/update-task-status/:agentId/:taskNo', combinedAuthenticate, checkRole(['admin', 'agent']), (req, res) => agentController.updateTaskStatus(io, req, res));
+    app.get('/get-task-status/:agentId/:taskNo', combinedAuthenticate, checkRole(['admin', 'agent']), (req, res) => agentController.getTaskStatus(io, req, res));
+
 
 
     app.post('/assign-review/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.assignReview(io, req, res))

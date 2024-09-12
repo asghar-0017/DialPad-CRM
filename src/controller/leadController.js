@@ -91,7 +91,8 @@ const leadController = {
       
       updateLead: async (io, req, res) => {
         try {
-            const data = req.body;
+          
+          const data = req.body;
             const leadId = req.params.leadId;
             const user = req.user;
     

@@ -124,7 +124,7 @@ findByEmail: async (email) => {
   //   }
   // },
 
-  assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
+assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
     try {
         const agentRepository = dataSource.getRepository('agent');
         const agentTaskRepository = dataSource.getRepository('agentTask');
@@ -141,7 +141,7 @@ findByEmail: async (email) => {
         // Create task entity with dynamic data
         let taskEntity = {
             agentId,
-            leadId:leadId,
+            leadId,
             taskNo, // Task number passed from the controller
             DynamicData: taskData, // Dynamic data passed in taskData
         };
@@ -187,8 +187,8 @@ findByEmail: async (email) => {
         console.error('Error in assignTaskToAgentById:', error.message);
         throw new Error('Error assigning task to agent');
     }
-},
-
+}
+,
 
 
   
@@ -250,30 +250,99 @@ findByEmail: async (email) => {
     }
   },
 
-  updateAssignTaskToAgentById: async (taskId, updatedTaskData) => {
+
+ updateAssignTaskToAgentById: async ({ data, leadId, user }) => {
     try {
-      const agentTaskRepository = dataSource.getRepository(agentTask);
-        const existingTask = await agentTaskRepository.findOne({
-        where: { taskId },
-      });
-  
-      if (existingTask) {
-        const { DynamicData } = existingTask;
-          const newDynamicData = {
-          ...DynamicData,
-          ...updatedTaskData,
-        };
-          await agentTaskRepository.update({ taskId }, { DynamicData: newDynamicData, updated_at: new Date() });
-          const updatedTask = await agentTaskRepository.findOne({ where: { taskId } });
+        if (!leadId) {
+            throw new Error('taskId is required');
+        }
+        console.log("Data in Repo", data);
+
+        const agentTaskRepository = dataSource.getRepository(agentTask);
+        const followUpRepository = dataSource.getRepository(FollowUp);
+        const otherRepository = dataSource.getRepository(Other);
+
+        // Fetch the existing task data
+        const existingTask = await agentTaskRepository.findOne({ where: { leadId } });
+
+        if (!existingTask) {
+            throw new Error('Task not found');
+        }
+        console.log("Task Data in Repo", existingTask);
+
+        // Handle feedback logic
+        const taskFeedback = existingTask.DynamicData.CustomerFeedBack;
+        console.log('FeedbackType from task:', taskFeedback);
+
+        if (taskFeedback === 'followUp') {
+            const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
+            const updatedFollowUpData = existingFollowUp
+                ? { ...existingFollowUp.DynamicData, ...data }
+                : { ...data };
+
+            if (existingFollowUp) {
+                await followUpRepository.update({ leadId }, { dynamicLead: updatedFollowUpData });
+            } else {
+                await followUpRepository.save({
+                  leadId,
+                    dynamicLead: data,
+                    userId: user.id,
+                });
+            }
+        } else if (taskFeedback === 'other') {
+            const existingOther = await otherRepository.findOne({ where: { leadId } });
+            const updatedOtherData = existingOther
+                ? { ...existingOther.DynamicData, ...data }
+                : { ...data };
+
+            if (existingOther) {
+                await otherRepository.update({ leadId }, { DynamicData: updatedOtherData });
+            } else {
+                await otherRepository.save({
+                  leadId,
+                    dynamicLead: data,
+                    userId: user.id,
+                });
+            }
+        }
+
+        // Handle removal of follow-up or other details based on feedback status
+        if (['ongoing', 'completed', 'archived'].includes(data.FeedbackType)) {
+            const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
+            if (existingFollowUp) {
+                await followUpRepository.delete({ taskId });
+            }
+
+            const existingOther = await otherRepository.findOne({ where: { leadId } });
+            if (existingOther) {
+                await otherRepository.delete({ leadId });
+            }
+        }
+
+        // Merge new data into task data
+        const updatedTaskData = { ...existingTask.DynamicData, ...data };
+
+        // Remove any extra follow-up or other details based on feedback status
+        if (['ongoing', 'completed', 'archived'].includes(updatedTaskData.FeedbackType)) {
+            delete updatedTaskData.followUpDetail;
+            delete updatedTaskData.otherDetail;
+        }
+
+        // Update the task with the merged data
+        await agentTaskRepository.update({ leadId }, { DynamicData: updatedTaskData, updated_at: new Date() });
+        console.log("Updated Task:", updatedTaskData);
+
+        // Fetch the updated task
+        const updatedTask = await agentTaskRepository.findOne({ where: { leadId } });
+
         return updatedTask;
-      } else {
-        return 'Data Not Found';
-      }
+
     } catch (error) {
-      console.error('Error updating task for agent:', error.message);
-      throw new Error('Error updating task for agent');
+        console.error('Error updating task for agent:', error.message);
+        throw new Error('Failed to update task for agent.');
     }
-  },
+},
+
   
   
   deleteAssignTaskToAgentByTaskIds: async (taskId) => {
@@ -520,7 +589,23 @@ findByEmail: async (email) => {
       console.error('Error in updateTaskStatus:', error.message);
       throw error;
     }
-  }
+  },
+
+  getTaskStatusByTaskNo: async (agentId, taskNo) => {
+    try {
+      const taskRepository = dataSource.getRepository('agentTask');
+      
+      // Fetch a single task based on agentId and taskNo
+      const task = await taskRepository.findOne({ where: { agentId, taskNo } });
+      
+      return task;  // Return the single task object
+    } catch (error) {
+      console.error('Error in getTaskStatusByTaskNo:', error.message);  // Log the error with function context
+      throw new Error('Failed to get task status');  // Throw a user-friendly error message
+    }
+  },
+  
+  
   
   
 };

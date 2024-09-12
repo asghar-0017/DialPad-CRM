@@ -138,10 +138,10 @@ const agentService = {
       throw error
     }
   },
-  updateAssignTaskToAgentById:async(taskId,task)=>{
+  updateAssignTaskToAgentById:async({ data, leadId, user })=>{
     try{
-      const data=await agentRepository.updateAssignTaskToAgentById(taskId,task)
-      return data
+      const result=await agentRepository.updateAssignTaskToAgentById({ data, leadId, user })
+      return result
     }catch(error){
       throw error
     }
