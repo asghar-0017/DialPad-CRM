@@ -1243,7 +1243,6 @@ verifyEmail: async (req, res) => {
           if (task.DynamicData) {
             return {
               taskNo,
-              status:data[0].status,
               ...task.DynamicData,
             };
           }
@@ -1251,7 +1250,7 @@ verifyEmail: async (req, res) => {
         });
     
         io.emit('receive_message', transformedData);
-        res.status(200).send({ message: 'Success', taskNo:taskNo, status:data[0].status, transformedData });
+        res.status(200).send({ message: 'Success', taskNo:taskNo, transformedData });
       } catch (error) {
         console.error('Error fetching tasks by agent ID:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
