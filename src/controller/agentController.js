@@ -1218,7 +1218,7 @@ verifyEmail: async (req, res) => {
         });
     
         io.emit('receive_message', transformedData);
-        res.status(200).send({ message: 'Success',status:data[0].status, data: transformedData });
+        res.status(200).send({ message: 'Success',status:data[0].status, transformedData });
       } catch (error) {
         console.error('Error fetching tasks by agent ID:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
@@ -1250,7 +1250,7 @@ verifyEmail: async (req, res) => {
         });
     
         io.emit('receive_message', transformedData);
-        res.status(200).send({ message: 'Success', taskNo:taskNo, transformedData });
+        res.status(200).send({ message: 'Success', taskNo:taskNo, data:transformedData });
       } catch (error) {
         console.error('Error fetching tasks by agent ID:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
