@@ -530,7 +530,7 @@ verifyEmail: async (req, res) => {
                 display: inline-block;
                 padding: 10px 20px;
                 font-size: 16px;
-                color: #fff;
+                color: #fcfffe;
                 background-color: #28a745;
                 text-decoration: none;
                 border-radius: 5px;
@@ -628,7 +628,7 @@ verifyEmail: async (req, res) => {
                 display: inline-block;
                 padding: 10px 20px;
                 font-size: 16px;
-                color: #fff;
+                color: #fcfffe;
                 background-color: #28a745;
                 text-decoration: none;
                 border-radius: 5px;
@@ -725,7 +725,7 @@ verifyEmail: async (req, res) => {
                 display: inline-block;
                 padding: 10px 20px;
                 font-size: 16px;
-                color: #fff;
+                color: #fcfffe;
                 background-color: #28a745;
                 text-decoration: none;
                 border-radius: 5px;
@@ -824,7 +824,7 @@ verifyEmail: async (req, res) => {
                   display: inline-block;
                   padding: 10px 20px;
                   font-size: 16px;
-                  color: #fff;
+                  color: #fcfffe;
                   background-color: #28a745;
                   text-decoration: none;
                   border-radius: 5px;
@@ -913,7 +913,7 @@ verifyEmail: async (req, res) => {
                 display: inline-block;
                 padding: 10px 20px;
                 font-size: 16px;
-                color: #fff;
+                color: #fcfffe;
                 background-color: #28a745;
                 text-decoration: none;
                 border-radius: 5px;
@@ -1003,7 +1003,7 @@ verifyEmail: async (req, res) => {
               display: inline-block;
               padding: 10px 20px;
               font-size: 16px;
-              color: #fff;
+              color: #fcfffe;
               background-color: #28a745;
               text-decoration: none;
               border-radius: 5px;
