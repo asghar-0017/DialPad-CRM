@@ -1242,6 +1242,7 @@ verifyEmail: async (req, res) => {
           if (task.DynamicData) {
             return {
               taskNo,
+              status:data[0].status,
               ...task.DynamicData,
             };
           }
