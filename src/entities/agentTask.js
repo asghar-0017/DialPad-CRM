@@ -30,8 +30,8 @@ module.exports = new EntitySchema({
     // },
     status: {
       type: "enum",
-      enum: ["pending", "progress", "complete"], 
-      default: "pending",
+      enum: ["progress", "complete"], 
+      default: "progress",
     },
     created_at: {
       type: "timestamp",

@@ -26,14 +26,6 @@ const agentRoute = (app,io) => {
     app.put('/update-task-status/:agentId/:taskNo', combinedAuthenticate, checkRole(['admin', 'agent']), (req, res) => agentController.updateTaskStatus(io, req, res));
 
 
-
-    // app.post('/assign-review/:agentId',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.assignReview(io, req, res))
-    // app.get('/get-assign-reviews/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignReviewsById);
-    // app.get('/get-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignReviewByReviewId);
-    // app.put('/update-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.updateAssignReviewById(io, req, res));
-    // app.delete('/delete-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignReviewByReviewId);
-
-
     app.post('/assign-review/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.assignReview(io, req, res))
     app.get('/get-assign-reviews/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignReviewsById);
     app.get('/get-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignReviewByReviewId);
@@ -53,7 +45,7 @@ const agentRoute = (app,io) => {
     app.post('/logout', adminAuth.logout);
     app.post('/verify-token',adminAuth.verifyToken);
 
-    app.put('/update-status/:agentId',combinedAuthenticate, checkRole(['admin']),(req, res) =>agentAuthController.updateAgentStatus(io, req, res))
+    app.put('/update-status/:agentId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) =>agentAuthController.updateAgentStatus(io, req, res))
 
 };
 
