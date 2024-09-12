@@ -45,7 +45,7 @@ const agentRoute = (app,io) => {
     app.post('/logout', adminAuth.logout);
     app.post('/verify-token',adminAuth.verifyToken);
 
-    app.put('/update-status/:agentId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) =>agentAuthController.updateAgentStatus(io, req, res))
+    app.put('/update-status/:agentId',combinedAuthenticate, checkRole(['admin']),(req, res) =>agentAuthController.updateAgentStatus(io, req, res))
 
 };
 

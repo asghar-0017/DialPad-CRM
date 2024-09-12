@@ -1003,7 +1003,7 @@ verifyEmail: async (req, res) => {
               display: inline-block;
               padding: 10px 20px;
               font-size: 16px;
-              color: #fcfffe;
+              color: white;
               background-color: #28a745;
               text-decoration: none;
               border-radius: 5px;
@@ -1337,7 +1337,7 @@ verifyEmail: async (req, res) => {
     
         if (data) {
           io.emit('send_message', data);
-          res.status(200).send({ message: "Task status updated successfully", data: data });
+          res.status(200).send({ message: "Task status updated successfully",status:data[0].status, data: data });
         } else {
           res.status(404).send({ message: "Task not found" });
         }
@@ -1508,11 +1508,11 @@ verifyEmail: async (req, res) => {
     
           if (agent) {
             // Generate a unique taskId for each task
-            const taskId = reviewId(); // Use uuid to generate a unique taskId
+            const leadId = reviewId(); // Use uuid to generate a unique taskId
     
             const taskData = {
               agentId,
-              taskId,
+              leadId,
               ...convertedRow,
             };
     
@@ -1521,7 +1521,7 @@ verifyEmail: async (req, res) => {
             }
     
             // Assign the task to the agent
-            const assignedTask = await agentRepository.assignTaskToAgentById(agentId, taskData, taskId, initialTaskNo);
+            const assignedTask = await agentRepository.assignTaskToAgentById(agentId, taskData, leadId, initialTaskNo);
             tasksAssigned.push(assignedTask);
           } else {
             console.error("Agent not found for agentId:", agentId);

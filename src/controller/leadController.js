@@ -163,26 +163,39 @@ const leadController = {
       
       
 
-    getLeadById: async (req, res) => {
+      getLeadById: async (req, res) => {
         try {
             const leadId = req.params.leadId;
             const data = await leadService.leadGetServiceById(leadId);
+            console.log("Data", data);
+    
             if (data) {
-                if (data && data.customer_feedBack !== 'followUp') {
-                    delete data.followUpDetail;
-                }
-                if (data && data.customer_feedBack !== 'other') {
-                    delete data.otherDetail;
-                }
-                res.status(200).send({ message: "success", data: data });
-            }else{
-                res.status(200).send({ message: "Data Not Found", });
-
+                const processedData = ((lead) => {
+                    const { dynamicLead = {}, ...otherDetails } = lead;
+                    const mergedLead = {
+                        ...dynamicLead,
+                        ...otherDetails,
+                    };
+    
+                    if (mergedLead.CustomerFeedBack !== 'followUp') {
+                        delete mergedLead.FollowUpDetail;
+                    }
+                    if (mergedLead.CustomerFeedBack !== 'other') {
+                        delete mergedLead.OtherDetail;
+                    }
+    
+                    return mergedLead;
+                })(data);  // Immediately invoke the processing function with 'data'
+    
+                res.status(200).send({ message: "success", data: processedData });
+            } else {
+                res.status(200).send({ message: "Data Not Found" });
             }
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
     },
+    
     getallSpecificLeadByAgentId: async (req, res) => {
         try {
           const agentId = req.params.agentId;

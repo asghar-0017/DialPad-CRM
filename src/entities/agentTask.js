@@ -12,7 +12,7 @@ module.exports = new EntitySchema({
     agentId: {
       type: "varchar",
     },
-    taskId: {
+    leadId: {
       type: "varchar",
     },
     DynamicData: {

@@ -5,6 +5,9 @@ const agentTask=require('../entities/agentTask')
 const agentTrash=require('../entities/agentTrash')
 const tempAgent=require('../entities/tempAgent')
 const agentReview=require('../entities/reviewToAgent')
+const FollowUp=require('../entities/followUp')
+const Other=require('../entities/otherDetail')
+
 
 
 const agentRepository = {
@@ -88,39 +91,97 @@ findByEmail: async (email) => {
 
 
 
-  assignTaskToAgentById: async (agentId, taskData, taskId, taskNo) => {
-    try {
-      console.log("AgentID in repo:", agentId);
-      console.log("Task Id in Repo:", taskId);
-      console.log("Task Data in Repo:", taskData);
+  // assignTaskToAgentById: async (agentId, taskData, taskId, taskNo) => {
+  //   try {
+  //     console.log("AgentID in repo:", agentId);
+  //     console.log("Task Id in Repo:", taskId);
+  //     console.log("Task Data in Repo:", taskData);
   
-      const agentRepository = dataSource.getRepository('agent');
-      const agentTaskRepository = dataSource.getRepository(agentTask);
+  //     const agentRepository = dataSource.getRepository('agent');
+  //     const agentTaskRepository = dataSource.getRepository(agentTask);
   
-      const agent = await agentRepository.findOne({ where: { agentId } });
+  //     const agent = await agentRepository.findOne({ where: { agentId } });
   
-      if (!agent) {
-        console.log("No agent found with ID:", agentId);
-        return null;
-      }
+  //     if (!agent) {
+  //       console.log("No agent found with ID:", agentId);
+  //       return null;
+  //     }
   
-      let taskEntity = {
-        agentId,
-        taskId,
-        taskNo, // Pass the task number from the controller
-        DynamicData: taskData
-      };
+  //     let taskEntity = {
+  //       agentId,
+  //       taskId,
+  //       taskNo, // Pass the task number from the controller
+  //       DynamicData: taskData
+  //     };
   
-      taskEntity = agentTaskRepository.create(taskEntity);
-      await agentTaskRepository.save(taskEntity);
+  //     taskEntity = agentTaskRepository.create(taskEntity);
+  //     await agentTaskRepository.save(taskEntity);
   
-      return taskEntity;
-    } catch (error) {
-      console.error('Error in assignTaskToAgentById:', error.message);
-      throw new Error('Error assigning task to agent');
-    }
-  },
+  //     return taskEntity;
+  //   } catch (error) {
+  //     console.error('Error in assignTaskToAgentById:', error.message);
+  //     throw new Error('Error assigning task to agent');
+  //   }
+  // },
+
+  // assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
+  //   try {
+  //       const agentRepository = dataSource.getRepository('agent');
+  //       const agentTaskRepository = dataSource.getRepository('agentTask');
+  //       const followUpRepository = dataSource.getRepository(FollowUp);
+  //       const otherRepository = dataSource.getRepository(Other);
+
+  //       // Check if agent exists
+  //       const agent = await agentRepository.findOne({ where: { agentId } });
+  //       if (!agent) {
+  //           console.log("No agent found with ID:", agentId);
+  //           return null;
+  //       }
+
+  //       // Create task entity with dynamic data
+  //       let taskEntity = {
+  //           agentId,
+  //           leadId,
+  //           taskNo, // Task number passed from the controller
+  //           DynamicData: taskData, // Dynamic data passed in taskData
+  //       };
+
+  //       taskEntity = agentTaskRepository.create(taskEntity);
+  //       await agentTaskRepository.save(taskEntity);
+
+  //       // Conditionally save dynamic data in respective repositories
+  //       if (taskData.CustomerFeedBack === 'followUp') {
+  //         const followUpData = {
+  //           dynamicLead: taskData,  
+  //           agentId: taskData.agentId,
+  //           leadId:leadId,
+
+  //         };
+  //         console.log("FollouYP",followUpData)
+        
+  //         await followUpRepository.createFollowUp(followUpData); 
+  //       }
+  //           console.log("Task saved in FollowUp repository");
+  //           if (taskData.CustomerFeedBack === 'other') {
+  //             const otherData = {
+  //                 dynamicLead: taskData, 
+  //                 agentId: taskData.agentId,
+  //                 leadId:leadId,
   
+  //             };
+  //             console.log("Other",otherData)
+  //             await otherRepository.createOther(otherData); 
+  //           }
+        
+
+  //       return taskEntity;
+  //   } catch (error) {
+  //       console.error('Error in assignTaskToAgentById:', error.message);
+  //       throw new Error('Error assigning task to agent');
+  //   }
+  // },
+
+
   
   
   getAssignTaskToAgent: async () => {
