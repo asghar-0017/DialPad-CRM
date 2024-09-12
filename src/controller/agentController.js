@@ -1069,8 +1069,8 @@ verifyEmail: async (req, res) => {
           return res.status(404).send({Data:`Data not Found with ${agentId}`})
         }
         const data = result.map(agent => {
-        const { id,agentId, firstName, lastName, email, phone, role ,isActivated} = agent;
-        return {id, agentId, firstName, lastName, email, phone, role,isActivated };
+        const { id,agentId, firstName, lastName, email, phone, role ,isActivated,created_at,updated_at} = agent;
+        return {id, agentId, firstName, lastName, email, phone, role,isActivated,created_at,updated_at };
      
     });
     io.emit('receive_message', data);
@@ -1095,7 +1095,10 @@ verifyEmail: async (req, res) => {
                   email: result.email,
                   phone: result.phone,
                   role: result.role,
-                  isActivated:result.isActivated
+                  isActivated:result.isActivated,
+                  created_at:result.created_at,
+                  update_at:result.updated_at
+
               };
               res.status(200).json({ message: 'Success', data });
           } else {
