@@ -1368,7 +1368,7 @@ verifyEmail: async (req, res) => {
     
         if (task) {
           io.emit('send_message', task);  
-          res.status(200).send({status: task.status });  
+          res.status(200).send({data: task.status });  
         } else {
           res.status(404).send({ message: "Task not found" });  
         }

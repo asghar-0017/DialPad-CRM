@@ -251,10 +251,10 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
   },
 
 
- updateAssignTaskToAgentById: async ({ data, leadId, user }) => {
+  updateAssignTaskToAgentById: async ({ data, leadId, user }) => {
     try {
         if (!leadId) {
-            throw new Error('taskId is required');
+            throw new Error('leadId is required');
         }
         console.log("Data in Repo", data);
 
@@ -270,26 +270,28 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
         }
         console.log("Task Data in Repo", existingTask);
 
-        // Handle feedback logic
-        const taskFeedback = existingTask.DynamicData.CustomerFeedBack;
+        const taskFeedback = existingTask.DynamicData?.CustomerFeedBack;
         console.log('FeedbackType from task:', taskFeedback);
 
+        // Check if `CustomerFeedBack` is `followUp`
         if (taskFeedback === 'followUp') {
             const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
             const updatedFollowUpData = existingFollowUp
-                ? { ...existingFollowUp.DynamicData, ...data }
+                ? { ...existingTask.DynamicData, ...data }
                 : { ...data };
 
             if (existingFollowUp) {
                 await followUpRepository.update({ leadId }, { dynamicLead: updatedFollowUpData });
             } else {
                 await followUpRepository.save({
-                  leadId,
+                    leadId,
                     dynamicLead: data,
                     userId: user.id,
                 });
             }
-        } else if (taskFeedback === 'other') {
+        } 
+        // Check if `CustomerFeedBack` is `other`
+        else if (taskFeedback === 'other') {
             const existingOther = await otherRepository.findOne({ where: { leadId } });
             const updatedOtherData = existingOther
                 ? { ...existingOther.DynamicData, ...data }
@@ -299,18 +301,26 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
                 await otherRepository.update({ leadId }, { DynamicData: updatedOtherData });
             } else {
                 await otherRepository.save({
-                  leadId,
+                    leadId,
                     dynamicLead: data,
                     userId: user.id,
                 });
             }
         }
 
-        // Handle removal of follow-up or other details based on feedback status
-        if (['ongoing', 'completed', 'archived'].includes(data.FeedbackType)) {
+        // Check if body data has 'onGoing' and the existing task has 'followUp' and 'followUpDetail'
+        if (data.CustomerFeedBack === 'onGoing' && taskFeedback === 'followUp') {
+            if (existingTask.DynamicData.followUp && existingTask.DynamicData.followUpDetail) {
+                delete existingTask.DynamicData.followUp;
+                delete existingTask.DynamicData.followUpDetail;
+            }
+        }
+
+        // Remove follow-up or other details if status is 'onGoing', 'hangUp', or 'other'
+        if (['onGoing', 'hangUp', 'other'].includes(data.CustomerFeedBack)) {
             const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
             if (existingFollowUp) {
-                await followUpRepository.delete({ taskId });
+                await followUpRepository.delete({ leadId });
             }
 
             const existingOther = await otherRepository.findOne({ where: { leadId } });
@@ -322,8 +332,8 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
         // Merge new data into task data
         const updatedTaskData = { ...existingTask.DynamicData, ...data };
 
-        // Remove any extra follow-up or other details based on feedback status
-        if (['ongoing', 'completed', 'archived'].includes(updatedTaskData.FeedbackType)) {
+        // Remove unnecessary details from the task based on feedback
+        if (['onGoing', 'hangUp', 'other'].includes(updatedTaskData.FeedbackType)) {
             delete updatedTaskData.followUpDetail;
             delete updatedTaskData.otherDetail;
         }
@@ -342,6 +352,7 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
         throw new Error('Failed to update task for agent.');
     }
 },
+
 
   
   
