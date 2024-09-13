@@ -99,6 +99,7 @@ getallSpecifiFollowUpByAgentId: async (req, res) => {
   updateFollowUp: async (io,req, res) => {
     try {
       const { leadId } = req.params;
+      console.log("Leead Id",leadId)
       const followUpData = req.body;
       const updatedFollowUp = await followUpService.updateFollowUp(leadId, followUpData);
       if (updatedFollowUp) {

@@ -1198,7 +1198,8 @@ verifyEmail: async (req, res) => {
   
               agents.push({ email, status: 'Verification Email Sent' });
           }
-  
+          io.emit('send_message', agents);
+
           return res.status(200).json({ message: 'Emails sent', agents });
       } catch (error) {
           console.error('Error processing the CSV file:', error);
