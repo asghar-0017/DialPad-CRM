@@ -40,17 +40,6 @@ const getLatestTaskForAgent=async (agentId) => {
   }
 };
 
-
-// const toPascalCase = (str) => {
-//   return str
-//     .replace(/\s(.)/g, function (match, group1) {
-//       return group1.toUpperCase();
-//     })
-//     .replace(/^(.)/, function (match, group1) {
-//       return group1.toUpperCase();
-//     })
-//     .replace(/\s+/g, ''); 
-// };
 const toPascalCase = (str) => {
   const words = str.split(/[_\s-]+/);
 
@@ -71,18 +60,6 @@ const toPascalCase = (str) => {
   return pascalCaseStr;
 };
 
-
-
-// const convertKeysToPascalCase = (data) => {
-//   const result = {};
-//   for (const key in data) {
-//     if (data.hasOwnProperty(key)) {
-//       const pascalCaseKey = toPascalCase(key);
-//       result[pascalCaseKey] = data[key];
-//     }
-//   }
-//   return result;
-// };
 
 const convertKeysToPascalCase = (data) => {
   const result = {};
@@ -865,7 +842,6 @@ verifyEmail: async (req, res) => {
           return res.status(404).send({ message: 'No tasks found for this agent.' });
 
         }
-        console.log("data",data[0].status)
             const transformedData = data.map(task => {
           if (task.DynamicData) {
             return {

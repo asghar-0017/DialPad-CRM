@@ -3,7 +3,8 @@ const FollowUp = require('../entities/followUp'); // Adjust the path as needed
 const Lead = require('../entities/lead');
 const followUp = require("../entities/followUp");
 const agentTask=require('../entities/agentTask')
-const Other=require('../entities/otherDetail')
+const OtherDetail=require('../entities/otherDetail');
+const otherDetail = require("../entities/otherDetail");
 
 const followUpRepository = {
   createFollowUp: async (followUpData) => {
@@ -35,294 +36,244 @@ const followUpRepository = {
   },
 
  
-//  updateFollowUpOrTask: async (leadId, data, user) => {
-//     try {
-//       if (!leadId) {
-//         throw new Error('leadId is required');
-//       }
-  
-//       console.log("Data in Repo", data);
-  
-//       const agentTaskRepository = dataSource.getRepository(agentTask);
-//       const followUpRepository = dataSource.getRepository(FollowUp);
-//       const otherRepository = dataSource.getRepository(Other);
-//       const leadRepository = dataSource.getRepository(Lead);
-  
-//       // Find existing entities
-//       const existingTask = await agentTaskRepository.findOne({ where: { leadId } });
-//       const existingLead = await leadRepository.findOne({ where: { leadId } });
-  
-//       if (!existingTask && !existingLead) {
-//         throw new Error('Task and Lead not found');
-//       }
-  
-//       console.log('Task found for leadId:', leadId);
-//       console.log('Lead found for leadId:', leadId);
-  
-//       // Update task if it exists
-//       if (existingTask) {
-//         if (data.CustomerFeedBack === 'followUp') {
-//           // Remove FollowUpDetail and OtherDetail from task's DynamicData if they exist
-//           if (existingTask.DynamicData.Followupdetail) {
-//             console.log('Removing Followupdetail for leadId:', leadId);
-//             delete existingTask.DynamicData.Followupdetail;
-//           }
-//           delete existingTask.DynamicData.OtherDetail;
-  
-//           // Save or update follow-up details
-//           const updatedFollowUpData = { ...data };
-//           const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
-  
-//           if (existingFollowUp) {
-//             console.log(`Updating FollowUp for leadId: ${leadId}`);
-//             await followUpRepository.update(
-//               { leadId },
-//               { dynamicLead: updatedFollowUpData, updated_at: new Date() }
-//             );
-//           } else {
-//             console.log(`Saving new FollowUp for leadId: ${leadId}`);
-//             await followUpRepository.save({
-//               leadId,
-//               dynamicLead: updatedFollowUpData,
-//               userId: user.id,
-//             });
-//           }
-  
-//         } else if (data.CustomerFeedBack === 'other') {
-//           // Handle 'other' feedback
-//           existingTask.DynamicData.OtherDetail = data.OtherDetail;
-  
-//           const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
-//           if (existingFollowUp) {
-//             console.log(`Deleting FollowUp for leadId: ${leadId}`);
-//             await followUpRepository.delete({ leadId });
-//           }
-  
-//           const existingOther = await otherRepository.findOne({ where: { leadId } });
-//           const updatedOtherData = existingOther
-//             ? { ...existingOther.dynamicLead, ...data }
-//             : { ...data };
-  
-//           if (existingOther) {
-//             await otherRepository.update({ leadId }, { dynamicLead: updatedOtherData });
-//           } else {
-//             await otherRepository.save({
-//               leadId,
-//               dynamicLead: existingTask.DynamicData,
-//               userId: user.id,
-//             });
-//           }
-  
-//         } else if (data.CustomerFeedBack === 'onGoing') {
-//           // Handle 'onGoing' feedback
-//           delete existingTask.DynamicData.Followupdetail;  // Ensure Followupdetail is removed
-//           delete existingTask.DynamicData.OtherDetail;    // Ensure OtherDetail is removed
-  
-//           // Check for and delete FollowUp and Other data for the leadId
-//           const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
-//           if (existingFollowUp) {
-//             console.log(`Deleting FollowUp for leadId: ${leadId}`);
-//             await followUpRepository.delete({ leadId });
-//           }
-  
-//           const existingOther = await otherRepository.findOne({ where: { leadId } });
-//           if (existingOther) {
-//             console.log(`Deleting Other for leadId: ${leadId}`);
-//             await otherRepository.delete({ leadId });
-//           }
-//         }
-  
-//         // Update task with the merged data
-//         const updatedTaskData = { ...existingTask.DynamicData, ...data };
-//         if (['onGoing', 'hangUp', 'other'].includes(updatedTaskData.CustomerFeedBack)) {
-//           delete updatedTaskData.Followupdetail;  // Ensure Followupdetail is removed if feedback is 'onGoing'
-//         }
-  
-//         await agentTaskRepository.update(
-//           { leadId },
-//           { DynamicData: updatedTaskData, updated_at: new Date() }
-//         );
-  
-//         console.log('Task updated successfully');
-//       }
-  
-//       // Update lead if it exists
-//       if (existingLead) {
-//         const updatedLeadData = { ...existingLead.dynamicLead, ...data };
-//         if (data.CustomerFeedBack === 'onGoing') {
-//           delete updatedLeadData.Followupdetail;  // Ensure Followupdetail is removed if feedback is 'onGoing'
-//           delete updatedLeadData.OtherDetail;    // Ensure OtherDetail is removed if feedback is 'onGoing'
-//         }
-  
-//         await leadRepository.update(
-//           { leadId },
-//           { dynamicLead: updatedLeadData, updated_at: new Date() }
-//         );
-  
-//         console.log('Lead updated successfully');
-//       }
-  
-//       return { message: 'Task and/or Lead updated successfully' };
-  
-//     } catch (error) {
-//       console.error('Error updating follow-up or task:', error.message);
-//       throw new Error('Failed to update follow-up or task.');
-//     }
-//   },
-  
-  
+
+
+
+
 updateFollowUpOrTask: async (taskLeadId, data, user) => {
   try {
-    if (!taskLeadId) {
-      throw new Error('taskLeadId is required');
-    }
+      if (!taskLeadId) {
+          throw new Error('taskLeadId is required');
+      }
 
-    console.log("Data in Repo", data);
+      console.log("Data in Repo", data);
 
-    const agentTaskRepository = dataSource.getRepository(agentTask);
-    const followUpRepository = dataSource.getRepository(FollowUp);
-    const otherRepository = dataSource.getRepository(Other);
-    const leadRepository = dataSource.getRepository(Lead);
+      const agentTaskRepository = dataSource.getRepository(agentTask);
+      const followUpRepository = dataSource.getRepository(FollowUp);
+      const leadRepository = dataSource.getRepository(Lead);
+      const otherDetailRepository = dataSource.getRepository(otherDetail);
 
-    // Fetch the existing task based on the taskLeadId
-    const existingTask = await agentTaskRepository.findOne({ where: { leadId: taskLeadId } });
-
-    if (!existingTask) {
-      console.log(`Task not found for leadId: ${taskLeadId}. Checking lead...`);
-
-      // If no task is found, check if a lead exists with the provided leadId
+      const existingTask = await agentTaskRepository.findOne({ where: { leadId: taskLeadId } });
+      console.log("Existing Task", existingTask);
       const existingLead = await leadRepository.findOne({ where: { leadId: taskLeadId } });
+      console.log("Existing Lead", existingLead);
 
-      if (!existingLead) {
-        throw new Error('Task and Lead not found');
-      }
+      if (!existingTask) {
+          console.log(`Task not found for leadId: ${taskLeadId}. Checking lead...`);
 
-      console.log(`Lead found for leadId: ${taskLeadId}. Proceeding with Lead updates.`);
+          if (!existingLead) {
+              throw new Error('Task and Lead not found');
+          }
 
-      // Proceed with updating Lead if found (similar to how task updates are handled)
-      const updatedLeadData = { ...existingLead.dynamicLead, ...data };
-      if (data.CustomerFeedBack === 'onGoing') {
-        delete updatedLeadData.Followupdetail;  // Ensure Followupdetail is removed
-        delete updatedLeadData.OtherDetail;    // Ensure OtherDetail is removed
-      }
+          console.log(`Lead found for leadId: ${taskLeadId}. Proceeding with Lead updates.`);
 
-      await leadRepository.update(
-        { leadId: taskLeadId },
-        { dynamicLead: updatedLeadData, updated_at: new Date() }
-      );
+          const updatedLeadData = { ...existingLead.dynamicLead, ...data };
+          console.log("UpdateLeadData", updatedLeadData);
 
-      console.log('Lead updated successfully', updatedLeadData);
+          if (data.CustomerFeedBack === 'followUp') {
+              console.log(`Handling FollowUp for leadId: ${taskLeadId}`);
+              console.log(`Removing OtherDetail entity for leadId: ${taskLeadId}`);
+              await otherDetailRepository.delete({ leadId: taskLeadId });
 
-      // Handle follow-up data when CustomerFeedBack is 'followUp'
-      if (data.CustomerFeedBack === 'followUp') {
-        const existingFollowUp = await followUpRepository.findOne({ where: { leadId: taskLeadId } });
+              const existingFollowUp = await followUpRepository.findOne({ where: { leadId: taskLeadId } });
 
-        if (existingFollowUp) {
-          console.log(`Updating FollowUp for leadId: ${taskLeadId}`);
-          await followUpRepository.update(
-            { leadId: taskLeadId },
-            { dynamicLead: { ...existingFollowUp.dynamicLead, ...data }, updated_at: new Date() }
+              if (existingFollowUp) {
+                  console.log(`Existing FollowUp found for leadId: ${taskLeadId}. Updating FollowUp.`);
+                  await followUpRepository.update(
+                      { leadId: taskLeadId },
+                      {
+                          dynamicLead: { ...existingLead.dynamicLead, ...data },
+                          updated_at: new Date(),
+                      }
+                  );
+                  console.log('FollowUp updated successfully.');
+              } else {
+                  console.log(`No FollowUp found for leadId: ${taskLeadId}. Creating new FollowUp.`);
+                  await followUpRepository.save({
+                      leadId: taskLeadId,
+                      dynamicLead: { ...existingLead.dynamicLead, ...data },
+                      userId: user.id,
+                      created_at: new Date(),
+                      updated_at: new Date(),
+                  });
+                  console.log('New FollowUp saved successfully.');
+              }
+
+          } else if (data.CustomerFeedBack === 'other') {
+              console.log(`Handling 'Other' feedback for leadId: ${taskLeadId}`);
+
+              const existingFollowUp = await followUpRepository.findOne({ where: { leadId: taskLeadId } });
+              if (existingFollowUp) {
+                  console.log(`Removing existing FollowUp for leadId: ${taskLeadId}`);
+                  await followUpRepository.delete({ leadId: taskLeadId });
+              }
+
+              if (data.OtherDetail) {
+                  const existingOtherDetail = await otherDetailRepository.findOne({ where: { leadId: taskLeadId } });
+
+                  if (existingOtherDetail) {
+                      console.log(`Existing OtherDetail found for leadId: ${taskLeadId}. Updating OtherDetail.`);
+                      await otherDetailRepository.update(
+                          { leadId: taskLeadId },
+                          {
+                              dynamicLead: { ...existingLead, ...data },
+                              updated_at: new Date(),
+                          }
+                      );
+                      console.log('OtherDetail updated successfully.');
+                  } else {
+                      console.log(`No OtherDetail found for leadId: ${taskLeadId}. Creating new OtherDetail.`);
+                      await otherDetailRepository.save({
+                          leadId: taskLeadId,
+                          dynamicLead: { ...existingLead, ...data },
+                          created_at: new Date(),
+                          updated_at: new Date(),
+                      });
+                      console.log('New OtherDetail saved successfully.');
+                  }
+              }
+          } else if (data.CustomerFeedBack === 'onGoing') {
+              console.log(`Handling 'onGoing' feedback for leadId: ${taskLeadId}`);
+
+              await followUpRepository.delete({ leadId: taskLeadId });
+              await otherDetailRepository.delete({ leadId: taskLeadId });
+
+              const updatedLeadData = { ...existingLead.dynamicLead, ...data };
+              await leadRepository.update(
+                  { leadId: taskLeadId },
+                  { dynamicLead: updatedLeadData, updated_at: new Date() }
+              );
+
+              console.log('Lead updated successfully, and follow-up and other feedback removed as applicable.');
+          }
+
+          await leadRepository.update(
+              { leadId: taskLeadId },
+              { dynamicLead: updatedLeadData, updated_at: new Date() }
           );
-        } else {
-          console.log(`Saving new FollowUp for leadId: ${taskLeadId}`);
-          await followUpRepository.save({
-            leadId: taskLeadId,
-            dynamicLead: { ...data }, // Save the new follow-up data
-            userId: user.id,
-            created_at: new Date(),
-            updated_at: new Date()
-          });
-        }
+
+          return { message: 'Lead updated successfully, and follow-up or other feedback handled as applicable' };
       }
 
-      return { message: 'Lead updated successfully, no task found but follow-up handled' };
-    }
+      console.log('Task found for taskLeadId:', taskLeadId);
 
-    console.log('Task found for taskLeadId:', taskLeadId);
+      if (data.CustomerFeedBack === 'followUp') {
+          console.log(`Handling FollowUp for taskLeadId: ${taskLeadId}`);
 
-    // Update task-related follow-up or other data
-    if (data.CustomerFeedBack === 'followUp') {
-      // Handle follow-up
-      const existingFollowUp = await followUpRepository.findOne({ where: { leadId: taskLeadId } });
+          if (existingTask.DynamicData.OtherDetail) {
+              console.log(`Removing OtherDetail from taskLeadId: ${taskLeadId}`);
+              delete existingTask.DynamicData.OtherDetail;
 
-      if (existingFollowUp) {
-        console.log(`Updating FollowUp for taskLeadId: ${taskLeadId}`);
-        await followUpRepository.update(
-          { leadId: taskLeadId },
-          { dynamicLead: { ...existingFollowUp.dynamicLead, ...data }, updated_at: new Date() }
-        );
-      } else {
-        console.log(`Saving new FollowUp for taskLeadId: ${taskLeadId}`);
-        await followUpRepository.save({
-          leadId: taskLeadId,
-          dynamicLead: { ...data }, // Save the new follow-up data
-          userId: user.id,
-          created_at: new Date(),
-          updated_at: new Date()
-        });
+              console.log(`Removing Other entity for leadId: ${taskLeadId}`);
+              await otherDetailRepository.delete({ leadId: taskLeadId });
+          }
+
+          const existingFollowUp = await followUpRepository.findOne({ where: { leadId: taskLeadId } });
+
+          if (existingFollowUp) {
+              console.log(`Existing FollowUp found for taskLeadId: ${taskLeadId}. Updating FollowUp.`);
+              await followUpRepository.update(
+                  { leadId: taskLeadId },
+                  {
+                      dynamicLead: { ...existingTask.DynamicData, ...data },
+                      updated_at: new Date(),
+                  }
+              );
+              console.log('FollowUp updated successfully.');
+          } else {
+              console.log(`No FollowUp found for taskLeadId: ${taskLeadId}. Creating new FollowUp.`);
+              await followUpRepository.save({
+                  leadId: taskLeadId,
+                  dynamicLead: { ...existingTask.DynamicData, ...data },
+                  userId: user.id,
+                  created_at: new Date(),
+                  updated_at: new Date(),
+              });
+              console.log('New FollowUp saved successfully.');
+          }
+
+          await agentTaskRepository.update(
+              { leadId: taskLeadId },
+              { DynamicData: { ...existingTask.DynamicData, ...data }, updated_at: new Date() }
+          );
+
+          console.log('Task updated successfully');
+          return { message: 'Task updated successfully and follow-up handled as applicable' };
+      } else if (data.CustomerFeedBack === 'onGoing') {
+          console.log(`Handling 'onGoing' feedback for taskLeadId: ${taskLeadId}`);
+
+          await followUpRepository.delete({ leadId: taskLeadId });
+          await otherDetailRepository.delete({ leadId: taskLeadId });
+
+          const updatedTaskData = { ...existingTask.DynamicData, ...data };
+
+          await agentTaskRepository.update(
+              { leadId: taskLeadId },
+              { DynamicData: updatedTaskData, updated_at: new Date() }
+          );
+
+          console.log('Task updated successfully');
+          return { message: 'Task updated successfully and follow-up and other feedback removed as applicable' };
+      } else if (data.CustomerFeedBack === 'other') {
+          console.log(`Handling 'Other' feedback for taskLeadId: ${taskLeadId}`);
+
+          const existingFollowUp = await followUpRepository.findOne({ where: { leadId: taskLeadId } });
+          if (existingFollowUp) {
+              console.log(`Removing existing FollowUp for taskLeadId: ${taskLeadId}`);
+              await followUpRepository.delete({ leadId: taskLeadId });
+          }
+
+          if (data.OtherDetail) {
+              const existingOtherDetail = await otherDetailRepository.findOne({ where: { leadId: taskLeadId } });
+
+              if (existingOtherDetail) {
+                  console.log(`Existing OtherDetail found for taskLeadId: ${taskLeadId}. Updating OtherDetail.`);
+                  await otherDetailRepository.update(
+                      { leadId: taskLeadId },
+                      {
+                          dynamicLead: { ...existingTask.DynamicData, ...data },
+                          updated_at: new Date(),
+                      }
+                  );
+                  console.log('OtherDetail updated successfully.');
+              } else {
+                  console.log(`No OtherDetail found for taskLeadId: ${taskLeadId}. Creating new OtherDetail.`);
+                  await otherDetailRepository.save({
+                      leadId: taskLeadId,
+                      dynamicLead: { ...existingTask.DynamicData, ...data },
+                      created_at: new Date(),
+                      updated_at: new Date(),
+                  });
+                  console.log('New OtherDetail saved successfully.');
+              }
+          }
+
+          await agentTaskRepository.update(
+              { leadId: taskLeadId },
+              { DynamicData: { ...existingTask.DynamicData, ...data }, updated_at: new Date() }
+          );
+
+          console.log('Task updated successfully');
+          return { message: 'Task updated successfully and other feedback handled as applicable' };
       }
-    } else if (data.CustomerFeedBack === 'other') {
-      // Handle 'other' feedback
-      existingTask.DynamicData.OtherDetail = data.OtherDetail;
 
-      // Delete FollowUp for 'other' feedback if exists
-      const existingFollowUp = await followUpRepository.findOne({ where: { leadId: taskLeadId } });
-      if (existingFollowUp) {
-        console.log(`Deleting FollowUp for taskLeadId: ${taskLeadId}`);
-        await followUpRepository.delete({ leadId: taskLeadId });
-      }
-
-      // Update Other repository
-      const existingOther = await otherRepository.findOne({ where: { leadId: taskLeadId } });
-      if (existingOther) {
-        await otherRepository.update({ leadId: taskLeadId }, { dynamicLead: { ...existingOther.dynamicLead, ...data } });
-      } else {
-        await otherRepository.save({
-          leadId: taskLeadId,
-          dynamicLead: { ...existingTask.DynamicData, ...data },
-          userId: user.id,
-          created_at: new Date(),
-          updated_at: new Date()
-        });
-      }
-    } else if (data.CustomerFeedBack === 'onGoing') {
-      // Handle 'onGoing' feedback
-      delete existingTask.DynamicData.Followupdetail; // Remove Followupdetail if it exists
-      delete existingTask.DynamicData.OtherDetail;    // Remove OtherDetail if it exists
-
-      // Delete FollowUp and Other data for the taskLeadId
-      const existingFollowUp = await followUpRepository.findOne({ where: { leadId: taskLeadId } });
-      if (existingFollowUp) {
-        console.log(`Deleting FollowUp for taskLeadId: ${taskLeadId}`);
-        await followUpRepository.delete({ leadId: taskLeadId });
-      }
-
-      const existingOther = await otherRepository.findOne({ where: { leadId: taskLeadId } });
-      if (existingOther) {
-        console.log(`Deleting Other for taskLeadId: ${taskLeadId}`);
-        await otherRepository.delete({ leadId: taskLeadId });
-      }
-    }
-
-    // Update task with the merged data
-    const updatedTaskData = { ...existingTask.DynamicData, ...data };
-    if (['onGoing', 'hangUp', 'other'].includes(updatedTaskData.CustomerFeedBack)) {
-      delete updatedTaskData.Followupdetail;  // Clean up unnecessary fields
-    }
-
-    await agentTaskRepository.update(
-      { leadId: taskLeadId },
-      { DynamicData: updatedTaskData, updated_at: new Date() }
-    );
-
-    console.log('Task updated successfully');
-    return { message: 'Task updated successfully' };
-
+      return { message: 'No CustomerFeedBack provided or not handled' };
   } catch (error) {
-    console.error('Error updating follow-up or task:', error.message);
-    throw new Error('Failed to update follow-up or task.');
+      console.error('Error updating FollowUp or Task:', error);
+      throw new Error('Error updating FollowUp or Task');
   }
-},
+}
+
+,
+  
+
+
+
+
+
+
+
+
 
 
 

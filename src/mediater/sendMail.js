@@ -59,7 +59,7 @@ const sendVerificationEmail = async (email, verificationToken, name) => {
               display: inline-block;
               padding: 10px 20px;
               font-size: 16px;
-              color: #ffffff;
+              color: #000000; /* Set text color to black */
               background-color: #007bff;
               text-decoration: none;
               border-radius: 5px;
@@ -69,14 +69,6 @@ const sendVerificationEmail = async (email, verificationToken, name) => {
               text-align: center;
               color: #999;
               font-size: 12px;
-            }
-            @media only screen and (max-width: 600px) {
-              .container {
-                padding: 10px;
-              }
-              .btn {
-                font-size: 14px;
-              }
             }
           </style>
         </head>
@@ -88,7 +80,7 @@ const sendVerificationEmail = async (email, verificationToken, name) => {
             <div class="content">
               <h3>Hello ${name},</h3>
               <p>Click the button below to verify your email address and activate your account.</p>
-              <a href="${verificationUrl}" class="btn">Verify Your Email</a>
+              <a href="${verificationUrl}" class="btn" style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #000000; background-color: #007bff; text-decoration: none; border-radius: 5px; margin-top: 10px;">Verify Your Email</a>
             </div>
             <div class="footer">
               <p>If you did not create an account, no further action is required.</p>
@@ -102,7 +94,7 @@ const sendVerificationEmail = async (email, verificationToken, name) => {
         {
           filename: 'logo.png',
           path: path.join(__dirname, '../public/images/Logo.png'),
-          cid: 'logo', 
+          cid: 'logo',
         },
       ],
     };
