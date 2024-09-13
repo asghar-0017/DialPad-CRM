@@ -19,8 +19,8 @@ const followUpService = {
   }
   },
 
-  updateFollowUp: async (leadId, data) => {
-    return await followUpRepository.updateFollowUpOrTask(leadId, data);
+  updateFollowUp: async (leadId, data,user) => {
+    return await followUpRepository.updateFollowUpOrTask(leadId, data,user);
   },
 
   deleteFollowUp: async (id,user) => {

@@ -32,12 +32,6 @@ module.exports = new EntitySchema({
     },
   },
   relations: {
-    // lead: {
-    //   type: "many-to-one",
-    //   target: "lead",
-    //   joinColumn: { name: "leadId", referencedColumnName: "leadId" },
-    //   onDelete: "CASCADE",
-    // },
     agent: {
       type: "many-to-one",
       target: "agent",

@@ -101,7 +101,8 @@ getallSpecifiFollowUpByAgentId: async (req, res) => {
       const { leadId } = req.params;
       console.log("Leead Id",leadId)
       const followUpData = req.body;
-      const updatedFollowUp = await followUpService.updateFollowUp(leadId, followUpData);
+      const user=req.user
+      const updatedFollowUp = await followUpService.updateFollowUp(leadId, followUpData,user);
       if (updatedFollowUp) {
         io.emit('receive_message', updatedFollowUp);
         res.status(200).json({ message: 'Follow-up updated successfully', data:updatedFollowUp });

@@ -863,11 +863,14 @@ verifyEmail: async (req, res) => {
         const data = await agentService.getAssignTaskToAgentByTaskNO(agentId, taskNo);
         if (!data || data.length === 0) {
           return res.status(404).send({ message: 'No tasks found for this agent.' });
+
         }
+        console.log("data",data[0].status)
             const transformedData = data.map(task => {
           if (task.DynamicData) {
             return {
               taskNo,
+              status:data[0].status,
               ...task.DynamicData,
             };
           }
