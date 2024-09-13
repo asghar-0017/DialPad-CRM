@@ -89,41 +89,6 @@ findByEmail: async (email) => {
   },
   
 
-
-
-  // assignTaskToAgentById: async (agentId, taskData, taskId, taskNo) => {
-  //   try {
-  //     console.log("AgentID in repo:", agentId);
-  //     console.log("Task Id in Repo:", taskId);
-  //     console.log("Task Data in Repo:", taskData);
-  
-  //     const agentRepository = dataSource.getRepository('agent');
-  //     const agentTaskRepository = dataSource.getRepository(agentTask);
-  
-  //     const agent = await agentRepository.findOne({ where: { agentId } });
-  
-  //     if (!agent) {
-  //       console.log("No agent found with ID:", agentId);
-  //       return null;
-  //     }
-  
-  //     let taskEntity = {
-  //       agentId,
-  //       taskId,
-  //       taskNo, // Pass the task number from the controller
-  //       DynamicData: taskData
-  //     };
-  
-  //     taskEntity = agentTaskRepository.create(taskEntity);
-  //     await agentTaskRepository.save(taskEntity);
-  
-  //     return taskEntity;
-  //   } catch (error) {
-  //     console.error('Error in assignTaskToAgentById:', error.message);
-  //     throw new Error('Error assigning task to agent');
-  //   }
-  // },
-
 assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
     try {
         const agentRepository = dataSource.getRepository('agent');
@@ -131,37 +96,26 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
         const followUpRepository = dataSource.getRepository(FollowUp);
         const otherRepository = dataSource.getRepository(Other);
 
-        // Check if agent exists
         const agent = await agentRepository.findOne({ where: { agentId } });
         if (!agent) {
             console.log("No agent found with ID:", agentId);
             return null;
         }
 
-        // Create task entity with dynamic data
         let taskEntity = {
             agentId,
             leadId,
-            taskNo, // Task number passed from the controller
-            DynamicData: taskData, // Dynamic data passed in taskData
+            taskNo,
+            DynamicData: taskData, 
         };
-        console.log("TaskEntity:", taskEntity);
-        console.log("Task Data:", taskData);
-
-        // Save task in agentTask repository
         taskEntity = agentTaskRepository.create(taskEntity);
         await agentTaskRepository.save(taskEntity);
-
-        // Conditionally save dynamic data in respective repositories
         if (taskData.CustomerFeedBack === 'followUp') {
             const followUpData = {
                 dynamicLead: taskData,
                 agentId: taskData.agentId,
                 leadId: leadId,
             };
-            console.log("FollowUp Data:", followUpData);
-
-            // Save follow-up data in FollowUp repository
             const followUpEntity = followUpRepository.create(followUpData);
             await followUpRepository.save(followUpEntity);
             console.log("Task saved in FollowUp repository");
@@ -173,12 +127,8 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
                 agentId: taskData.agentId,
                 leadId: leadId,
             };
-            console.log("Other Data:", otherData);
-
-            // Save other data in Other repository
             const otherEntity = otherRepository.create(otherData);
             await otherRepository.save(otherEntity);
-            console.log("Task saved in Other repository");
         }
 
         return taskEntity;
@@ -187,11 +137,8 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
         console.error('Error in assignTaskToAgentById:', error.message);
         throw new Error('Error assigning task to agent');
     }
-}
-,
+},
 
-
-  
   
   getAssignTaskToAgent: async () => {
     try {
@@ -251,110 +198,107 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
   },
 
 
-  updateAssignTaskToAgentById: async ({ data, leadId, user }) => {
-    try {
-        if (!leadId) {
-            throw new Error('leadId is required');
-        }
-        console.log("Data in Repo", data);
 
-        const agentTaskRepository = dataSource.getRepository(agentTask);
-        const followUpRepository = dataSource.getRepository(FollowUp);
-        const otherRepository = dataSource.getRepository(Other);
-
-        // Fetch the existing task data
-        const existingTask = await agentTaskRepository.findOne({ where: { leadId } });
-
-        if (!existingTask) {
-            throw new Error('Task not found');
-        }
-        console.log("Task Data in Repo", existingTask);
-
-        const taskFeedback = existingTask.DynamicData?.CustomerFeedBack;
-        console.log('FeedbackType from task:', taskFeedback);
-
-        // Check if `CustomerFeedBack` is `followUp`
-        if (taskFeedback === 'followUp') {
-            const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
-            const updatedFollowUpData = existingFollowUp
-                ? { ...existingTask.DynamicData, ...data }
-                : { ...data };
-
-            if (existingFollowUp) {
-                await followUpRepository.update({ leadId }, { dynamicLead: updatedFollowUpData });
-            } else {
-                await followUpRepository.save({
-                    leadId,
-                    dynamicLead: data,
-                    userId: user.id,
-                });
-            }
-        } 
-        // Check if `CustomerFeedBack` is `other`
-        else if (taskFeedback === 'other') {
-            const existingOther = await otherRepository.findOne({ where: { leadId } });
-            const updatedOtherData = existingOther
-                ? { ...existingOther.DynamicData, ...data }
-                : { ...data };
-
-            if (existingOther) {
-                await otherRepository.update({ leadId }, { DynamicData: updatedOtherData });
-            } else {
-                await otherRepository.save({
-                    leadId,
-                    dynamicLead: data,
-                    userId: user.id,
-                });
-            }
-        }
-
-        // Check if body data has 'onGoing' and the existing task has 'followUp' and 'followUpDetail'
-        if (data.CustomerFeedBack === 'onGoing' && taskFeedback === 'followUp') {
-            if (existingTask.DynamicData.followUp && existingTask.DynamicData.followUpDetail) {
-                delete existingTask.DynamicData.followUp;
-                delete existingTask.DynamicData.followUpDetail;
-            }
-        }
-
-        // Remove follow-up or other details if status is 'onGoing', 'hangUp', or 'other'
-        if (['onGoing', 'hangUp', 'other'].includes(data.CustomerFeedBack)) {
-            const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
-            if (existingFollowUp) {
-                await followUpRepository.delete({ leadId });
-            }
-
-            const existingOther = await otherRepository.findOne({ where: { leadId } });
-            if (existingOther) {
-                await otherRepository.delete({ leadId });
-            }
-        }
-
-        // Merge new data into task data
-        const updatedTaskData = { ...existingTask.DynamicData, ...data };
-
-        // Remove unnecessary details from the task based on feedback
-        if (['onGoing', 'hangUp', 'other'].includes(updatedTaskData.FeedbackType)) {
-            delete updatedTaskData.followUpDetail;
-            delete updatedTaskData.otherDetail;
-        }
-
-        // Update the task with the merged data
-        await agentTaskRepository.update({ leadId }, { DynamicData: updatedTaskData, updated_at: new Date() });
-        console.log("Updated Task:", updatedTaskData);
-
-        // Fetch the updated task
-        const updatedTask = await agentTaskRepository.findOne({ where: { leadId } });
-
-        return updatedTask;
-
-    } catch (error) {
-        console.error('Error updating task for agent:', error.message);
-        throw new Error('Failed to update task for agent.');
+updateAssignTaskToAgentById: async ({ data, leadId, user }) => {
+  try {
+    if (!leadId) {
+      throw new Error('leadId is required');
     }
+
+    console.log("Data in Repo", data);
+
+    const agentTaskRepository = dataSource.getRepository(agentTask);
+    const followUpRepository = dataSource.getRepository(FollowUp);
+    const otherRepository = dataSource.getRepository(Other);
+
+    const existingTask = await agentTaskRepository.findOne({ where: { leadId } });
+
+    if (!existingTask) {
+      throw new Error('Task not found');
+    }
+
+    const currentFeedback = existingTask.DynamicData?.CustomerFeedBack;
+    console.log('Current Feedback from task:', currentFeedback);
+
+    if (data.CustomerFeedBack === 'followUp') {
+      delete existingTask.DynamicData.OtherDetail;
+      delete existingTask.DynamicData.onGoing;
+      const existingOther = await otherRepository.findOne({ where: { leadId } });
+      if (existingOther) {
+        await otherRepository.delete({ leadId });
+      }
+      existingTask.DynamicData.FollowUpDetail = data.FollowUpDetail;
+      const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
+      if (existingFollowUp) {
+        await followUpRepository.update(
+          { leadId },
+          { dynamicLead: { ...existingFollowUp.dynamicLead, ...data } }
+        );
+      } else {
+        await followUpRepository.save({
+          leadId,
+          dynamicLead: existingTask.DynamicData,
+          userId: user.id,
+        });
+      }
+
+    } else if (data.CustomerFeedBack === 'other') {
+      existingTask.DynamicData.OtherDetail = data.OtherDetail;
+      const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
+      if (existingFollowUp) {
+        await followUpRepository.delete({ leadId });
+      }
+      const existingOther = await otherRepository.findOne({ where: { leadId } });
+      const updatedOtherData = existingOther
+        ? { ...existingOther.dynamicLead, ...data }
+        : { ...data };
+
+      if (existingOther) {
+        await otherRepository.update({ leadId }, { dynamicLead: updatedOtherData });
+      } else {
+        await otherRepository.save({
+          leadId,
+          dynamicLead: existingTask.DynamicData,
+          userId: user.id,
+        });
+      }
+
+    } else if (data.CustomerFeedBack === 'onGoing') {
+      delete existingTask.DynamicData.OtherDetail;
+      const existingOther = await otherRepository.findOne({ where: { leadId } });
+      if (existingOther) {
+        await otherRepository.delete({ leadId });
+      }
+      const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
+      if (existingFollowUp) {
+        await followUpRepository.delete({ leadId });
+      }
+    }
+    const updatedTaskData = { ...existingTask.DynamicData, ...data };
+    if (['onGoing', 'hangUp', 'other'].includes(updatedTaskData.CustomerFeedBack)) {
+      delete updatedTaskData.FollowUpDetail;
+    }
+    await agentTaskRepository.update(
+      { leadId },
+      { DynamicData: updatedTaskData, updated_at: new Date() }
+    );
+    const updatedTask = await agentTaskRepository.findOne({ where: { leadId } });
+    return updatedTask;
+
+  } catch (error) {
+    console.error('Error updating task for agent:', error.message);
+    throw new Error('Failed to update task for agent.');
+  }
 },
 
 
-  
+
+
+
+
+
+
+
   
   deleteAssignTaskToAgentByTaskIds: async (taskId) => {
     try {
@@ -404,49 +348,6 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
     }
   },
   
-  // assignReviewToAgentById: async (agentId,review,reviewId) => {
-  //   try {
-  //     console.log("AgentID in repo",agentId)
-  //     const agentRepository = dataSource.getRepository('agent');
-  //     const agent = await agentRepository.findOne({ where: { agentId } });
-  
-  //     if (!agent) {
-  //       console.log("No agent found with ID:", agentId);
-  //       return null;
-  //     }
-  //     console.log("Agent",agent)
-
-   
-  //     const agentReviewRepository = dataSource.getRepository(agentReview);
-  //     const reviewEntity = agentReviewRepository.create({
-  //       id: reviewId,
-  //       review: review ,
-  //       agent: agent, 
-  //       reviewId:reviewId
-  //     });
-  
-  //     await agentReviewRepository.save(reviewEntity);
-  
-  //     return reviewEntity;
-  //   } catch (error) {
-  //     console.error('Error in assignTaskToAgentById:', error.message);
-  //     throw new Error('Error assigning task to agent');
-  //   }
-  // },
-  // getAssignReviewsToAgentById: async (agentId) => {
-  //   try {
-  //     const agentTaskRepository = dataSource.getRepository(agentReview);
-  //     const review = await agentTaskRepository.find({ where: { agentId } });
-  //     if (review.length > 0) {
-  //       return review;
-  //     } else {
-  //       return []; 
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching tasks:', error);
-  //     throw new Error('Error fetching tasks');
-  //   }
-  // },
   
   getAssignReviewToAgentByReviewId: async (reviewId) => {
     try {
@@ -561,16 +462,14 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
   getAssignReviewsToAgentById: async (agentId, taskNo) => {
     try {
       const agentReviewRepository = dataSource.getRepository('agentReview');
-      
-      // Fetch reviews based on both agentId and taskNo
-      const reviews = await agentReviewRepository.find({
+            const reviews = await agentReviewRepository.find({
         where: { 
-           agentId ,  // Using relation to agent
-           taskNo     // Using relation to task
+           agentId ,  
+           taskNo 
         },
       });
   
-      return reviews.length > 0 ? reviews : []; // Return reviews or an empty array
+      return reviews.length > 0 ? reviews : []; 
     } catch (error) {
       console.error('Error fetching reviews by taskNo:', error.message);
       throw new Error('Error fetching reviews');
@@ -605,14 +504,11 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
   getTaskStatusByTaskNo: async (agentId, taskNo) => {
     try {
       const taskRepository = dataSource.getRepository('agentTask');
-      
-      // Fetch a single task based on agentId and taskNo
       const task = await taskRepository.findOne({ where: { agentId, taskNo } });
-      
-      return task;  // Return the single task object
+      return task; 
     } catch (error) {
-      console.error('Error in getTaskStatusByTaskNo:', error.message);  // Log the error with function context
-      throw new Error('Failed to get task status');  // Throw a user-friendly error message
+      console.error('Error in getTaskStatusByTaskNo:', error.message); 
+      throw new Error('Failed to get task status'); 
     }
   },
   

@@ -1,8 +1,6 @@
-const cloudinary = require('cloudinary').v2; // Ensure cloudinary is properly configured
-const { getRepository } = require('typeorm');
+const cloudinary = require('cloudinary').v2; 
 const dataSource=require('../infrastructure/psql')
-const Image = require('../entities/image'); // Assuming the entity is named Image
-
+const Image = require('../entities/image'); 
 const cloudinaryController = {
 
     uploadImage: async (req, res) => {

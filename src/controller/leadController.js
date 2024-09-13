@@ -37,7 +37,7 @@ const leadController = {
             const data = req.body;
             data.leadId = leadId();
             const user = req.user;
-            if (data.CustomerFeedBack === 'followUp' && !data.followUpDetail) {
+            if (data.CustomerFeedBack === 'followUp' && !data.FollowUpDetail) {
                 return res.status(400).json({ message: 'followUpDetail is required when customer_feedBack is followUp' });
             }
             if (data.CustomerFeedBack === 'other' && !data.otherDetail) {

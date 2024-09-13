@@ -18,8 +18,10 @@ const otherController = {
   
           if (role === 'admin') {
             delete mergedOther.agentId;
+            delete mergedOther.role
           }
             delete mergedOther.customerFeedBack;
+          
             return mergedOther;
         });
           io.emit('receive_message', processedData);
@@ -32,7 +34,6 @@ const otherController = {
       res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
   },
-  
   
   
   getOtherUpById: async (req, res) => {
@@ -106,16 +107,11 @@ getallSpecificOtherByAgentId: async (req, res) => {
   deleteOther: async (req, res) => {
     try {
         const leadId = req.params.leadId;
-        console.log("LeadId:", leadId);
         const user = req.user;
-        console.log("User:", user);
-
         const result = await otherService.deleteOthers(leadId, user);
-        
         if (!result) {
             return res.status(404).json({ message: 'Other not found' });
         }
-
         res.status(200).json({ message: 'Other deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });

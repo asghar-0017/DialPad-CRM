@@ -1,5 +1,4 @@
 const bcrypt = require('bcryptjs');
-const redis = require('../infrastructure/redis');
 const {agentRepository,authAgentRepository} = require('../repository/agentRepository');
 const sendVerificationEmail=require('../mediater/sendMail')
 

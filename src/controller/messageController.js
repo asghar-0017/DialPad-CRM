@@ -27,9 +27,7 @@ const messageController = {
         getAssignMessagesById:async (io,req, res) => {
             try {
               const agentId = req.params.agentId;
-              console.log("AgentId",agentId)
               const data = await messageService.getAssignMessagesToAgentById(agentId);
-              console.log("Data",data)
               if (data === 'Data Not Found') {
                 res.status(404).send({ message: 'Data Not Found' });
               } 
@@ -74,9 +72,7 @@ const messageController = {
               try {
                 const agentId = req.params.agentId;
                 const adminId=req.params.adminId
-                console.log("AgentId",agentId)
                 const data = await messageService.getSendMessagesFromAdminById(agentId,adminId);
-                console.log("Data",data)
                 if (data === 'Data Not Found') {
                   res.status(404).send({ message: 'Data Not Found' });
                 } 
@@ -86,8 +82,6 @@ const messageController = {
                   }
               )
               io.emit('receive_message', Messagedata);
-  
-          
           res.status(201).json({ message: 'success', data:Messagedata });
               } catch (error) {
                 console.error('Error fetching Reviews by agent ID:', error.message);

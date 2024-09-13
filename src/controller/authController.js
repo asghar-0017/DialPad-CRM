@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const authRepository=require('../repository/authRepository')
 const {logger}=require('../../logger');
 const { authAgentRepository, agentRepository } = require('../repository/agentRepository');
+const dotenv=require('dotenv')
+dotenv.config()
 
 require('dotenv').config()
 
@@ -29,7 +31,6 @@ const adminAuth = {
 
   logout: async (req, res) => {
     try {
-        console.log("API Hit: Logout");
 
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -65,7 +66,7 @@ const adminAuth = {
   forgotPassword: async (request, response) => {
     try {
       const { email } = request.body;
-      if (email === "rajaasgharali009@gmail.com") {
+      if (email === process.evv.ADMIN_EMAIL) {
         const code = generateResetCode();
         console.log("Generate code",code)
         await adminService.saveResetCode(code,email);
@@ -109,14 +110,12 @@ const adminAuth = {
 
   authenticate: async (request, response, next) => {
     try {
-      console.log("API hit");
       const authHeader = request.headers.authorization;
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return response.status(401).send({ message: 'No token provided' });
       }
       const token = authHeader.split(' ')[1];
       const isValidToken = await adminService.validateAdminToken(token,next);
-      console.log("Is validate Token",isValidToken)
       if (!isValidToken) {
         next()
         return response.status(401).send({ message: 'Invalid token' });
@@ -124,24 +123,20 @@ const adminAuth = {
 
       const decoded = jwt.verify(token, secretKey);
       const user = await adminService.findUserById(decoded.userName);
-      console.log("User",user)
       if (!user) {
         return response.status(401).send({ message: 'User not found' });
       }
 
       request.user = user;
-      console.log("User", user);
       next();   
     } catch (error) {
       response.status(500).send({ message: 'Internal Server Error', error: error.message });
     }
   },
  
-  
 
   verifyToken: async (request, response) => {
     try {
-      console.log("Aoi hit")
         const authHeader = request.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return response.status(401).send({ code: 401, message: 'No token provided' });

@@ -1,11 +1,13 @@
 // controllers/followUpController.js
 const followUpService = require('../service/followUpService');
+const {agentService}=require('../service/agentService')
 
 const followUpController = {
 
   getAllFollowUps: async (io, req, res) => {
     try {
       const followUps = await followUpService.getAllFollowUps();
+
   
       if (!followUps || followUps.length === 0) {
         return res.status(404).json({ message: 'No follow-ups found' });
@@ -24,6 +26,7 @@ const followUpController = {
         // If the role is 'admin', remove agentId
         if (mergedFollowUp.role === 'admin') {
           delete mergedFollowUp.agentId; // Remove agentId for admins
+          delete mergedFollowUp.role
         }
   
         // Return the merged object

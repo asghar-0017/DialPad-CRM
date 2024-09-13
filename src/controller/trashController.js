@@ -35,6 +35,7 @@ const trashController = {
             return res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }
     },
+
     getLeadOtherTrash: async (req, res) => {
         try {
           const { role } = req.user;
@@ -104,7 +105,6 @@ const trashController = {
     getLeadById: async (req, res) => {
         try {
             const leadId = req.params.leadId;
-            console.log("LeadId",leadId)
             const data = await trashService.leadGetServiceById(leadId);
             if (data) {
                 if (data && data.customer_feedBack !== 'followUp') {
@@ -124,11 +124,8 @@ const trashController = {
     },
     retrieveLeadFromTrash:async(req,res)=>{
         try{
-            console.log("Api Hit")
             const leadId = req.params.leadId;
-            console.log("leadId",leadId)
             const checkDataIsInLead=await trashRepository.getLeadDataById(leadId);
-            console.log("Data in Trash",checkDataIsInLead)
             const leadTrashRepository = dataSource.getRepository('leadsTrash');  
 
             if(checkDataIsInLead){
