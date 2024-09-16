@@ -132,7 +132,7 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
                       console.log('New OtherDetail saved successfully.');
                   }
               }
-          } else if (data.CustomerFeedBack === 'onGoing') {
+          } else if (data.CustomerFeedBack === 'onGoing' || data.CustomerFeedBack === 'voiceMail' || data.CustomerFeedBack === 'hangUp') {
               console.log(`Handling 'onGoing' feedback for leadId: ${taskLeadId}`);
 
               await followUpRepository.delete({ leadId: taskLeadId });
@@ -199,7 +199,7 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
 
           console.log('Task updated successfully');
           return { message: 'Task updated successfully and follow-up handled as applicable' };
-      } else if (data.CustomerFeedBack === 'onGoing') {
+      } else if (data.CustomerFeedBack === 'onGoing' || data.CustomerFeedBack === 'voiceMail' || data.CustomerFeedBack === 'hangUp') {
           console.log(`Handling 'onGoing' feedback for taskLeadId: ${taskLeadId}`);
 
           await followUpRepository.delete({ leadId: taskLeadId });

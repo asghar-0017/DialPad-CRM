@@ -17,11 +17,9 @@ const leadService = {
           } else if (user.role === 'admin') {
             data.role = 'admin';
           }
+              
       
-          const leadId = await leadIdGenerator();  
-          
-      
-          const lead = await leadRepository.saveLead(user.role, leadId,{
+          const lead = await leadRepository.saveLead(user.role, data.leadId,{
             dynamicLead: data,  
             role: user.role,
             agentId: data.agentId || null,
@@ -34,7 +32,7 @@ const leadService = {
             const followUpData = {
               dynamicLead: data,  
               agentId: data.agentId,
-              leadId:leadId,
+              leadId:data.leadId,
 
             };
             console.log("FollouYP",followUpData)
@@ -46,7 +44,7 @@ const leadService = {
             const otherData = {
                 dynamicLead: data, 
                 agentId: data.agentId,
-                leadId:leadId,
+                leadId:data.leadId,
 
             };
             console.log("Other",otherData)

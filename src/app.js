@@ -70,25 +70,21 @@ app.use((err, req, res, next) => {
   next();
 });
 
-// Track online agents and admins
-const onlineAgents = new Map(); // Map to store agentId and their socketId
-const onlineAdmins = new Map(); // Map to store adminId and their socketId
+const onlineAgents = new Map(); 
+const onlineAdmins = new Map(); 
 
 io.on('connection', (socket) => {
   console.log(`A user connected: ${socket.id}`);
   socket.on('agent_connected', (agentId) => {
-    onlineAgents.set(agentId, socket.id); // Store agent ID with socket ID
+    onlineAgents.set(agentId, socket.id);
     console.log(`Agent ${agentId} is online`);
-    // Notify all connected clients about online agents
     io.emit('online_agents', Array.from(onlineAgents.keys()));
   }); 
 
-  // Listen for admin connection with their admin ID
   socket.on('admin_connected', (adminId) => {
-    onlineAdmins.set(adminId, socket.id); // Store admin ID with socket ID
+    onlineAdmins.set(adminId, socket.id); 
     logger.info(`Admin ${adminId} is online`);
 
-    // Notify all agents that the admin is online
     io.emit('admin_online', { adminId, online: true });
   });
 
@@ -97,29 +93,24 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('receive_message', data);
   });
 
-  // On user disconnect (both agent or admin)
   socket.on('disconnect', () => {
-    // Handle agent disconnection
     for (const [agentId, socketId] of onlineAgents.entries()) {
       if (socketId === socket.id) {
-        onlineAgents.delete(agentId); // Remove agent from the list
+        onlineAgents.delete(agentId); 
         console.log(`Agent ${agentId} is offline`);
         break;
       }
     }
   
-    // Handle admin disconnection
     for (const [adminId, socketId] of onlineAdmins.entries()) {
       if (socketId === socket.id) {
-        onlineAdmins.delete(adminId); // Remove admin from the list
+        onlineAdmins.delete(adminId); 
         logger.info(`Admin ${adminId} is offline`);
-        io.emit('admin_online', { adminId, online: false }); // Notify that admin is offline
+        io.emit('admin_online', { adminId, online: false });
         break;
       }
     }
-  
-    // Broadcast the updated list of online agents
-    io.emit('online_agents', Array.from(onlineAgents.keys()));
+      io.emit('online_agents', Array.from(onlineAgents.keys()));
     console.log(`User disconnected: ${socket.id}`);
   });
   

@@ -323,11 +323,61 @@ updateAssignTaskToAgentById: async ({ data, leadId, user }) => {
     }
   },
 
+  // deleteAssignTaskToAgentByTaskId: async (agentId, taskNo) => {
+  //   try {
+  //     const agentTaskRepository = dataSource.getRepository(agentTask);
+  //     const agentReviewRepository = dataSource.getRepository(agentReview);
+  
+  //     // Fetch the tasks assigned to the agent with the provided task number
+  //     const tasksToDelete = await agentTaskRepository.find({
+  //       where: {
+  //         agentId,
+  //         taskNo
+  //       }
+  //     });
+  
+  //     if (tasksToDelete.length === 0) {
+  //       return 'Task Data Not Found';
+  //     }
+  
+  //     // Remove the found tasks
+  //     const deleteTaskResult = await agentTaskRepository.remove(tasksToDelete);
+  
+  //     // Check for reviews related to the agent and task
+  //     const reviewsToDelete = await agentReviewRepository.find({
+  //       where: {
+  //         agentId,
+  //         taskNo
+  //       }
+  //     });
+  
+  //     if (reviewsToDelete.length > 0) {
+  //       await agentReviewRepository.remove(reviewsToDelete);
+  //     }
+  
+  //     return {
+  //       message: 'Task and associated reviews deleted successfully',
+  //       deletedTasks: deleteTaskResult,
+  //       deletedReviews: reviewsToDelete.length > 0 ? reviewsToDelete : 'No reviews found'
+  //     };
+  
+  //   } catch (error) {
+  //     console.error('Error deleting task and reviews for agent:', error.message);
+  //     throw new Error('Error deleting task and reviews for agent');
+  //   }
+  // },
+  
   deleteAssignTaskToAgentByTaskId: async (agentId, taskNo) => {
     try {
       const agentTaskRepository = dataSource.getRepository(agentTask);
-  
-      // Find all tasks with the given taskNo and agentId
+      const agentReviewRepository = dataSource.getRepository(agentReview);
+      const followUpRepository = dataSource.getRepository(FollowUp); // Assuming the followUp repository exists
+      const leadsTrashRepository = dataSource.getRepository(leadTrash); // Repository for saving deleted data
+      const otherRepository = dataSource.getRepository(Other); // Assuming otherRepo is mapped to some entity
+
+
+      
+      // Fetch the tasks assigned to the agent with the provided task number
       const tasksToDelete = await agentTaskRepository.find({
         where: {
           agentId,
@@ -335,18 +385,141 @@ updateAssignTaskToAgentById: async ({ data, leadId, user }) => {
         }
       });
   
-      if (tasksToDelete.length > 0) {
-        // Remove all found tasks
-        const deleteResult = await agentTaskRepository.remove(tasksToDelete);
-        return deleteResult;
-      } else {
-        return 'Data Not Found';
+      if (tasksToDelete.length === 0) {
+        return 'Task Data Not Found';
       }
+  
+      // Fetch associated follow-up data using taskId or other valid property
+      const followUpsToDelete = await followUpRepository.find({
+        where: {
+          agentId, // Or some other valid linking property to followUp
+        }
+      });
+  
+      // Fetch related reviews
+      const reviewsToDelete = await agentReviewRepository.find({
+        where: {
+          agentId,
+          taskNo
+        }
+      });
+
+      const otherDataToDelete = await otherRepository.find({
+        where: {
+          agentId,
+        }
+      });
+  
+      // Prepare data to save into leadsTrash
+      const leadTrashData = tasksToDelete.map(task => ({
+        leadId: task.leadId,
+        agentId: task.agentId,
+        dynamicLead: task.DynamicData, // Assuming DynamicData contains task information
+        created_at: task.created_at,
+        updated_at: task.updated_at
+      }));
+  
+      // Save the tasks, follow-ups, and reviews into leadsTrash before deletion
+      await leadsTrashRepository.save(leadTrashData);
+  
+      // Remove the task, follow-ups, and reviews from the main tables
+      await agentTaskRepository.remove(tasksToDelete);
+  
+      if (followUpsToDelete.length > 0) {
+        await followUpRepository.remove(followUpsToDelete);
+      }
+  
+      if (reviewsToDelete.length > 0) {
+        await agentReviewRepository.remove(reviewsToDelete);
+      }
+  
+      return {
+        message: 'Task, follow-ups, reviews, and associated data deleted successfully and saved in leadsTrash',
+        deletedTasks: tasksToDelete,
+        deletedFollowUps: followUpsToDelete.length > 0 ? followUpsToDelete : 'No follow-ups found',
+        deletedReviews: reviewsToDelete.length > 0 ? reviewsToDelete : 'No reviews found'
+      };
+  
     } catch (error) {
-      console.error('Error deleting task for agent:', error.message);
-      throw new Error('Error deleting task for agent');
+      console.error('Error deleting task, follow-ups, and reviews for agent:', error.message);
+      throw new Error('Error deleting task, follow-ups, and reviews for agent');
+    }
+  },deleteAssignTaskToAgentByTaskId: async (agentId, taskNo) => {
+    try {
+      const agentTaskRepository = dataSource.getRepository(agentTask);
+      const agentReviewRepository = dataSource.getRepository(agentReview);
+      const followUpRepository = dataSource.getRepository(FollowUp);
+      const otherRepository = dataSource.getRepository(Other); // Assuming the repository for "other" data exists
+      const leadsTrashRepository = dataSource.getRepository(leadTrash);
+  
+      const tasksToDelete = await agentTaskRepository.find({
+        where: {
+          agentId,
+          taskNo
+        }
+      });
+  
+      if (tasksToDelete.length === 0) {
+        return 'Task Data Not Found';
+      }
+  
+      const followUpsToDelete = await followUpRepository.find({
+        where: {
+          agentId,
+        }
+      });
+        const reviewsToDelete = await agentReviewRepository.find({
+        where: {
+          agentId,
+          taskNo
+        }
+      });
+  
+      const othersToDelete = await otherRepository.find({
+        where: {
+          agentId,
+        }
+      });
+  
+      const leadTrashData = tasksToDelete.map(task => ({
+        leadId: task.leadId,
+        agentId: task.agentId,
+        dynamicLead: task.DynamicData, 
+        created_at: task.created_at,
+        updated_at: task.updated_at
+      }));
+  
+      await leadsTrashRepository.save(leadTrashData);
+  
+      await agentTaskRepository.remove(tasksToDelete);
+  
+      if (followUpsToDelete.length > 0) {
+        await followUpRepository.remove(followUpsToDelete);
+      }
+  
+      if (reviewsToDelete.length > 0) {
+        await agentReviewRepository.remove(reviewsToDelete);
+      }
+  
+      if (othersToDelete.length > 0) {
+        await otherRepository.remove(othersToDelete);
+      }
+  
+      return {
+        message: 'Task, follow-ups, reviews, others, and associated data deleted successfully and saved in leadsTrash',
+        deletedTasks: tasksToDelete,
+        deletedFollowUps: followUpsToDelete.length > 0 ? followUpsToDelete : 'No follow-ups found',
+        deletedReviews: reviewsToDelete.length > 0 ? reviewsToDelete : 'No reviews found',
+        deletedOthers: othersToDelete.length > 0 ? othersToDelete : 'No others found'
+      };
+  
+    } catch (error) {
+      console.error('Error deleting task, follow-ups, reviews, others for agent:', error.message);
+      throw new Error('Error deleting task, follow-ups, reviews, and others for agent');
     }
   },
+  
+  
   
   
   getAssignReviewToAgentByReviewId: async (reviewId) => {
@@ -517,7 +690,8 @@ updateAssignTaskToAgentById: async ({ data, leadId, user }) => {
   
 };
 const agent = require('../entities/agent');
-const dataSouece=require('../infrastructure/psql')
+const dataSouece=require('../infrastructure/psql');
+const leadTrash = require("../entities/leadTrash");
 
 const authAgentRepository = {
   findByUserName: async (userName) => {
