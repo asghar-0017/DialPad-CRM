@@ -755,14 +755,14 @@ verifyEmail: async (req, res) => {
       try {
         const agentId = req.params.agentId;
         const taskData = req.body;
-        taskData.taskId = taskId(); 
+        taskData.leadId = taskId(); 
         taskData.agentId=agentId
         console.log("agent Id", agentId);
 
         const latestTask = await getLatestTaskForAgent(agentId);
         let taskNo = latestTask ? latestTask.taskNo + 1 : 1; 
     
-        const data = await agentService.assignTaskToAgent(agentId, taskData, taskData.taskId,taskNo);
+        const data = await agentService.assignTaskToAgent(agentId, taskData, taskData.leadId,taskNo);
     
         if (data) {
           res.status(200).send({ message: "success", data: data });

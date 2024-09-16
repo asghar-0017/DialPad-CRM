@@ -108,13 +108,12 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
             taskNo,
             DynamicData: taskData, 
         };
-        console.log("task Entity",taskEntity)
         taskEntity = agentTaskRepository.create(taskEntity);
         await agentTaskRepository.save(taskEntity);
         if (taskData.CustomerFeedBack === 'followUp') {
             const followUpData = {
                 dynamicLead: taskData,
-                agentId: taskEntity.agentId,
+                agentId: taskData.agentId,
                 leadId: leadId,
             };
             const followUpEntity = followUpRepository.create(followUpData);
@@ -125,7 +124,7 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
         if (taskData.CustomerFeedBack === 'other') {
             const otherData = {
                 dynamicLead: taskData,
-                agentId: taskEntity.agentId,
+                agentId: taskData.agentId,
                 leadId: leadId,
             };
             const otherEntity = otherRepository.create(otherData);
@@ -404,7 +403,7 @@ updateAssignTaskToAgentById: async ({ data, leadId, user }) => {
     if (!leadId) {
       throw new Error('leadId is required');
     }
-    console.log("User in Repo",user)
+    console.log("Lead Id",leadId)
 
     const agentTaskRepository = dataSource.getRepository(agentTask);
     const followUpRepository = dataSource.getRepository(FollowUp);
@@ -438,48 +437,39 @@ updateAssignTaskToAgentById: async ({ data, leadId, user }) => {
     if (data.CustomerFeedBack === 'followUp') {
       const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
       if (existingFollowUp) {
-        // Update the existing FollowUp record with new data
         await followUpRepository.update(
           { leadId },
-          {
-            agentId: user.agentId || existingFollowUp.agentId,
-            dynamicLead: { ...existingFollowUp.dynamicLead, ...data }
-          }
+          {agentId:existingTask.agentId},
+          { dynamicLead: { ...existingFollowUp.dynamicLead, ...data } }
         );
       } else {
-        // Create a new FollowUp record
         await followUpRepository.save({
           leadId,
-          agentId: user.agentId || existingTask.DynamicData.agentId,
+          agentId:existingTask.agentId,
           dynamicLead: { ...existingTask.DynamicData, ...data },
           userId: user.id,
         });
       }
-    }
-
-    // Handle Other updates or insertions
-    else if (data.CustomerFeedBack === 'other') {
+    } else if (data.CustomerFeedBack === 'other') {
       const existingOther = await otherRepository.findOne({ where: { leadId } });
       if (existingOther) {
-        // Update the existing Other record with new data
+        // Update the existing Other record
         await otherRepository.update(
           { leadId },
-          {
-            agentId: data.agentId || existingOther.agentId,
-            dynamicLead: { ...existingOther.dynamicLead, ...data }
-          }
+          {agentId:existingTask.agentId},
+          { dynamicLead: { ...existingOther.dynamicLead, ...data } }
         );
       } else {
         // Create a new Other record
         await otherRepository.save({
           leadId,
-          agentId: data.agentId || existingTask.DynamicData.agentId,
+          agentId:existingTask.agentId,
+
           dynamicLead: { ...existingTask.DynamicData, ...data },
           userId: user.id,
         });
       }
     }
-
 
     existingTask.DynamicData = { ...existingTask.DynamicData, ...data };
 
