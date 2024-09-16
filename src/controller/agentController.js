@@ -756,6 +756,7 @@ verifyEmail: async (req, res) => {
         const agentId = req.params.agentId;
         const taskData = req.body;
         taskData.taskId = taskId(); 
+        taskData.agentId=agentId
         console.log("agent Id", agentId);
 
         const latestTask = await getLatestTaskForAgent(agentId);
