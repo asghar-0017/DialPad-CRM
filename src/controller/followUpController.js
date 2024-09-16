@@ -25,7 +25,7 @@ const followUpController = {
   
         // If the role is 'admin', remove agentId
         if (mergedFollowUp.role === 'admin') {
-          delete mergedFollowUp.agentId; // Remove agentId for admins
+          // delete mergedFollowUp.agentId; // Remove agentId for admins
           delete mergedFollowUp.role
         }
   

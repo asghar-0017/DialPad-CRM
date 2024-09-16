@@ -113,7 +113,7 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
         if (taskData.CustomerFeedBack === 'followUp') {
             const followUpData = {
                 dynamicLead: taskData,
-                agentId: taskData.agentId,
+                agentId: taskEntity.agentId,
                 leadId: leadId,
             };
             const followUpEntity = followUpRepository.create(followUpData);
@@ -124,7 +124,7 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
         if (taskData.CustomerFeedBack === 'other') {
             const otherData = {
                 dynamicLead: taskData,
-                agentId: taskData.agentId,
+                agentId: taskEntity.agentId,
                 leadId: leadId,
             };
             const otherEntity = otherRepository.create(otherData);
