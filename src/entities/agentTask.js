@@ -22,6 +22,7 @@ module.exports = new EntitySchema({
     taskNo: {
       type: "int", 
     },
+    
     // deadLine: {
     //   type: "timestamp",
     // },
