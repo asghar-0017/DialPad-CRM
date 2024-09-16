@@ -143,6 +143,6 @@ const trashController = {
             throw error
          }
         }
-};
+}
 
 module.exports = trashController;

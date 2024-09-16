@@ -14,4 +14,4 @@ const followUpRoute = (app,io) => {
 
 };
 
-module.exports = followUpRoute;
+module.exports = followUpRoute
