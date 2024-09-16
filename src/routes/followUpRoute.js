@@ -9,7 +9,7 @@ const followUpRoute = (app,io) => {
     app.get('/get-all-followUp/:agentId',combinedAuthenticate, checkRole(['admin','agent']), followUpController.getallSpecifiFollowUpByAgentId);
 
     
-    app.put('/update-followUp/:leadId', combinedAuthenticate, checkRole(['admin','agent']),(req, res) =>followUpController.updateFollowUp(io, req, res))
+    app.put('/update-followUp-other/:leadId', combinedAuthenticate, checkRole(['admin','agent']),(req, res) =>followUpController.updateFollowUp(io, req, res))
     app.delete('/delete-followUp/:leadId',combinedAuthenticate, checkRole(['admin']), followUpController.deleteFollowUp);
 
 };
