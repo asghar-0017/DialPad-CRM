@@ -778,7 +778,6 @@ verifyEmail: async (req, res) => {
     getAssignTask: async (io, req, res) => {
       try {
         const data = await agentService.getAssignTaskToAgent();
-        console.log("Data in controller", data);
     
         if (data && data.agentTasks && data.agentTasks.length > 0) {
           const filteredData = data.agentTasks.map(task => {
@@ -864,8 +863,8 @@ verifyEmail: async (req, res) => {
     
     getAssignTaskByTaskId: async (req, res) => {
       try {
-        const taskId = req.params.taskId;
-        const task = await agentService.getAssignTaskToAgentByTaskId(taskId);
+        const leadId = req.params.leadId;
+        const task = await agentService.getAssignTaskToAgentByTaskId(leadId);
     
         if (task) {
           res.status(200).send({ message: 'Success', data: task });

@@ -182,10 +182,10 @@ assignTaskToAgentById: async (agentId, taskData, leadId, taskNo) => {
 
   
   
-  getAssignTaskToAgentByTaskId: async (taskId) => {
+  getAssignTaskToAgentByTaskId: async (leadId) => {
     try {
       const agentTaskRepository =  dataSource.getRepository(agentTask);
-      const task = await agentTaskRepository.findOne({ where: { taskId } })
+      const task = await agentTaskRepository.findOne({ where: { leadId } })
       if (task) {
         return task;
       } else {

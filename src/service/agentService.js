@@ -129,9 +129,9 @@ const agentService = {
     }
   },
   
-  getAssignTaskToAgentByTaskId:async(taskId)=>{
+  getAssignTaskToAgentByTaskId:async(leadId)=>{
     try{
-      const data=await agentRepository.getAssignTaskToAgentByTaskId(taskId)
+      const data=await agentRepository.getAssignTaskToAgentByTaskId(leadId)
       return data
     }catch(error){
       throw error
