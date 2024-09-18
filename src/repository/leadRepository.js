@@ -35,111 +35,130 @@ const leadRepository = {
             throw error;
         }
     },
-    // updateLeadData: async ({ data, leadId, user }) => {
-    //     try {
-    //         if (!leadId) {
-    //             throw new Error('leadId is required');
-    //         }
-    //         console.log("Data in Repo", data);
+    updateLeadData: async ({ data, leadId, user }) => {
+        try {
+            if (!leadId) {
+                throw new Error('leadId is required');
+            }
+            console.log("Data in Repo", data);
     
-    //         const leadRepository = dataSource.getRepository(Lead);
-    //         const followUpRepository = dataSource.getRepository(FollowUp);
-    //         const otherRepository = dataSource.getRepository(other);
+            const leadRepository = dataSource.getRepository(Lead);
+            const followUpRepository = dataSource.getRepository(FollowUp);
+            const otherRepository = dataSource.getRepository(other);
     
-    //         // Fetch the lead data based on the user's role
-    //         let lead;
-    //         if (user.role === 'agent') {
-    //             lead = await leadRepository.findOne({ where: { leadId, agentId: user.agentId } });
-    //         } else if (user.role === 'admin') {
-    //             lead = await leadRepository.findOne({ where: { leadId } });
-    //         }
+            // Fetch the lead data based on the user's role
+            let lead;
+            if (user.role === 'agent') {
+                lead = await leadRepository.findOne({ where: { leadId, agentId: user.agentId } });
+            } else if (user.role === 'admin') {
+                lead = await leadRepository.findOne({ where: { leadId } });
+            }
     
-    //         if (!lead) {
-    //             throw new Error('Lead not found or does not belong to the agent');
-    //         }
-    //         console.log("Lead Data in Repo", lead);
+            if (!lead) {
+                throw new Error('Lead not found or does not belong to the agent');
+            }
+            console.log("Lead Data in Repo", lead);
     
-    //         // Handle customer feedback logic
-    //         const customerFeedBack = lead.dynamicLead?.CustomerFeedBack;
-    //         console.log('CustomerFeedBack from lead:', customerFeedBack);
+            // Handle customer feedback logic
+            const customerFeedBack = lead.dynamicLead?.CustomerFeedBack;
+            console.log('CustomerFeedBack from lead:', customerFeedBack);
+
     
-    //         // Handle 'followUp' feedback
-    //         if (customerFeedBack === 'followUp') {
-    //             const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
-    //             const updatedFollowUpData = existingFollowUp
-    //                 ? { ...existingFollowUp.dynamicLead, ...data }
-    //                 : { ...data };
+            // Handle 'followUp' feedback
+            if (customerFeedBack === 'followUp') {
+                const existingOther=await otherRepository.findOne({where:{leadId}})
+                if(existingOther){
+                    await otherRepository.delete({ leadId });
+                }
+                const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
+                const updatedFollowUpData = existingFollowUp
+                    ? { ...existingFollowUp.dynamicLead, ...data }
+                    : { ...data };
     
-    //             if (existingFollowUp) {
-    //                 await followUpRepository.update({ leadId }, { dynamicLead: updatedFollowUpData });
-    //             } else {
-    //                 await followUpRepository.save({
-    //                     leadId: lead.leadId,
-    //                     dynamicLead: data,
-    //                     agentId: user.agentId,
-    //                 });
-    //             }
-    //         }
-    //         else if (customerFeedBack === 'other') {
-    //             const existingOther = await otherRepository.findOne({ where: { leadId } });
-    //             const updatedOtherData = existingOther
-    //                 ? { ...existingOther.dynamicLead, ...data }
-    //                 : { ...data };
+                if (existingFollowUp) {
+                    await followUpRepository.update({ leadId }, { dynamicLead: updatedFollowUpData });
+                } else {
+                    await followUpRepository.save({
+                        leadId: lead.leadId,
+                        dynamicLead: data,
+                        agentId: user.agentId,
+                    });
+                }
+            }
+            else if (customerFeedBack === 'other') {
+                const existingfollowUP=await followUpRepository.findOne({where:{leadId}})
+                if(existingfollowUP){
+                    await followUpRepository.delete({ leadId });
+                }
+                const existingOther = await otherRepository.findOne({ where: { leadId } });
+                const updatedOtherData = existingOther
+                    ? { ...existingOther.dynamicLead, ...data }
+                    : { ...data };
     
-    //             if (existingOther) {
-    //                 await otherRepository.update({ leadId }, { dynamicLead: updatedOtherData });
-    //             } else {
-    //                 await otherRepository.save({
-    //                     leadId: lead.leadId,
-    //                     dynamicLead: data,
-    //                     agentId: user.agentId,
-    //                 });
-    //             }
-    //         }
+                if (existingOther) {
+                    await otherRepository.update({ leadId }, { dynamicLead: updatedOtherData });
+                } else {
+                    await otherRepository.save({
+                        leadId: lead.leadId,
+                        dynamicLead: data,
+                        agentId: user.agentId,
+                    });
+                }
+            }
     
-    //         if (['onGoing', 'voiceMail', 'hangUp', 'other'].includes(data.CustomerFeedBack)) {
-    //             const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
-    //             if (existingFollowUp) {
-    //                 await followUpRepository.delete({ leadId });
-    //             }
+            if (['onGoing', 'voiceMail', 'hangUp', 'other'].includes(data.CustomerFeedBack)) {
+                const existingFollowUp = await followUpRepository.findOne({ where: { leadId } });
+                if (existingFollowUp) {
+                    await followUpRepository.delete({ leadId });
+                }
     
-    //             const existingOther = await otherRepository.findOne({ where: { leadId } });
-    //             if (existingOther) {
-    //                 await otherRepository.delete({ leadId });
-    //             }
-    //         }
+                const existingOther = await otherRepository.findOne({ where: { leadId } });
+                if (existingOther) {
+                    await otherRepository.delete({ leadId });
+                }
+            }
     
-    //         // Merge new data into lead data
-    //         const updatedLeadData = { ...lead.dynamicLead, ...data };
+            // Merge new data into lead data
+            const updatedLeadData = { ...lead.dynamicLead, ...data };
+            console.log("Updated Lead Data",updatedLeadData)
     
-    //         // Remove any extra follow-up or other details based on feedback status
-    //         if (['onGoing', 'hangUp', 'voiceMail', 'other'].includes(updatedLeadData.CustomerFeedBack)) {
-    //             delete updatedLeadData.followUpDetail;
-    //             delete updatedLeadData.otherDetail;
-    //         }
+            // Remove any extra follow-up or other details based on feedback status
+            if (['onGoing', 'hangUp', 'voiceMail'].includes(updatedLeadData.CustomerFeedBack)) {
+                delete updatedLeadData.FollowUpDetail;
+                delete updatedLeadData.OtherDetail;
+            }
+            if(updatedLeadData.CustomerFeedBack !== 'followUp'){
+                delete updatedLeadData.FollowUpDetail;
+            }
+            if(updatedLeadData.CustomerFeedBack !== 'other'){
+                delete updatedLeadData.OtherDetail;
+            }
     
-    //         // Update the lead with the merged data
-    //         await leadRepository.update({ leadId }, { dynamicLead: updatedLeadData });
-    //         console.log("Updated Lead:", updatedLeadData);
+            // Update the lead with the merged data
+            await leadRepository.update({ leadId }, { dynamicLead: updatedLeadData });
+            console.log("Updated Lead:", updatedLeadData);
     
-    //         // Handle insertion of follow-up or other data based on new feedback
-    //         const updatedLead = await leadRepository.findOne({ where: { leadId } });
-    //         const updateFeedBack = updatedLead.dynamicLead.CustomerFeedBack;
+            // Handle insertion of follow-up or other data based on new feedback
+            const updatedLead = await leadRepository.findOne({ where: { leadId } });
+            const updateFeedBack = updatedLead.dynamicLead.CustomerFeedBack;
     
-    //         if (updateFeedBack === 'followUp') {
-    //             await followUpRepository.save({ leadId: updatedLead.leadId, dynamicLead: updatedLeadData, agentId: user.agentId });
-    //         } else if (updateFeedBack === 'other') {
-    //             await otherRepository.save({ leadId: updatedLead.leadId, dynamicLead: updatedLeadData, agentId: user.agentId });
-    //         }
+            if (updateFeedBack === 'followUp') {
+                await followUpRepository.save({ leadId: updatedLead.leadId, dynamicLead: updatedLeadData, agentId: user.agentId });
+            } else if (updateFeedBack === 'other') {
+                await otherRepository.save({ leadId: updatedLead.leadId, dynamicLead: updatedLeadData, agentId: user.agentId });
+            }
     
-    //         return updatedLead;
+            return updatedLead;
     
-    //     } catch (error) {
-    //         console.error('Error updating lead data:', error.message);
-    //         throw new Error('Failed to update lead data.');
-    //     }
-    // },
+        } catch (error) {
+            console.error('Error updating lead data:', error.message);
+            throw new Error('Failed to update lead data.');
+        }
+    },
     
+
+
+
     updateAssignTaskToAgentById: async ({ data, taskId, user }) => {
         try {
             if (!taskId) {
@@ -158,10 +177,21 @@ const leadRepository = {
                 throw new Error('Task not found');
             }
             console.log("Task Data in Repo", existingTask);
+
+            existingTask.DynamicData = { ...existingTask.DynamicData, ...data };
+
     
             // Handle feedback logic
             const taskFeedback = existingTask.DynamicData?.FeedbackType;
             console.log('FeedbackType from task:', taskFeedback);
+            
+            if (taskFeedback !== 'followUp') {
+                delete existingTask.DynamicData.FollowUpDetail;
+              }
+          
+              if (taskFeedback !== 'other') {
+                delete existingTask.DynamicData.OtherDetail;
+              }
     
             if (taskFeedback === 'followUp') {
                 const existingFollowUp = await followUpRepository.findOne({ where: { taskId } });
@@ -213,8 +243,8 @@ const leadRepository = {
     
             // Remove any extra follow-up or other details based on feedback status
             if (['onGoing', 'hangUp', 'other'].includes(updatedTaskData.FeedbackType)) {
-                delete updatedTaskData.followUpDetail;
-                delete updatedTaskData.otherDetail;
+                delete updatedTaskData.FollowUpDetail;
+                delete updatedTaskData.OtherDetail;
             }
     
             // Update the task with the merged data

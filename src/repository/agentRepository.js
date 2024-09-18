@@ -419,12 +419,12 @@ updateAssignTaskToAgentById: async ({ data, leadId, user }) => {
     if (previousFeedback !== data.CustomerFeedBack) {
       if (['onGoing', 'voiceMail', 'hangUp'].includes(data.CustomerFeedBack)) {
         delete existingTask.DynamicData.FollowUpDetail;
-        delete existingTask.DynamicData.otherDetail;
+        delete existingTask.DynamicData.OtherDetail;
 
         await followUpRepository.delete({ leadId });
         await otherRepository.delete({ leadId });
       } else if (data.CustomerFeedBack === 'followUp') {
-        delete existingTask.DynamicData.otherDetail;
+        delete existingTask.DynamicData.OtherDetail;
 
         await otherRepository.delete({ leadId });
       } else if (data.CustomerFeedBack === 'other') {

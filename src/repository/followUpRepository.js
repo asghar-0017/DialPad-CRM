@@ -57,6 +57,31 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
       console.log("Existing Task", existingTask);
       const existingLead = await leadRepository.findOne({ where: { leadId: taskLeadId } });
       console.log("Existing Lead", existingLead);
+      if(existingTask){
+
+          existingTask.DynamicData = { ...existingTask.DynamicData, ...data };
+      }
+
+      if (data.CustomerFeedBack !== 'followUp') {
+        if(existingTask){
+
+            delete existingTask.DynamicData.FollowUpDetail;
+        }else{
+
+            delete existingLead.dynamicLead.FollowUpDetail;
+        }
+      }
+  
+      if (data.CustomerFeedBack !== 'other') {
+        if(existingTask){
+
+            delete existingTask.DynamicData.OtherDetail;
+        }else{
+
+            delete existingLead.FollowUpDetail;
+        }
+
+      }
 
       if (!existingTask) {
           console.log(`Task not found for leadId: ${taskLeadId}. Checking lead...`);
@@ -83,7 +108,6 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
                       { leadId: taskLeadId },
                       {
                           dynamicLead: { ...existingLead.dynamicLead, ...data },
-                          updated_at: new Date(),
                       }
                   );
                   console.log('FollowUp updated successfully.');
@@ -93,8 +117,6 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
                       leadId: taskLeadId,
                       dynamicLead: { ...existingLead.dynamicLead, ...data },
                       userId: user.id,
-                      created_at: new Date(),
-                      updated_at: new Date(),
                   });
                   console.log('New FollowUp saved successfully.');
               }
@@ -116,8 +138,7 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
                       await otherDetailRepository.update(
                           { leadId: taskLeadId },
                           {
-                              dynamicLead: { ...existingLead, ...data },
-                              updated_at: new Date(),
+                              dynamicLead: { ...existingLead.dynamicLead, ...data },
                           }
                       );
                       console.log('OtherDetail updated successfully.');
@@ -125,9 +146,7 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
                       console.log(`No OtherDetail found for leadId: ${taskLeadId}. Creating new OtherDetail.`);
                       await otherDetailRepository.save({
                           leadId: taskLeadId,
-                          dynamicLead: { ...existingLead, ...data },
-                          created_at: new Date(),
-                          updated_at: new Date(),
+                          dynamicLead: { ...existingLead.dynamicLead, ...data },
                       });
                       console.log('New OtherDetail saved successfully.');
                   }
@@ -159,7 +178,8 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
 
       if (data.CustomerFeedBack === 'followUp') {
           console.log(`Handling FollowUp for taskLeadId: ${taskLeadId}`);
-
+        console.log("Existing Task in FollowUp",existingTask)
+        console.log("Existing Task in FollowUp",{...existingTask.DynamicData.CustomerFeedBack})
           if (existingTask.DynamicData.OtherDetail) {
               console.log(`Removing OtherDetail from taskLeadId: ${taskLeadId}`);
               delete existingTask.DynamicData.OtherDetail;
@@ -176,7 +196,6 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
                   { leadId: taskLeadId },
                   {
                       dynamicLead: { ...existingTask.DynamicData, ...data },
-                      updated_at: new Date(),
                   }
               );
               console.log('FollowUp updated successfully.');
@@ -186,8 +205,6 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
                   leadId: taskLeadId,
                   dynamicLead: { ...existingTask.DynamicData, ...data },
                   userId: user.id,
-                  created_at: new Date(),
-                  updated_at: new Date(),
               });
               console.log('New FollowUp saved successfully.');
           }
@@ -241,8 +258,6 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
                   await otherDetailRepository.save({
                       leadId: taskLeadId,
                       dynamicLead: { ...existingTask.DynamicData, ...data },
-                      created_at: new Date(),
-                      updated_at: new Date(),
                   });
                   console.log('New OtherDetail saved successfully.');
               }
@@ -256,14 +271,39 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
           console.log('Task updated successfully');
           return { message: 'Task updated successfully and other feedback handled as applicable' };
       }
-
-      return { message: 'No CustomerFeedBack provided or not handled' };
-  } catch (error) {
+      if (existingLead) {
+        console.log("Updating existing lead", existingLead.dynamicLead);
+    
+        let updatedLeadData = { ...existingLead.dynamicLead, ...data };
+    
+        // Remove FollowUpDetail or OtherDetail based on CustomerFeedBack
+        if (data.CustomerFeedBack !== 'followUp') {
+            delete updatedLeadData.FollowUpDetail;
+        }
+        if (data.CustomerFeedBack !== 'other') {
+            delete updatedLeadData.OtherDetail;
+        }
+    
+        // Update the lead in the repository
+        await leadRepository.update(
+            { leadId: taskLeadId },
+            { dynamicLead: updatedLeadData, updated_at: new Date() }
+        );
+    
+        console.log("Lead updated successfully", updatedLeadData);
+    }
+    
+    }
+  
+   catch (error) {
       console.error('Error updating FollowUp or Task:', error);
       throw new Error('Error updating FollowUp or Task');
   }
 }
 
+
+
+  
 ,
   
 

@@ -104,7 +104,14 @@ getallSpecifiFollowUpByAgentId: async (req, res) => {
       const user=req.user
       const updatedFollowUp = await followUpService.updateFollowUp(leadId, followUpData,user);
       if (updatedFollowUp) {
-        io.emit('receive_message', updatedFollowUp);
+        if (updatedFollowUp && updatedFollowUp.CustomerFeedBack !== 'followUp') {
+          delete updatedFollowUp.FollowUpDetail;
+      }
+      if (updatedFollowUp && updatedFollowUp.CustomerFeedBack !== 'other') {
+          delete updatedFollowUp.otherDetail;
+      }
+      io.emit('receive_message', updatedFollowUp);
+
         res.status(200).json({ message: 'Follow-up updated successfully', data:updatedFollowUp });
       } else {
         res.status(404).json({ message: 'Follow-up not found' });
