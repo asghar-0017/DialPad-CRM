@@ -809,6 +809,7 @@ verifyEmail: async (req, res) => {
         if (!data || data.length === 0) {
           return res.status(404).send({ message: 'No tasks found for this agent.' });
         }
+        console.log("Data",data)
     
         
         const transformedData = data.map(task => {
@@ -817,6 +818,9 @@ verifyEmail: async (req, res) => {
               taskNo: task.taskNo, 
               status: task.status, 
               ...task.DynamicData,
+              created_at:task.created_at,
+              updated_at: task.updated_at
+
 
             };
           }
@@ -843,6 +847,7 @@ verifyEmail: async (req, res) => {
           return res.status(404).send({ message: 'No tasks found for this agent.' });
 
         }
+        console.log("Dara",data)
             const transformedData = data.map(task => {
           if (task.DynamicData) {
             return {

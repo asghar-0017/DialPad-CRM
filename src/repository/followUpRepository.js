@@ -155,7 +155,7 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
               }
           } else if (data.CustomerFeedBack === 'onGoing' || data.CustomerFeedBack === 'voiceMail' || data.CustomerFeedBack === 'hangUp') {
               console.log(`Handling 'onGoing' feedback for leadId: ${taskLeadId}`);
-
+3
               await followUpRepository.delete({ leadId: taskLeadId });
               await otherDetailRepository.delete({ leadId: taskLeadId });
 
