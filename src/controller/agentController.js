@@ -40,26 +40,30 @@ const getLatestTaskForAgent=async (agentId) => {
   }
 };
 
+const isPascalCase = (str) => {
+  return /^[A-Z][a-z]+(?:[A-Z][a-z]+)*$/.test(str); // Matches only PascalCase format
+};
+
 const toPascalCase = (str) => {
-  const words = str.split(/[_\s-]+/);
+  if (isPascalCase(str)) {
+    // If already PascalCase, return unchanged
+    return str;
+  }
+
+  // Otherwise, split based on case transitions, underscores, or spaces
+  const words = str.match(/[A-Za-z][a-z]*/g) || []; 
 
   const pascalCaseStr = words
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join('');
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+    .join(''); 
 
-  if (pascalCaseStr.toLowerCase() === 'customer') {
-    return 'CustomerFeedBack'; 
-  }
-  if (pascalCaseStr.toLowerCase() === 'feedback') {
-    return 'CustomerFeedBack'; 
-  }
-  if (pascalCaseStr.toLowerCase() === 'customerfeedback' || pascalCaseStr.toLowerCase() === 'feedbackcustomer') {
+  // Special cases for customer feedback
+  if (['customer', 'feedback', 'customerfeedback', 'feedbackcustomer'].includes(pascalCaseStr.toLowerCase())) {
     return 'CustomerFeedBack'; 
   }
 
   return pascalCaseStr;
 };
-
 
 const convertKeysToPascalCase = (data) => {
   const result = {};
@@ -71,6 +75,8 @@ const convertKeysToPascalCase = (data) => {
   }
   return result;
 };
+
+
 
 
 
@@ -1065,7 +1071,7 @@ verifyEmail: async (req, res) => {
       }
     },
 
-    saveExcelFileData: async (io, req, res) => {
+   saveExcelFileData : async (io, req, res) => {
       if (!req.file) {
         return res.status(400).json({ message: 'Please upload an Excel file.' });
       }
@@ -1077,19 +1083,18 @@ verifyEmail: async (req, res) => {
         const workbook = xlsx.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const results = xlsx.utils.sheet_to_json(sheet);
+        const results = xlsx.utils.sheet_to_json(sheet); // Convert Excel sheet to JSON
     
         if (results.length === 0) {
           return res.status(400).json({ message: 'No data found in the Excel file.' });
         }
     
         const tasksAssigned = [];
-    
         const latestTask = await getLatestTaskForAgent(agentId);
         let initialTaskNo = latestTask ? latestTask.taskNo + 1 : 1;
     
         for (const row of results) {
-          const convertedRow = convertKeysToPascalCase(row);
+          const convertedRow = convertKeysToPascalCase(row); // Convert row keys to PascalCase
           const agent = await agentRepository.getAgentDataById(agentId);
     
           if (agent) {
@@ -1102,18 +1107,19 @@ verifyEmail: async (req, res) => {
             };
     
             if (taskData.PhoneNumber) {
-              taskData.PhoneNumber = String(taskData.PhoneNumber);
+              taskData.PhoneNumber = String(taskData.PhoneNumber); // Convert PhoneNumber to string if exists
             }
     
             const assignedTask = await agentRepository.assignTaskToAgentById(agentId, taskData, leadId, initialTaskNo);
             tasksAssigned.push(assignedTask);
+            initialTaskNo++; // Increment task number for next iteration
           } else {
             console.error("Agent not found for agentId:", agentId);
           }
         }
     
         if (tasksAssigned.length > 0) {
-          io.emit('send_message', tasksAssigned);
+          io.emit('send_message', tasksAssigned); // Emit assigned tasks via WebSocket
           return res.status(200).json({ message: 'Tasks assigned successfully', data: tasksAssigned });
         } else {
           return res.status(400).json({ message: 'No tasks were assigned due to missing data or agent not found.' });
@@ -1122,7 +1128,7 @@ verifyEmail: async (req, res) => {
         console.error('Error processing the Excel file:', error);
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
       } finally {
-        fs.unlinkSync(filePath);
+        fs.unlinkSync(filePath); // Delete the uploaded file after processing
       }
     },
     
