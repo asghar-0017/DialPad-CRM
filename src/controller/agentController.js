@@ -78,8 +78,6 @@ const convertKeysToPascalCase = (data) => {
 
 
 
-
-
 const agentController = {
 
   createAgent: async (io, req, res) => {
@@ -1071,7 +1069,7 @@ verifyEmail: async (req, res) => {
       }
     },
 
-   saveExcelFileData : async (io, req, res) => {
+    saveExcelFileData: async (io, req, res) => {
       if (!req.file) {
         return res.status(400).json({ message: 'Please upload an Excel file.' });
       }
@@ -1083,18 +1081,19 @@ verifyEmail: async (req, res) => {
         const workbook = xlsx.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const results = xlsx.utils.sheet_to_json(sheet); // Convert Excel sheet to JSON
+        const results = xlsx.utils.sheet_to_json(sheet);
     
         if (results.length === 0) {
           return res.status(400).json({ message: 'No data found in the Excel file.' });
         }
     
         const tasksAssigned = [];
+    
         const latestTask = await getLatestTaskForAgent(agentId);
         let initialTaskNo = latestTask ? latestTask.taskNo + 1 : 1;
     
         for (const row of results) {
-          const convertedRow = convertKeysToPascalCase(row); // Convert row keys to PascalCase
+          const convertedRow = convertKeysToPascalCase(row);
           const agent = await agentRepository.getAgentDataById(agentId);
     
           if (agent) {
@@ -1107,19 +1106,18 @@ verifyEmail: async (req, res) => {
             };
     
             if (taskData.PhoneNumber) {
-              taskData.PhoneNumber = String(taskData.PhoneNumber); // Convert PhoneNumber to string if exists
+              taskData.PhoneNumber = String(taskData.PhoneNumber);
             }
     
             const assignedTask = await agentRepository.assignTaskToAgentById(agentId, taskData, leadId, initialTaskNo);
             tasksAssigned.push(assignedTask);
-            initialTaskNo++; // Increment task number for next iteration
           } else {
             console.error("Agent not found for agentId:", agentId);
           }
         }
     
         if (tasksAssigned.length > 0) {
-          io.emit('send_message', tasksAssigned); // Emit assigned tasks via WebSocket
+          io.emit('send_message', tasksAssigned);
           return res.status(200).json({ message: 'Tasks assigned successfully', data: tasksAssigned });
         } else {
           return res.status(400).json({ message: 'No tasks were assigned due to missing data or agent not found.' });
@@ -1128,7 +1126,7 @@ verifyEmail: async (req, res) => {
         console.error('Error processing the Excel file:', error);
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
       } finally {
-        fs.unlinkSync(filePath); // Delete the uploaded file after processing
+        fs.unlinkSync(filePath);
       }
     },
     
