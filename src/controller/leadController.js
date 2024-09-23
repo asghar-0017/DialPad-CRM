@@ -1,5 +1,6 @@
 const leadService = require('../service/leadService');
 const leadId = require('../utils/token');
+const generateId=require('../utils/token')
 const fs = require('fs');
 const path = require('path');
 const xlsx = require('xlsx');
@@ -130,6 +131,7 @@ const leadController = {
           const sheetName = workbook.SheetNames[0];
           const sheet = workbook.Sheets[sheetName];
           const results = xlsx.utils.sheet_to_json(sheet);
+
       
           if (results.length === 0) {
             return res.status(400).json({ message: 'No data found in the Excel file.' });
@@ -141,12 +143,16 @@ const leadController = {
             const leadData = {
               ...convertedRow,
               PhoneNumber: convertedRow.PhoneNumber ? String(convertedRow.PhoneNumber) : undefined,
+              leadId: generateId() // Add leadId as a property
+
             };
+    
             console.log("Lead Data:", leadData);
       
             const assignedLead = await leadService.leadCreateService(leadData, req.user);
             leadCreate.push(assignedLead);
           }
+
       
           if (leadCreate.length > 0) {
             io.emit('send_message', leadCreate);
