@@ -66,9 +66,11 @@ updateFollowUpOrTask: async (taskLeadId, data, user) => {
         if(existingTask){
 
             delete existingTask.DynamicData.FollowUpDetail;
+            delete existingTask.DynamicData.Followupdetail;
         }else{
 
             delete existingLead.dynamicLead.FollowUpDetail;
+            delete existingLead.dynamicLead.Followupdetail;
         }
       }
   

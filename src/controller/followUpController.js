@@ -106,6 +106,7 @@ getallSpecifiFollowUpByAgentId: async (req, res) => {
       if (updatedFollowUp) {
         if (updatedFollowUp && updatedFollowUp.CustomerFeedBack !== 'followUp') {
           delete updatedFollowUp.FollowUpDetail;
+          delete updatedFollowUp.Followupdetail;
       }
       if (updatedFollowUp && updatedFollowUp.CustomerFeedBack !== 'other') {
           delete updatedFollowUp.otherDetail;
