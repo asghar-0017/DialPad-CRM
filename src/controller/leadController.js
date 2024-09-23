@@ -8,28 +8,60 @@ const dataSource = require('../infrastructure/psql');
 const otherDetail = require('../entities/otherDetail');
 const followUp = require('../entities/followUp');
 
+// const toPascalCase = (str) => {
+//     return str
+//       .replace(/\s(.)/g, function (match, group1) {
+//         return group1.toUpperCase();
+//       })
+//       .replace(/^(.)/, function (match, group1) {
+//         return group1.toUpperCase();
+//       })
+//       .replace(/\s+/g, ''); 
+//   };
+  
+//   const convertKeysToPascalCase = (data) => {
+//     const result = {};
+//     for (const key in data) {
+//       if (data.hasOwnProperty(key)) {
+//         const pascalCaseKey = toPascalCase(key);
+//           result[pascalCaseKey] = data[key];
+//       }
+//     }
+//     return result;
+//   };
+  
+const isPascalCase = (str) => {
+  return /^[A-Z][a-z]+(?:[A-Z][a-z]+)*$/.test(str); // Matches only PascalCase format
+};
+
 const toPascalCase = (str) => {
-    return str
-      .replace(/\s(.)/g, function (match, group1) {
-        return group1.toUpperCase();
-      })
-      .replace(/^(.)/, function (match, group1) {
-        return group1.toUpperCase();
-      })
-      .replace(/\s+/g, ''); 
-  };
-  
-  const convertKeysToPascalCase = (data) => {
-    const result = {};
-    for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        const pascalCaseKey = toPascalCase(key);
-          result[pascalCaseKey] = data[key];
-      }
+  if (isPascalCase(str)) {
+    return str;
+  }
+  const words = str.match(/[A-Za-z][a-z]*/g) || []; 
+
+  const pascalCaseStr = words
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+    .join(''); 
+
+  // Special cases for customer feedback
+  if (['customer', 'feedback', 'customerfeedback', 'feedbackcustomer'].includes(pascalCaseStr.toLowerCase())) {
+    return 'CustomerFeedBack'; 
+  }
+
+  return pascalCaseStr;
+};
+
+const convertKeysToPascalCase = (data) => {
+  const result = {};
+  for (const key in data) {
+    if (data.hasOwnProperty(key)) {
+      const pascalCaseKey = toPascalCase(key);
+      result[pascalCaseKey] = data[key];
     }
-    return result;
-  };
-  
+  }
+  return result;
+};
 
 
 const leadController = {
@@ -143,7 +175,7 @@ const leadController = {
             const leadData = {
               ...convertedRow,
               PhoneNumber: convertedRow.PhoneNumber ? String(convertedRow.PhoneNumber) : undefined,
-              leadId: generateId() // Add leadId as a property
+              leadId: generateId()
 
             };
     

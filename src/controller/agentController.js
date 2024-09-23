@@ -46,11 +46,8 @@ const isPascalCase = (str) => {
 
 const toPascalCase = (str) => {
   if (isPascalCase(str)) {
-    // If already PascalCase, return unchanged
     return str;
   }
-
-  // Otherwise, split based on case transitions, underscores, or spaces
   const words = str.match(/[A-Za-z][a-z]*/g) || []; 
 
   const pascalCaseStr = words
