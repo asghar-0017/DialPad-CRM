@@ -72,7 +72,7 @@ getallSpecificOtherByAgentId: async (req, res) => {
         if (role === 'admin') {
           delete mergedOther.agentId;
         }
-        delete mergedOther.customerFeedBack;
+        // delete mergedOther.customerFeedBack;
 
         return mergedOther;
       });

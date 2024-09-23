@@ -82,7 +82,7 @@ getallSpecifiFollowUpByAgentId: async (req, res) => {
           ...otherDetails,
         };
 
-        delete mergedFollowUp.CustomerFeedBack;
+        // delete mergedFollowUp.CustomerFeedBack;
         return mergedFollowUp;
       });
       res.status(200).send({ message: "success", data: processedData });
@@ -106,7 +106,6 @@ getallSpecifiFollowUpByAgentId: async (req, res) => {
       if (updatedFollowUp) {
         if (updatedFollowUp && updatedFollowUp.CustomerFeedBack !== 'followUp') {
           delete updatedFollowUp.FollowUpDetail;
-          delete updatedFollowUp.Followupdetail;
       }
       if (updatedFollowUp && updatedFollowUp.CustomerFeedBack !== 'other') {
           delete updatedFollowUp.otherDetail;
