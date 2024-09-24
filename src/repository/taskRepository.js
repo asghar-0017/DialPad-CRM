@@ -1,11 +1,14 @@
-const dataSource = require('../infrastructure/psql');  // PostgreSQL data source
-const agentsTaskAssign = require('../entities/taskAssignAgents');  // Task assign entity
-const agents = require('../entities/agent');  // Agents entity
-const agentTask = require('../entities/agentTask');  // Agent task entity
-const cron = require('cron');  // Cron library for scheduled jobs
+const dataSource = require('../infrastructure/psql');  
+const agentsTaskAssign = require('../entities/taskAssignAgents');  
+const agents = require('../entities/agent');  
+const agentTask = require('../entities/agentTask'); 
+const followUp = require('../entities/followUp');  
+const other=require('../entities/otherDetail')
+const followUpRepository = dataSource.getRepository(followUp);  
+const otherRepository = dataSource.getRepository(other);  
+const cron = require('cron');  
 
 const taskRepository = {
-  // Upload task to the database
   uploadTaskDb: async (taskData) => {
     try {
       let taskEntity = {
@@ -18,7 +21,7 @@ const taskRepository = {
       throw error;
     }
   },
-
+  
   // Assign tasks to agents
   assignTaskToAgents: async () => {
     try {
@@ -61,6 +64,28 @@ const taskRepository = {
 
             await dataSource.getRepository(agentTask).save(agentTaskEntity);
             await taskRepo.delete({ id: task.id });  // Remove task after assignment
+            
+            // Check and save follow-up data if exists
+            if (task.DynamicData.CustomerFeedBack === 'followUp') {
+              const followUpData = {
+                  dynamicLead: agentTaskEntity,
+                  agentId: agentTaskEntity.agentId,
+                  leadId: agentTaskEntity.leadId,
+              };
+              const followUpEntity = followUpRepository.create(followUpData);
+              await followUpRepository.save(followUpEntity);
+              console.log("Task saved in FollowUp repository");
+            }
+
+            if (task.DynamicData.CustomerFeedBack === 'other') {
+              const otherData = {
+                  dynamicLead: agentTaskEntity,
+                  agentId: agentTaskEntity.agentId,
+                  leadId: agentTaskEntity.leadId,
+              };
+              const otherEntity = otherRepository.create(otherData);
+              await otherRepository.save(otherEntity);
+          }
           }));
           console.log(`Assigned ${taskBatch.length} tasks to agent ${agent.agentId}`);
         }
@@ -99,6 +124,27 @@ const taskRepository = {
 
             await agentTaskRepo.save(agentTaskEntity);
             await taskRepo.delete({ id: task.id });  // Remove after reassignment
+            
+            // Check and save follow-up data if exists
+            if (task.DynamicData.CustomerFeedBack === 'followUp') {
+              const followUpData = {
+                  dynamicLead: agentTaskEntity,
+                  agentId: agentTaskEntity.agentId,
+                  leadId: agentTaskEntity.leadId,
+              };
+              const followUpEntity = followUpRepository.create(followUpData);
+              await followUpRepository.save(followUpEntity);
+              console.log("Task saved in FollowUp repository");
+            }
+            if (task.DynamicData.CustomerFeedBack === 'other') {
+              const otherData = {
+                  dynamicLead: agentTaskEntity,
+                  agentId: agentTaskEntity.agentId,
+                  leadId: agentTaskEntity.leadId,
+              };
+              const otherEntity = otherRepository.create(otherData);
+              await otherRepository.save(otherEntity);
+          }
           }));
           console.log(`Reassigned ${remainingTasks.length} tasks to agent ${agentId}`);
         }
@@ -159,7 +205,7 @@ const markTaskCompleteAndReassign = async (agentId, taskId) => {
 };
 
 // Cron job to automatically assign tasks every minute
-const cronJob = new cron.CronJob('* * * * *', async () => {
+const cronJob = new cron.CronJob('* * * * * *', async () => {
   console.log('Running task assignment every minute...');
   await taskRepository.assignTaskToAgents();
 });
