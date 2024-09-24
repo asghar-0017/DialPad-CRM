@@ -9,6 +9,7 @@ const followUpRoute = require('./routes/followUpRoute');
 const otherRoute = require('./routes/otherRoute');
 const TrashRoute = require('./routes/trashRoute');
 const messageRoute = require('./routes/messagingRoute');
+const taskToAgents=require('./routes/taskToAgents')
 const cloudnaryRoute = require('./routes/cloudnaryRoute');
 const dataSource = require('./infrastructure/psql');
 const cors = require('cors');
@@ -61,6 +62,7 @@ otherRoute(app, io);
 TrashRoute(app);
 messageRoute(app, io);
 cloudnaryRoute(app);
+taskToAgents(app)
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {

@@ -8,22 +8,22 @@ const followUpTrash=require('../entities/followUpTrash')
 
 
 const leadRepository = {
-     saveLead :async (role, leadId, lead) => {
-        try {
-            let leadEntity = {
-            agentId:lead.agentId,
-            role,
-            leadId,
+        saveLead :async (role, leadId, lead) => {
+            try {
+                let leadEntity = {
+                agentId:lead.agentId,
+                role,
+                leadId,
 
-            dynamicLead: lead.dynamicLead, 
-          };
-      
-          return await dataSource.getRepository(Lead).save(leadEntity);
-        } catch (error) {
-          console.error("Error saving lead:", error.message);
-          throw error;
-        }
-      },
+                dynamicLead: lead.dynamicLead, 
+            };
+        
+            return await dataSource.getRepository(Lead).save(leadEntity);
+            } catch (error) {
+            console.error("Error saving lead:", error.message);
+            throw error;
+            }
+        },
       
       
 
