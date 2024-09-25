@@ -851,6 +851,7 @@ verifyEmail: async (req, res) => {
             const transformedData = data.map(task => {
           if (task.DynamicData) {
             return {
+              agentId,
               taskNo,
               status:data[0].status,
               ...task.DynamicData,
