@@ -45,7 +45,7 @@ const followUpController = {
   },
   
 
-getFollowUpById: async (req, res) => {
+getFollowUpById: async (io,req, res) => {
   try {
       const { leadId } = req.params;
       const followUp = await followUpService.getFollowUpById(leadId);
@@ -65,11 +65,13 @@ getFollowUpById: async (req, res) => {
           : followUp;
 
       res.status(200).json({ message: 'Success', data });
+      io.emit('receive_message', data);
+
   } catch (error) {
       res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 },
-getallSpecifiFollowUpByAgentId: async (req, res) => {
+getallSpecifiFollowUpByAgentId: async (io,req, res) => {
   try {
     const agentId = req.params.agentId;
     const data = await followUpService.followUpAllGetServiceByAgentId(agentId); 
@@ -86,6 +88,8 @@ getallSpecifiFollowUpByAgentId: async (req, res) => {
         return mergedFollowUp;
       });
       res.status(200).send({ message: "success", data: processedData });
+      io.emit('receive_message', processedData);
+
     } else {
       res.status(404).send({ message: `No leads found for agentId ${agentId}` });
     }
@@ -121,7 +125,7 @@ getallSpecifiFollowUpByAgentId: async (req, res) => {
     }
   },
 
-  deleteFollowUp: async (req, res) => {
+  deleteFollowUp: async (io,req, res) => {
     try {
         const leadId = req.params.leadId;
         console.log("LeadId:", leadId);
@@ -131,6 +135,8 @@ getallSpecifiFollowUpByAgentId: async (req, res) => {
         if (!result) {
             return res.status(404).json({ message: 'FollowUp not found' });
         }
+        io.emit('receive_message', result);
+
         res.status(200).json({ message: 'FollowUp deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });

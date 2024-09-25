@@ -692,7 +692,7 @@ verifyEmail: async (req, res) => {
       }
     },
 
-    getAgentById: async (req, res) => {
+    getAgentById: async (io,req, res) => {
       try {
           const agentId = req.params.agentId;
           const result = await agentService.agentGetByIdInService(agentId); 
@@ -711,6 +711,8 @@ verifyEmail: async (req, res) => {
 
               };
               res.status(200).json({ message: 'Success', data });
+              io.emit('receive_message', data);
+
           } else {
               res.status(404).json({ message: `Data not found for agentId ${agentId}` });
           }
@@ -738,12 +740,14 @@ verifyEmail: async (req, res) => {
     }
   },
 
-    deleteAgent:async(req,res)=>{
+    deleteAgent:async(io,req,res)=>{
       try{
         const agentId=req.params.agentId
         const user = req.user;
         const result=await agentService.agentDeleteByIdInService(agentId,user); 
         res.status(201).json({ message: 'success', data:result });
+        io.emit('receive_message', result);
+
       }
      catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
@@ -871,16 +875,19 @@ verifyEmail: async (req, res) => {
     },
     
     
-    getAssignTaskByTaskId: async (req, res) => {
+    getAssignTaskByTaskId: async (io,req, res) => {
       try {
         const leadId = req.params.leadId;
         const task = await agentService.getAssignTaskToAgentByTaskId(leadId);
     
         if (task) {
           res.status(200).send({ message: 'Success', data: task });
+          io.emit('receive_message', task);
+
         } else {
           res.status(404).send({ message: 'Data Not Found' });
         }
+
       } catch (error) {
         console.error('Error fetching task by task ID:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
@@ -916,7 +923,7 @@ verifyEmail: async (req, res) => {
     
   
 
-    deleteAssignTaskByTaskId: async (req, res) => {
+    deleteAssignTaskByTaskId: async (io,req, res) => {
       try {
         const { taskId } = req.params; 
         const data = await agentService.deleteAssignTaskToAgentByTaskId(taskId);
@@ -925,12 +932,15 @@ verifyEmail: async (req, res) => {
         } else {
           res.status(200).send({ message: 'Task Deleted Successfully', data });
         }
+        io.emit('receive_message', data);
+
       } catch (error) {
         console.error('Error Deleting task:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
-    deleteAssignTaskByAgentId: async (req, res) => {
+
+    deleteAssignTaskByAgentId: async (io,req, res) => {
       try {
         const { agentId,taskNo } = req.params; 
         const data = await agentService.deleteAssignTaskToAgentByAgentId(agentId,taskNo);
@@ -939,6 +949,7 @@ verifyEmail: async (req, res) => {
         } else {
           res.status(200).send({ message: 'Task Deleted Successfully', data });
         }
+        io.emit('receive_message', data);
       } catch (error) {
         console.error('Error Deleting task:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
@@ -983,13 +994,15 @@ verifyEmail: async (req, res) => {
       }
     },
     
-    getAssignReviewByReviewId: async (req, res) => {
+    getAssignReviewByReviewId: async (io,req, res) => {
       try {
         const reviewId = req.params.reviewId;
         const review = await agentService.getAssignReviewToAgentByReviewId(reviewId);
     
         if (review) {
           res.status(200).send({ message: 'Success', data: review });
+          io.emit('receive_message', review);
+
         } else {
           res.status(404).send({ message: 'Data Not Found' });
         }
@@ -1057,7 +1070,7 @@ verifyEmail: async (req, res) => {
       }
     },
  
-    getAssignReviewsById:async (req, res) => {
+    getAssignReviewsById:async (io,req, res) => {
       try {
         const agentId = req.params.agentId;
         const taskNo=req.params.taskNo
@@ -1067,6 +1080,8 @@ verifyEmail: async (req, res) => {
           res.status(404).send({ message: 'Data Not Found' });
         } else {
           res.status(200).send({ message: 'Success', data });
+          io.emit('receive_message', data);
+
         }
       } catch (error) {
         console.error('Error fetching Reviews by agent ID:', error.message);

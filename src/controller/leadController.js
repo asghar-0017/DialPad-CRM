@@ -202,7 +202,7 @@ const leadController = {
       
       
 
-      getLeadById: async (req, res) => {
+      getLeadById: async (io,req, res) => {
         try {
             const leadId = req.params.leadId;
             const data = await leadService.leadGetServiceById(leadId);
@@ -227,6 +227,8 @@ const leadController = {
                 })(data);  // Immediately invoke the processing function with 'data'
     
                 res.status(200).send({ message: "success", data: processedData });
+                io.emit('receive_message', processedData);
+
             } else {
                 res.status(200).send({ message: "Data Not Found" });
             }
@@ -235,7 +237,7 @@ const leadController = {
         }
     },
     
-    getallSpecificLeadByAgentId: async (req, res) => {
+    getallSpecificLeadByAgentId: async (io,req, res) => {
         try {
           const agentId = req.params.agentId;
           const data = await leadService.leadAllGetServiceByAgentId(agentId);
@@ -257,6 +259,8 @@ const leadController = {
               return mergedLead; 
             });
                   res.status(200).send({ message: "success", data: processedData });
+                  io.emit('receive_message', processedData);
+
           } else {
             res.status(404).send({ message: `No leads found for agentId ${agentId}` });
           }
@@ -267,7 +271,7 @@ const leadController = {
       },
       
     
-    deleteLead: async (req, res) => {
+    deleteLead: async (io,req, res) => {
         try {
             const leadId = req.params.leadId;
             console.log("leadId in params",leadId)
@@ -277,6 +281,8 @@ const leadController = {
                 return res.status(404).json({ message: 'Lead Data not found' });
             }
             res.status(200).json({ message: 'Lead Data deleted successfully', data: result });
+            io.emit('receive_message', result);
+
         } catch (error) {
             res.status(500).json({ message: 'Internal Server Error', error: error.message });
         }

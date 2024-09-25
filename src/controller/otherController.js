@@ -36,27 +36,32 @@ const otherController = {
   },
   
   
-  getOtherUpById: async (req, res) => {
+  getOtherUpById: async (io,req, res) => {
     try {
         const { leadId } = req.params;
         const other = await otherService.getOthersUpById(leadId);
 
         if (other) {
-            if (other.role === 'admin') {
-                const { id, leadId, leadName, phone, email, role, otherDetail } = other;
-                const data = { id, leadId, leadName, phone, email, role, otherDetail };
-                return res.status(200).json({ message: 'success', data });
-            } else {
+          if (other.role === 'admin') {
+            const { id, leadId, leadName, phone, email, role, otherDetail } = other;
+            const data = { id, leadId, leadName, phone, email, role, otherDetail };
+            return res.status(200).json({ message: 'success', data });
+          } 
+          else {
                 return res.status(200).json({ message: 'success', data: other });
             }
-        } else {
+        }
+         else {
             return res.status(404).json({ message: 'Data Not Found' });
         }
-    } catch (error) {
+
+    } 
+
+    catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 },
-getallSpecificOtherByAgentId: async (req, res) => {
+getallSpecificOtherByAgentId: async (io,req, res) => {
   try {
     const agentId = req.params.agentId;
     const { role } = req.user; 
@@ -78,6 +83,8 @@ getallSpecificOtherByAgentId: async (req, res) => {
       });
 
       res.status(200).json({ message: "success", data: processedData });
+      io.emit('receive_message', processedData);
+
     } else {
       res.status(404).json({ message: `No others found for agentId ${agentId}` });
     }
@@ -104,7 +111,7 @@ getallSpecificOtherByAgentId: async (req, res) => {
     }
   },
 
-  deleteOther: async (req, res) => {
+  deleteOther: async (io,req, res) => {
     try {
         const leadId = req.params.leadId;
         const user = req.user;
@@ -113,6 +120,8 @@ getallSpecificOtherByAgentId: async (req, res) => {
             return res.status(404).json({ message: 'Other not found' });
         }
         res.status(200).json({ message: 'Other deleted successfully' });
+        io.emit('receive_message', result);
+
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }

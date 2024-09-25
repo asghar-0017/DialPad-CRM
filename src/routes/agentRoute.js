@@ -10,27 +10,27 @@ const agentRoute = (app,io) => {
     app.post('/create-agent', combinedAuthenticate, checkRole(['admin']), (req, res) => agentController.createAgent(io, req, res));
     app.get("/verify-email",agentController.verifyEmail);
     app.get('/get-agent',combinedAuthenticate, checkRole(['admin','agent']),  (req, res) => agentController.getAgent(io, req, res))
-    app.get('/get-agent/:agentId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAgentById);
+    app.get('/get-agent/:agentId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAgentById(io, req, res));
     app.put('/update-agent/:agentId',combinedAuthenticate, checkRole(['admin','agent']), (req, res) => agentController.updateAgent(io, req, res));
-    app.delete('/delete-agent/:agentId', combinedAuthenticate, checkRole(['admin']),agentController.deleteAgent);
+    app.delete('/delete-agent/:agentId', combinedAuthenticate, checkRole(['admin']), (req, res) => agentController.deleteAgent(io, req, res));
 
     app.post('/assign-task/:agentId',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.assignTask(io, req, res))
     app.get('/get-assign-task', combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignTask(io, req, res))
     app.get('/get-assign-tasks/:agentId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignTaskById(io, req, res));
-    app.get('/get-assign-task/:leadId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignTaskByTaskId);
+    app.get('/get-assign-task/:leadId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignTaskByTaskId(io, req, res));
     app.put('/update-assign-task/:leadId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.updateAssignTaskById(io, req, res));
 
-    app.delete('/delete-assign-task/:taskId',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignTaskByTaskId);
+    app.delete('/delete-assign-task/:taskId',combinedAuthenticate, checkRole(['admin']),(req, res) =>  agentController.deleteAssignTaskByTaskId(io, req, res));
     app.get('/get-assign-task-taskNo/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignTaskByTaskNo(io, req, res))
-    app.delete('/delete-assign-tasks/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignTaskByAgentId);
+    app.delete('/delete-assign-tasks/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin']), (req, res) =>  agentController.deleteAssignTaskByAgentId(io, req, res));
     app.put('/update-task-status/:agentId/:taskNo', combinedAuthenticate, checkRole(['admin', 'agent']), (req, res) => agentController.updateTaskStatus(io, req, res));
     app.get('/get-task-status/:agentId/:taskNo', combinedAuthenticate, checkRole(['admin', 'agent']), (req, res) => agentController.getTaskStatus(io, req, res));
 
 
 
     app.post('/assign-review/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.assignReview(io, req, res))
-    app.get('/get-assign-reviews/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignReviewsById);
-    app.get('/get-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin','agent']), agentController.getAssignReviewByReviewId);
+    app.get('/get-assign-reviews/:agentId/:taskNo',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignReviewsById(io, req, res));
+    app.get('/get-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => agentController.getAssignReviewByReviewId(io, req, res));
     app.put('/update-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin']),(req, res) => agentController.updateAssignReviewById(io, req, res));
     app.delete('/delete-assign-review/:reviewId',combinedAuthenticate, checkRole(['admin']),  agentController.deleteAssignReviewByReviewId);
 
