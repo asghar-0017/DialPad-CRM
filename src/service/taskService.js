@@ -17,6 +17,14 @@ getTaskFromDb:async()=>{
       throw error
     }
   },
+  deleteData:async()=>{
+    try{
+      const data=await taskRepository.remainingDeleteData()
+      return data
+    }catch(error){
+      throw error
+    }
+  }
 }
 
 module.exports=trashService

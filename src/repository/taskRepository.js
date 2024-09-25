@@ -158,6 +158,22 @@ const taskRepository = {
       throw error;
     }
   },
+
+  remainingDeleteData:async()=>{
+    try{
+      const agentTaskSaveRepository = await dataSource.getRepository(agentsTaskAssign);
+      const deleteData = await agentTaskSaveRepository.createQueryBuilder()
+      .delete()
+      .from(agentsTaskAssign)
+      .execute();
+
+    return deleteData;
+    }catch(error){
+      throw error
+    }
+  }
+
+
 };
 
 const getLatestTaskForAgent = async (agentId) => {

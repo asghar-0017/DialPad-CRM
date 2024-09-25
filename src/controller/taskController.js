@@ -112,6 +112,19 @@ saveExcelFileData :async (io, req, res) => {
       res.status(500).send({ message: 'Internal Server Error' });
     }
   },
+
+  deleteRemainingTasks: async (io,req, res) => {
+    try {
+      const deleteData = await taskService.deleteData();
+   
+        res.status(200).send({ message: "data Deleted SuccessFully", data: deleteData });
+      
+    } catch (error) {
+      console.error("Error deleting tasks:", error.message);
+      throw error
+    }
+  },
+  
 }
 
 module.exports=taskController
