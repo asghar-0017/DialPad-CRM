@@ -89,7 +89,29 @@ saveExcelFileData :async (io, req, res) => {
     } finally {
       fs.unlinkSync(filePath); 
     }
-  }
+  },
+  getTaskData: async (io, req, res) => {
+    try {
+      const data = await taskService.getTaskFromDb();
+      console.log("Data",data)
+
+      const transformedData = data.map(task => {
+        if (task.DynamicData) {
+          return {
+            ...task.DynamicData,
+          };
+        }
+        return task; 
+      });
+  
+  
+      res.status(200).send({ message: "Success", data: transformedData });
+
+    } catch (error) {
+      console.error('Error fetching tasks:', error.message);
+      res.status(500).send({ message: 'Internal Server Error' });
+    }
+  },
 }
 
 module.exports=taskController

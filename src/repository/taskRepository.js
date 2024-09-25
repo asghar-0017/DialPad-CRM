@@ -22,17 +22,16 @@ const taskRepository = {
     }
   },
   
-  // Assign tasks to agents
   assignTaskToAgents: async () => {
     try {
       const agentRepo = dataSource.getRepository(agents);
-      const allAgents = await agentRepo.find();  // Get all agents
+      const allAgents = await agentRepo.find(); 
 
       const taskRepo = dataSource.getRepository(agentsTaskAssign);
       const tasks = await taskRepo
         .createQueryBuilder('task')
-        .where('task.status = :status', { status: 'progress' })  // Get tasks in progress
-        .limit(100)  // Limit tasks to 100 for processing
+        .where('task.status = :status', { status: 'progress' })  
+        .limit(100)  
         .getMany();
 
       if (tasks.length === 0 || allAgents.length === 0) {
@@ -46,26 +45,23 @@ const taskRepository = {
           console.log(`Agent ${agent.agentId} has incomplete tasks, skipping assignment.`);
           continue; 
         }
-
-        // Get the latest task number for the agent
         const latestTask = await getLatestTaskForAgent(agent.agentId);
         const currentTaskNo = latestTask ? latestTask.taskNo + 1 : 1;
 
-        const taskBatch = tasks.splice(0, 10);  // Assign tasks in batches of 10
+        const taskBatch = tasks.splice(0, 10);  
         if (taskBatch.length > 0) {
           await Promise.all(taskBatch.map(async (task) => {
             let agentTaskEntity = {
               agentId: agent.agentId,
               taskNo: currentTaskNo,
               leadId: task.leadId,
-              status: 'progress',  // Mark task as 'in progress'
+              status: 'progress',  
               DynamicData: task.DynamicData,
             };
 
             await dataSource.getRepository(agentTask).save(agentTaskEntity);
-            await taskRepo.delete({ id: task.id });  // Remove task after assignment
+            await taskRepo.delete({ id: task.id });  
             
-            // Check and save follow-up data if exists
             if (task.DynamicData.CustomerFeedBack === 'followUp') {
               const followUpData = {
                   dynamicLead: agentTaskEntity,
@@ -95,7 +91,6 @@ const taskRepository = {
     }
   },
 
-  // Reassign tasks when the agent completes their current tasks
   reassignTasks: async (agentId) => {
     try {
       const agentTaskRepo = dataSource.getRepository(agentTask);
@@ -104,12 +99,11 @@ const taskRepository = {
       if (!hasIncompleteTasks) {
         const taskRepo = dataSource.getRepository(agentsTaskAssign);
         const remainingTasks = await taskRepo.find({
-          where: { status: 'progress' },  // Get tasks in 'progress'
-          take: 10,  // Limit reassigned tasks to 10
+          where: { status: 'progress' }, 
+          take: 10, 
         });
 
         if (remainingTasks.length > 0) {
-          // Get the latest task number for the agent
           const latestTask = await getLatestTaskForAgent(agentId);
           const currentTaskNo = latestTask ? latestTask.taskNo + 1 : 1;
 
@@ -118,14 +112,13 @@ const taskRepository = {
               agentId: agentId,
               taskNo: currentTaskNo,
               leadId: task.leadId,
-              status: 'progress',  // Mark reassigned task as 'in progress'
+              status: 'progress',  
               DynamicData: task.DynamicData,
             };
 
             await agentTaskRepo.save(agentTaskEntity);
-            await taskRepo.delete({ id: task.id });  // Remove after reassignment
+            await taskRepo.delete({ id: task.id });  
             
-            // Check and save follow-up data if exists
             if (task.DynamicData.CustomerFeedBack === 'followUp') {
               const followUpData = {
                   dynamicLead: agentTaskEntity,
@@ -153,9 +146,20 @@ const taskRepository = {
       console.error("Error reassigning tasks:", error.message);
     }
   },
+    
+  getTaskFromUploadRepo: async () => {
+    try {
+      const agentTaskSaveRepository = dataSource.getRepository(agentsTaskAssign);
+      const agentTasksData = await agentTaskSaveRepository.find();
+      console.log("data in Repo",agentTasksData)
+      return agentTasksData
+      
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
-// Helper function to get the latest task for the agent
 const getLatestTaskForAgent = async (agentId) => {
   try {
     const agentTaskRepository = dataSource.getRepository(agentTask);
@@ -173,13 +177,12 @@ const getLatestTaskForAgent = async (agentId) => {
   }
 };
 
-// Helper function to check if an agent has any incomplete tasks
 const hasIncompleteTasksForAgent = async (agentId) => {
   try {
     const agentTaskRepository = dataSource.getRepository(agentTask);
 
     const incompleteTasks = await agentTaskRepository.find({
-      where: { agentId, status: 'progress' },  // Check tasks in 'progress'
+      where: { agentId, status: 'progress' },  
     });
 
     return incompleteTasks.length > 0;
@@ -189,28 +192,22 @@ const hasIncompleteTasksForAgent = async (agentId) => {
   }
 };
 
-// Mark task as complete and trigger reassignment
 const markTaskCompleteAndReassign = async (agentId, taskId) => {
   try {
     const agentTaskRepo = dataSource.getRepository(agentTask);
-
-    // Update the task status to 'complete'
     await agentTaskRepo.update({ agentId, id: taskId }, { status: 'complete' });
-
-    // Reassign tasks if needed
     await taskRepository.reassignTasks(agentId);
   } catch (error) {
     console.error("Error completing task and reassigning:", error.message);
   }
 };
 
-// Cron job to automatically assign tasks every minute
-const cronJob = new cron.CronJob('* * * * * *', async () => {
-  console.log('Running task assignment every minute...');
-  await taskRepository.assignTaskToAgents();
-});
+// const cronJob = new cron.CronJob('* * * * * *', async () => {
+//   console.log('Running task assignment every minute...');
+//   await taskRepository.assignTaskToAgents();
+// });
 
-cronJob.start();
+// cronJob.start();
 
 module.exports = {
   taskRepository,

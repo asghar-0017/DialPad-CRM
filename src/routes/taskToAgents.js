@@ -7,6 +7,9 @@ const combinedAuthenticate=require('../middleware/permission')
 const taskToAgents = (app,io) => {
   
     app.post('/upload-task-to-agents',combinedAuthenticate, checkRole(['admin']), upload.single('file'),(req, res) => taskController.saveExcelFileData(io, req, res))
+    app.get('/get-uploaded-Data', combinedAuthenticate, checkRole(['admin']),(req, res) => taskController.getTaskData(io, req, res))
+
+    
 
 };
 

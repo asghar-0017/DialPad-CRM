@@ -8,7 +8,15 @@ const trashService = {
     }catch(error){
         throw error
     }
-}
+},
+getTaskFromDb:async()=>{
+    try{
+      const data=await taskRepository.getTaskFromUploadRepo()
+      return data
+    }catch(error){
+      throw error
+    }
+  },
 }
 
 module.exports=trashService
