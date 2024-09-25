@@ -833,7 +833,7 @@ verifyEmail: async (req, res) => {
         });
     
         io.emit('receive_message', transformedData);
-        res.status(200).send({ message: 'Success', data:transformedData });
+        res.status(200).send({ message: 'Success',agentId:transformedData[0].agentId, data:transformedData });
       } catch (error) {
         console.error('Error fetching tasks by agent ID:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
