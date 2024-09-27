@@ -90,10 +90,9 @@ const leadController = {
     createLead: async (io, req, res) => {
       try {
           const data = req.body;
-          data.leadId = leadId(); // Generate a unique lead ID
-          const user = req.user; // Get the authenticated user
+          data.leadId = leadId(); 
+          const user = req.user; 
   
-          // Validate required fields based on CustomerFeedBack type
           if (data.CustomerFeedBack === 'followUp' && !data.FollowUpDetail) {
               return res.status(400).json({ message: 'FollowUpDetail is required when CustomerFeedBack is followUp' });
           }
@@ -101,38 +100,33 @@ const leadController = {
               return res.status(400).json({ message: 'Other details are required when CustomerFeedBack is other' });
           }
   
-          // Create the lead using the service
           const lead = await leadService.leadCreateService(data, user);
           if (!lead) {
               return res.status(400).json({ message: 'Failed to create lead' });
           }
   
-          // Process the lead data to prepare it for emission
-          const { dynamicLead = {}, ...otherDetails } = lead; // Destructure dynamicLead and other properties
+          const { dynamicLead = {}, ...otherDetails } = lead; 
           const mergedLead = {
               ...dynamicLead,
               ...otherDetails,
           };
-  
-          // Conditionally delete fields based on CustomerFeedBack
-          if (mergedLead.CustomerFeedBack !== 'followUp') {
-              delete mergedLead.FollowUpDetail; // Ensure the property name matches
+            if (mergedLead.CustomerFeedBack !== 'followUp') {
+              delete mergedLead.FollowUpDetail; 
           }
           if (mergedLead.CustomerFeedBack !== 'other') {
-              delete mergedLead.otherDetail; // Ensure the property name matches
+              delete mergedLead.otherDetail; 
           }
           if (mergedLead.role === 'admin') {
-              delete mergedLead.agentId; // Remove agentId if the role is admin
+              delete mergedLead.agentId;
           }
   
-          console.log("Processed Data:", mergedLead); // Log the processed data
+          console.log("Processed Data:", mergedLead);
   
-          // Emit the processed lead data
           io.emit('receive_message', mergedLead);
           return res.status(200).json({ message: 'Success', data: mergedLead });
   
       } catch (error) {
-          console.error('Error creating lead:', error); // Log the error for debugging
+          console.error('Error creating lead:', error); 
           return res.status(500).json({ message: 'Internal Server Error', error: error.message });
       }
   },
