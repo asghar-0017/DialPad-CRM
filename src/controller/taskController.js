@@ -69,11 +69,21 @@ saveExcelFileData :async (io, req, res) => {
           leadId: generateId()
 
         };
+        const formattedTask = {
+          ...taskData,
+          ...convertedRow, 
+          status: "progress", 
+
+        };
+        console.log("Lead Data:", formattedTask);
+
 
         console.log("Lead Data:", taskData);
   
         const uploadTask = await taskService.createTaskService(taskData);
-        taskCreate.push(uploadTask);
+        taskCreate.push(formattedTask); // Push formattedTask into taskCreate
+       
+
       }
 
   
