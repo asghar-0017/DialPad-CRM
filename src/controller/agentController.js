@@ -784,24 +784,39 @@ verifyEmail: async (req, res) => {
     getAssignTask: async (io, req, res) => {
       try {
         const data = await agentService.getAssignTaskToAgent();
-    
-        if (data && data.agentTasks && data.agentTasks.length > 0) {
-          const filteredData = data.agentTasks.map(task => {
-            return Object.fromEntries(
-              Object.entries(task).filter(([key, value]) => value !== null && value !== undefined)
-            );
-          });
-              io.emit('receive_message', filteredData);
-    
-          res.status(200).send({ message: "Success", data: filteredData });
-        } else {
-          res.status(404).send({ message: "Data Not Found" });
+            if (!data || !Array.isArray(data.agentTasks)) {
+          console.error('Unexpected data format received:', data);
+          return res.status(500).send({ message: 'Unexpected data format received.' });
         }
+    
+        const agentTasks = data.agentTasks;
+            if (agentTasks.length === 0) {
+          return res.status(404).send({ message: 'No tasks found for this agent.' });
+        }
+            const transformedData = agentTasks.map(task => {
+          const { DynamicData, ...rest } = task;
+              const dynamicData = typeof DynamicData === 'object' && !Array.isArray(DynamicData) ? DynamicData : {};
+    
+          return {
+            ...rest,
+            ...dynamicData, 
+            taskNo: task.taskNo,
+            status: task.status,
+            created_at: task.created_at,
+            updated_at: task.updated_at
+          };
+        });
+            io.emit('receive_message', transformedData);
+            res.status(200).send({ message: 'Success', data: transformedData });
+    
       } catch (error) {
         console.error('Error fetching tasks:', error.message);
         res.status(500).send({ message: 'Internal Server Error' });
       }
     },
+    
+    
+    
     
     
 

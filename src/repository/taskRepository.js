@@ -35,7 +35,7 @@ const taskRepository = {
         .getMany();
 
       if (tasks.length === 0 || allAgents.length === 0) {
-        console.log("No tasks or agents available");
+        console.log("No tasks available");
         return;
       }
 
