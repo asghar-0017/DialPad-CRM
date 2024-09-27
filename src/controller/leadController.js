@@ -234,10 +234,9 @@ const leadController = {
     
           const assignedLead = await leadService.leadCreateService(leadData, req.user);
           if (assignedLead) {
-            // Flatten the assignedLead structure
-            const { dynamicLead, ...leadDetails } = assignedLead; // Exclude dynamicLead from the response
-            const flattenedLead = { ...leadDetails, ...dynamicLead }; // Merge dynamicLead properties into leadDetails
-            leadCreate.push(flattenedLead); // Add the flattened lead to the array
+            const { dynamicLead, ...leadDetails } = assignedLead; 
+            const flattenedLead = { ...leadDetails, ...dynamicLead }; 
+            leadCreate.push(flattenedLead); 
         }        }
 
     
