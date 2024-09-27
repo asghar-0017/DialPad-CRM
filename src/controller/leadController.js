@@ -65,28 +65,78 @@ const convertKeysToPascalCase = (data) => {
 
 
 const leadController = {
-    createLead: async (io,req, res) => {
-        try {
-            const data = req.body;
-            data.leadId = leadId();
-            const user = req.user;
-            if (data.CustomerFeedBack === 'followUp' && !data.FollowUpDetail) {
-                return res.status(400).json({ message: 'followUpDetail is required when customer_feedBack is followUp' });
-            }
-            if (data.CustomerFeedBack === 'other' && !data.otherDetail) {
-                return res.status(400).json({ message: 'other is required when customer_feedBack is other' });
-            }
-            const lead = await leadService.leadCreateService(data, user);
-           if(lead){
-            io.emit('send_message', lead);
+    // createLead: async (io,req, res) => {
+    //     try {
+    //         const data = req.body;
+    //         data.leadId = leadId();
+    //         const user = req.user;
+    //         if (data.CustomerFeedBack === 'followUp' && !data.FollowUpDetail) {
+    //             return res.status(400).json({ message: 'followUpDetail is required when customer_feedBack is followUp' });
+    //         }
+    //         if (data.CustomerFeedBack === 'other' && !data.otherDetail) {
+    //             return res.status(400).json({ message: 'other is required when customer_feedBack is other' });
+    //         }
+    //         const lead = await leadService.leadCreateService(data, user);
+    //        if(lead){
+    //         io.emit('send_message', lead);
 
-            res.status(201).json({ message: 'Lead created successfully', lead });
-           }
-        } catch (error) {
-            res.status(500).json({ message: 'Internal Server Error', error: error.message });
-        }
-    },
+    //         res.status(201).json({ message: 'Lead created successfully', lead });
+    //        }
+    //     } catch (error) {
+    //         res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    //     }
+    // },
 
+    createLead: async (io, req, res) => {
+      try {
+          const data = req.body;
+          data.leadId = leadId(); // Generate a unique lead ID
+          const user = req.user; // Get the authenticated user
+  
+          // Validate required fields based on CustomerFeedBack type
+          if (data.CustomerFeedBack === 'followUp' && !data.FollowUpDetail) {
+              return res.status(400).json({ message: 'FollowUpDetail is required when CustomerFeedBack is followUp' });
+          }
+          if (data.CustomerFeedBack === 'other' && !data.otherDetail) {
+              return res.status(400).json({ message: 'Other details are required when CustomerFeedBack is other' });
+          }
+  
+          // Create the lead using the service
+          const lead = await leadService.leadCreateService(data, user);
+          if (!lead) {
+              return res.status(400).json({ message: 'Failed to create lead' });
+          }
+  
+          // Process the lead data to prepare it for emission
+          const { dynamicLead = {}, ...otherDetails } = lead; // Destructure dynamicLead and other properties
+          const mergedLead = {
+              ...dynamicLead,
+              ...otherDetails,
+          };
+  
+          // Conditionally delete fields based on CustomerFeedBack
+          if (mergedLead.CustomerFeedBack !== 'followUp') {
+              delete mergedLead.FollowUpDetail; // Ensure the property name matches
+          }
+          if (mergedLead.CustomerFeedBack !== 'other') {
+              delete mergedLead.otherDetail; // Ensure the property name matches
+          }
+          if (mergedLead.role === 'admin') {
+              delete mergedLead.agentId; // Remove agentId if the role is admin
+          }
+  
+          console.log("Processed Data:", mergedLead); // Log the processed data
+  
+          // Emit the processed lead data
+          io.emit('receive_message', mergedLead);
+          return res.status(200).json({ message: 'Success', data: mergedLead });
+  
+      } catch (error) {
+          console.error('Error creating lead:', error); // Log the error for debugging
+          return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+      }
+  },
+  
     readLead: async (io, req, res) => {
         try {
           const data = await leadService.leadReadService();
@@ -114,6 +164,7 @@ const leadController = {
       
             return mergedLead; 
           });
+          console.log("processedData",)
       
           io.emit('receive_message', processedData);
                 res.status(200).json({ message: 'Success', data: processedData });
@@ -151,54 +202,58 @@ const leadController = {
         }
     },
     
-     saveExcelFileData :async (io, req, res) => {
-        if (!req.file) {
-          return res.status(400).json({ message: 'Please upload an Excel file.' });
-        }
-      
-        const filePath = path.join(__dirname, '../uploads/', req.file.filename);
-      
-        try {
-          const workbook = xlsx.readFile(filePath);
-          const sheetName = workbook.SheetNames[0];
-          const sheet = workbook.Sheets[sheetName];
-          const results = xlsx.utils.sheet_to_json(sheet);
-
-      
-          if (results.length === 0) {
-            return res.status(400).json({ message: 'No data found in the Excel file.' });
-          }
-      
-          const leadCreate = [];
-          for (const row of results) {
-            const convertedRow = convertKeysToPascalCase(row);
-            const leadData = {
-              ...convertedRow,
-              PhoneNumber: convertedRow.PhoneNumber ? String(convertedRow.PhoneNumber) : undefined,
-              leadId: generateId()
-
-            };
+    saveExcelFileData :async (io, req, res) => {
+      if (!req.file) {
+        return res.status(400).json({ message: 'Please upload an Excel file.' });
+      }
     
-            console.log("Lead Data:", leadData);
-      
-            const assignedLead = await leadService.leadCreateService(leadData, req.user);
-            leadCreate.push(assignedLead);
-          }
+      const filePath = path.join(__dirname, '../uploads/', req.file.filename);
+    
+      try {
+        const workbook = xlsx.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const results = xlsx.utils.sheet_to_json(sheet);
 
-      
-          if (leadCreate.length > 0) {
-            io.emit('send_message', leadCreate);
-            return res.status(200).json({ message: 'Leads created successfully', data: leadCreate });
-          } else {
-            return res.status(400).json({ message: 'No leads were created due to missing data or errors.' });
-          }
-        } catch (error) {
-          console.error('Error processing the Excel file:', error);
-          return res.status(500).json({ message: 'Internal Server Error', error: error.message });
-        } finally {
-          fs.unlinkSync(filePath); 
+    
+        if (results.length === 0) {
+          return res.status(400).json({ message: 'No data found in the Excel file.' });
         }
-      },
+    
+        const leadCreate = [];
+        for (const row of results) {
+          const convertedRow = convertKeysToPascalCase(row);
+          const leadData = {
+            ...convertedRow,
+            PhoneNumber: convertedRow.PhoneNumber ? String(convertedRow.PhoneNumber) : undefined,
+            leadId: generateId()
+
+          };
+  
+          console.log("Lead Data:", leadData);
+    
+          const assignedLead = await leadService.leadCreateService(leadData, req.user);
+          if (assignedLead) {
+            // Flatten the assignedLead structure
+            const { dynamicLead, ...leadDetails } = assignedLead; // Exclude dynamicLead from the response
+            const flattenedLead = { ...leadDetails, ...dynamicLead }; // Merge dynamicLead properties into leadDetails
+            leadCreate.push(flattenedLead); // Add the flattened lead to the array
+        }        }
+
+    
+        if (leadCreate.length > 0) {
+          io.emit('send_message', leadCreate);
+          return res.status(200).json({ message: 'Leads created successfully', data: leadCreate });
+        } else {
+          return res.status(400).json({ message: 'No leads were created due to missing data or errors.' });
+        }
+      } catch (error) {
+        console.error('Error processing the Excel file:', error);
+        return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+      } finally {
+        fs.unlinkSync(filePath); 
+      }
+    },
       
       
 
