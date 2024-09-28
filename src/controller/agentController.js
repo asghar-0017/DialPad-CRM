@@ -194,7 +194,7 @@ verifyEmail: async (req, res) => {
               <div class="content">
                 <h2>Invalid or Expired Token</h2>
                 <p>It seems that the verification link is invalid or expired. Please try again.</p>
-                <a href="https://dialpad-crm-production.up.railway.app/login" class="btn">Back to Login</a>
+                <a href="https://frontend-crm-production.up.railway.app/login" class="btn">Back to Login</a>
               </div>
               <div class="footer">
                 <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
@@ -284,7 +284,7 @@ verifyEmail: async (req, res) => {
               <div class="content">
                 <h2>User Already Registered</h2>
                 <p>Your email has already been verified. You can proceed to login.</p>
-                <a href="https://dialpad-crm-production.up.railway.app/login" class="btn">Proceed to Login</a>
+                <a href="https://frontend-crm-production.up.railway.app/login" class="btn">Proceed to Login</a>
               </div>
               <div class="footer">
                 <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
@@ -390,7 +390,7 @@ verifyEmail: async (req, res) => {
               <img src="/public/images/Logo.png" alt="Success" class="success-image">
                 <h2>Email Verified Successfully!</h2>
                 <p>Your email has been successfully verified.</p>
-                <a href="https://dialpad-crm-production.up.railway.app/login" class="btn">Proceed to Login</a>
+                <a href="https://frontend-crm-production.up.railway.app/login" class="btn">Proceed to Login</a>
               </div>
               <div class="footer">
                 <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
@@ -480,7 +480,7 @@ verifyEmail: async (req, res) => {
                 <div class="content">
                   <h2>User Already Registered</h2>
                   <p>Your email is already registered. Please proceed to login.</p>
-                  <a href="https://dialpad-crm-production.up.railway.app/login" class="btn">Back to Login</a>
+                  <a href="https://frontend-crm-production.up.railway.app/login" class="btn">Back to Login</a>
                 </div>
                 <div class="footer">
                   <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
@@ -569,7 +569,7 @@ verifyEmail: async (req, res) => {
               <div class="content">
                 <h2>Oops!</h2>
                 <p>There was an issue verifying your email. Please try again later.</p>
-                <a href="https://dialpad-crm-production.up.railway.app/login" class="btn">Back to Login</a>
+                <a href="https://frontend-crm-production.up.railway.app/login" class="btn">Back to Login</a>
               </div>
               <div class="footer">
                 <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
@@ -659,7 +659,7 @@ verifyEmail: async (req, res) => {
             <div class="content">
               <h2>Oops!</h2>
               <p>There was an issue verifying your email. Please try again later.</p>
-              <a href="https://dialpad-crm-production.up.railway.app/agentLogin" class="btn">Back to Login</a>
+              <a href="https://frontend-crm-production.up.railway.app/agentLogin" class="btn">Back to Login</a>
             </div>
             <div class="footer">
               <p>&copy; ${new Date().getFullYear()} SoftMark Solutions. All rights reserved.</p>
