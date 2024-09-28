@@ -2,6 +2,8 @@
   "name": "softmark-crm",
   "version": "1.0.0",
   "main": "index.js",
+  "proxy": "https://dialpad-crm-production.up.railway.app",
+
   "scripts": {
     "start": "nodemon index.js"
   },
