@@ -11,7 +11,7 @@ const sendVerificationEmail = async (email, verificationToken, name) => {
         pass: process.env.EMAIL_PASS,
       },
     });
-    const verificationUrl = `https://dialpad-crm-production.up.railway.app//verify-email?email=${encodeURIComponent(email)}&verificationToken=${verificationToken}`;
+    const verificationUrl = `https://dialpad-crm-production.up.railway.app/verify-email?email=${encodeURIComponent(email)}&verificationToken=${verificationToken}`;
     // const verificationUrl = `https://backend-crm-theta.vercel.app//verify-email?email=${encodeURIComponent(email)}&verificationToken=${verificationToken}`;
     // const verificationUrl = `http://localhost:4000/verify-email?email=${encodeURIComponent(email)}&verificationToken=${verificationToken}`;
 
