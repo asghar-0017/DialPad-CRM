@@ -23,11 +23,10 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(cors({
-  origin: 'http://localhost:5174',
+  origin: '*',
   methods: ['GET', 'POST', 'DELETE', 'PUT'],
   credentials: true,
 }));
-
 
 const io = new Server(server, {
   cors: {
