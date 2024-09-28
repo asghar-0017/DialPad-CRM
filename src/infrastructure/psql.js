@@ -6,18 +6,18 @@ const { PinoLogger } = require('../../logger');
 
 const entityPath = path.join(__dirname, "..", "entities", "*.js");
 
-const dataSource = new DataSource({
-  type: "postgres",
-  host: 'localhost',
-  port:  5432,
-  username: 'postgres',
-  password: "postgres", 
-  database: 'postgres',
-  synchronize: true,  // Set this to false
-  logging: true,
-  logger: new PinoLogger(),
-  entities: [entityPath],
-});
+// const dataSource = new DataSource({
+//   type: "postgres",
+//   host: 'localhost',
+//   port:  5432,
+//   username: 'postgres',
+//   password: "postgres", 
+//   database: 'postgres',
+//   synchronize: true,  // Set this to false
+//   logging: true,
+//   logger: new PinoLogger(),
+//   entities: [entityPath],
+// });
 // const dataSource = new DataSource({
 //   type: "postgres",
 //   host: process.env.POSTGRES_HOST,
@@ -30,5 +30,20 @@ const dataSource = new DataSource({
 //   logger: new PinoLogger(),
 //   entities: [entityPath],
 // });
+
+const dataSource = new DataSource({
+  type: "postgres",
+  host: "junction.proxy.rlwy.net",  // Public host
+  port: 37929,                      // Port from the public URL
+  username: 'postgres',             // Username
+  password: "HSUELWSKYTKHeWNyEzeToxgcvhEDGLUz",  // Password
+  database: 'railway',              // Database name
+  synchronize: true,                // or false in production
+  logging: true,
+  logger: new PinoLogger(),
+  entities: [entityPath],
+});
+
+
 
 module.exports = dataSource;
