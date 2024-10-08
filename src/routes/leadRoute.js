@@ -11,12 +11,8 @@ const leadRoute = (app,io) => {
     app.get('/get-lead/:leadId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => leadController.getLeadById(io, req, res));
     app.get('/get-all-lead/:agentId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => leadController.getallSpecificLeadByAgentId(io, req, res));
     app.put('/update-lead/:leadId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => leadController.updateLead(io, req, res));
-    
     app.delete('/delete-lead/:leadId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => leadController.deleteLead(io, req, res));
-    
     app.post('/upload-csv',combinedAuthenticate, checkRole(['admin','agent']), upload.single('file'),(req, res) => leadController.saveExcelFileData(io, req, res))
-    
-
 };
 
 module.exports = leadRoute;

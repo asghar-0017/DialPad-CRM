@@ -1,6 +1,7 @@
 const { getRepository } = require('typeorm');
 const dataSource=require('../infrastructure/psql')
 const Auth = require('../entities/auth');
+const AdminToken=require('../entities/adminToken')
 
 const authRepository = {
   findByUserName: async (userName) => {
@@ -27,6 +28,22 @@ const authRepository = {
     return dataToken
 
   },
+  saveToken: async (adminId, token) => {
+    const tokenEntity = {
+      adminId,
+      token,
+    };
+    return await dataSource.getRepository(AdminToken).save(tokenEntity);
+  },
+
+  deleteToken: async (token) => {
+    return await dataSource.getRepository(AdminToken).delete({ token });
+  },
+
+  findTokenByToken: async (token) => {
+    return await dataSource.getRepository(AdminToken).findOne({ where: { token } });
+  },
+
 };
 
 module.exports = authRepository;

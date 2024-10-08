@@ -43,7 +43,7 @@ const agentRoute = (app,io) => {
     app.post('/login-agent',agentAuthController.login)
     app.post('/forgot-password-agent', agentAuthController.forgotPassword);
     app.post('/verify-reset-code-agent', agentAuthController.verifyResetCode)
-    app.post('/reset-password-agent', agentAuthController.resetPassword);
+    app.put('/reset-password-agent', agentAuthController.resetPassword);
     app.post('/logout', adminAuth.logout);
     app.post('/verify-token',adminAuth.verifyToken);
 

@@ -904,7 +904,9 @@ const authAgentRepository = {
   },
 
   findByToken: async (token) => {
-    return await dataSouece.getRepository(agent).findOne({ where: { resetCode: token } });
+   const result= await dataSouece.getRepository(agent).findOne({ where: { resetCode: token } });
+   console.log("Result",result)
+   return result
   },
 
   save: async (agent) => {

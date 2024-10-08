@@ -19,7 +19,8 @@ const secretKey = process.env.SCERET_KEY;
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const sendVerificationEmail=require('../mediater/sendMail')
-const dataSource=require('../infrastructure/psql')
+const dataSource=require('../infrastructure/psql');
+const generateRandomPassword = require('../utils/randomPasswordGenerator');
 
 
 
@@ -82,6 +83,8 @@ const agentController = {
       const data = req.body;
       const email = data.email;
       data.agentId=agentId()
+      data.password=generateRandomPassword()
+      console.log("Random Password",data.password)
       const existingAgent = await agentRepository.findByEmail(email);
       
       if (existingAgent) {
@@ -93,7 +96,7 @@ const agentController = {
       data.isActivated = false; 
       await agentRepository.saveTempAgent(data);
 
-      await sendVerificationEmail(email, verificationToken, data.firstName);
+      await sendVerificationEmail(email, verificationToken, data.firstName,data.agentId,data.password);
 
       res.status(201).json({ message: 'Verification email sent successfully' });
 
@@ -1273,7 +1276,8 @@ const agentAuthController = {
 
   verifyResetCode: async (request, response) => {
     try {
-      const { code } = request.body;
+      const  {code}  = request.body;
+      console.log("Code",code)
       const isCodeValid = await agentAuthService.validateResetCode(code);
       if (isCodeValid) {
         const agent = await authAgentRepository.findByToken(code);

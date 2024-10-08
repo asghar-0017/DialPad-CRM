@@ -1,8 +1,14 @@
 const nodemailer = require("nodemailer");
-const path = require('path');
-const fs = require('fs');
+const path = require("path");
+const fs = require("fs");
 
-const sendVerificationEmail = async (email, verificationToken, name) => {
+const sendVerificationEmail = async (
+  email,
+  verificationToken,
+  name,
+  agentId,
+  password
+) => {
   try {
     const transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -11,9 +17,9 @@ const sendVerificationEmail = async (email, verificationToken, name) => {
         pass: process.env.EMAIL_PASS,
       },
     });
-    const verificationUrl = `https://dialpad-crm-production.up.railway.app/verify-email?email=${encodeURIComponent(email)}&verificationToken=${verificationToken}`;
+    // const verificationUrl = `https://dialpad-crm-production.up.railway.app/verify-email?email=${encodeURIComponent(email)}&verificationToken=${verificationToken}`;
     // const verificationUrl = `https://backend-crm-theta.vercel.app//verify-email?email=${encodeURIComponent(email)}&verificationToken=${verificationToken}`;
-    // const verificationUrl = `http://localhost:4000/verify-email?email=${encodeURIComponent(email)}&verificationToken=${verificationToken}`;
+    const verificationUrl = `http://localhost:4000/verify-email?agentId=${encodeURIComponent(agentId)}&verificationToken=${verificationToken}`;
 
     const mailOptions = {
       from: process.env.EMAIL,
@@ -60,8 +66,8 @@ const sendVerificationEmail = async (email, verificationToken, name) => {
               display: inline-block;
               padding: 10px 20px;
               font-size: 16px;
-              color: #000000; /* Set text color to black */
-              background-color: #007bff;
+              color: #ffffff; /* White text color */
+              background-color: #007bff; /* Blue button background */
               text-decoration: none;
               border-radius: 5px;
               margin-top: 10px;
@@ -81,6 +87,7 @@ const sendVerificationEmail = async (email, verificationToken, name) => {
             <div class="content">
               <h3>Hello ${name},</h3>
               <p>Click the button below to verify your email address and activate your account.</p>
+              <p><strong>Your temporary password is: ${password}</strong></p>
               <a href="${verificationUrl}" class="btn" style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #000000; background-color: #007bff; text-decoration: none; border-radius: 5px; margin-top: 10px;">Verify Your Email</a>
             </div>
             <div class="footer">
@@ -93,9 +100,9 @@ const sendVerificationEmail = async (email, verificationToken, name) => {
       `,
       attachments: [
         {
-          filename: 'logo.png',
-          path: path.join(__dirname, '../public/images/Logo.png'),
-          cid: 'logo',
+          filename: "logo.png",
+          path: path.join(__dirname, "../public/images/Logo.png"),
+          cid: "logo",
         },
       ],
     };

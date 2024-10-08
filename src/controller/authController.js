@@ -31,33 +31,21 @@ const adminAuth = {
 
   logout: async (req, res) => {
     try {
-
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).send({ message: 'No token provided' });
-        }
-
-        const token = authHeader.split(' ')[1];
-
-        const admin = await authRepository.findTokenByToken(token);
-        if (admin) {
-            admin.verifyToken = '';
-            await authRepository.save(admin);
-            logger.info('Admin Logout Success');
-            return res.status(200).send({ message: 'Logged out successfully' });
-        }
-        const agent = await authAgentRepository.findTokenByToken(token);
-        if (agent) {
-            agent.verifyToken = '';
-            await agentRepository.saveAgent(agent);
-            logger.info('Agent Logout Success');
-            return res.status(200).send({ message: 'Logged out successfully' });
-        }
-        return res.status(401).send({ message: 'Invalid token' });
-
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).send({ message: 'No token provided' });
+      }
+      const token = authHeader.split(' ')[1];
+            const result = await authRepository.deleteToken(token);
+      if (result.affected > 0) {
+        logger.info('Admin Logout Success');
+        return res.status(200).send({ message: 'Logged out successfully' });
+      }
+  
+      return res.status(401).send({ message: 'Invalid token' });
     } catch (error) {
-        logger.error('Error during logout:', error);
-        return res.status(500).send({ message: 'Internal Server Error', error: error.message });
+      logger.error('Error during logout:', error);
+      return res.status(500).send({ message: 'Internal Server Error', error: error.message });
     }
 },
 

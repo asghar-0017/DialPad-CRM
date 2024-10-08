@@ -218,7 +218,7 @@ const markTaskCompleteAndReassign = async (agentId, taskId) => {
   }
 };
 
-// const cronJob = new cron.CronJob('* * * * * *', async () => {
+// const cronJob = new cron.CronJob('* * * * *', async () => {
 //   console.log('Running task assignment every minute...');
 //   await taskRepository.assignTaskToAgents();
 // });

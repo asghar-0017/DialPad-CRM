@@ -1,8 +1,6 @@
-// services/followUpService.js
-const otherRepository = require('../repository/otherRepository');
+const otherRepository = require("../repository/otherRepository");
 
 const OtherService = {
-
   getAllOthers: async () => {
     return await otherRepository.findAll();
   },
@@ -10,21 +8,22 @@ const OtherService = {
   getOthersUpById: async (leadId) => {
     return await otherRepository.findById(leadId);
   },
-  otherAllGetServiceByAgentId:async(agentId)=>{
+  otherAllGetServiceByAgentId: async (agentId) => {
     try {
-      const result = await otherRepository.getAllSpecificOtherDataByAgentId(agentId);
+      const result =
+        await otherRepository.getAllSpecificOtherDataByAgentId(agentId);
       return result;
-  } catch (error) {
+    } catch (error) {
       throw error;
-  }
+    }
   },
 
   updateOtherById: async (leadId, data) => {
     return await otherRepository.update(leadId, data);
   },
 
-  deleteOthers: async (id,user) => {
-    return await otherRepository.delete(id,user);
+  deleteOthers: async (id, user) => {
+    return await otherRepository.delete(id, user);
   },
 };
 

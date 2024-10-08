@@ -11,7 +11,6 @@ const logger = pino(stream);
 
 class PinoLogger extends AbstractLogger {
   logQuery(query, parameters, queryRunner) {
-    // query = query.JSON
     logger.info(query);
   }
 
@@ -22,10 +21,6 @@ class PinoLogger extends AbstractLogger {
   logQuerySlow(time, query, parameters, queryRunner) {
     logger.warn(time, query, parameters, "Slow query");
   }
-
-  // logSchemaBuild(message, queryRunner) {
-  //   logger.info(message, "Schema build");
-  // }
 
   logMigration(message, queryRunner) {
     logger.info(message, "Migration");
