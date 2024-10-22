@@ -298,8 +298,8 @@ verifyEmail: async (req, res) => {
       `);
     }
 
-    const hashedPassword = await bcrypt.hash(tempAgent.password, 10);
-    tempAgent.password = hashedPassword;
+    // const hashedPassword = await bcrypt.hash(tempAgent.password, 10);
+    // tempAgent.password = hashedPassword;
     tempAgent.isActivated = true;
 
     try {
@@ -682,8 +682,8 @@ verifyEmail: async (req, res) => {
           return res.status(404).send({Data:`Data not Found with ${agentId}`})
         }
         const data = result.map(agent => {
-        const { id,agentId, firstName, lastName, email, phone, role ,isActivated,created_at,updated_at} = agent;
-        return {id, agentId, firstName, lastName, email, phone, role,isActivated,created_at,updated_at };
+        const { id,agentId, firstName, lastName, email, phone, role ,isActivated,created_at,updated_at,password} = agent;
+        return {id, agentId, firstName, lastName, email, phone, role,isActivated,created_at,updated_at,password };
      
     });
     io.emit('receive_message', data);
