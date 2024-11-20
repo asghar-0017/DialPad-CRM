@@ -1,6 +1,7 @@
 const nodemailer = require("nodemailer");
 const path = require("path");
 const fs = require("fs");
+const imageUrl='https://s.rozee.pk/company_logos/00/cpl_34362578003607.png'
 
 const sendVerificationEmail = async (
   email,
@@ -101,7 +102,7 @@ const sendVerificationEmail = async (
       attachments: [
         {
           filename: "logo.png",
-          path: path.join(__dirname, "../public/images/Logo.png"),
+          path: `${imageUrl}`,
           cid: "logo",
         },
       ],

@@ -22,8 +22,6 @@ const sendVerificationEmail=require('../mediater/sendMail')
 const dataSource=require('../infrastructure/psql');
 const generateRandomPassword = require('../utils/randomPasswordGenerator');
 
-
-
 const getLatestTaskForAgent=async (agentId) => {
   try {
     const agentTaskRepository = dataSource.getRepository('agentTask');
@@ -390,7 +388,7 @@ verifyEmail: async (req, res) => {
                 <h1>Email Verification</h1>
               </div>
               <div class="content">
-              <img src="/public/images/Logo.png" alt="Success" class="success-image">
+              <img src="../public/images/check.png" alt="Success" class="success-image">
                 <h2>Email Verified Successfully!</h2>
                 <p>Your email has been successfully verified.</p>
                 <a href="https://frontend-crm-production.up.railway.app/login" class="btn">Proceed to Login</a>
