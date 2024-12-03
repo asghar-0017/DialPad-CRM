@@ -5,6 +5,9 @@ const { logger } = require("../logger");
 const AdminAuthRoute = require("./routes/authRoute");
 const agentRoute = require("./routes/agentRoute");
 const leadRoute = require("./routes/leadRoute");
+const leadsRoute = require("./routes/leadsRoute");
+const sheerRoute = require("./routes/sheetRoute");
+
 const followUpRoute = require("./routes/followUpRoute");
 const otherRoute = require("./routes/otherRoute");
 const TrashRoute = require("./routes/trashRoute");
@@ -65,6 +68,8 @@ TrashRoute(app);
 messageRoute(app, io);
 cloudnaryRoute(app);
 taskToAgents(app);
+leadsRoute(app,io)
+sheerRoute(app,io)
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
