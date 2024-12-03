@@ -8,7 +8,7 @@ const Agent = require("../entities/agent");
 const Admin = require("../entities/auth");
 require("dotenv").config();
 
-const secretKey = process.env.SCERET_KEY;
+const secretKey = 'ancdefghijklmnopqrstuvwxys';
 if (!secretKey) {
   throw new Error("SECRET_KEY environment variable is not set.");
 }
@@ -27,6 +27,7 @@ const adminService = {
           await authRepository.saveToken(admin.id, token);
 
           logger.info("Admin Login Success");
+          console.log("TOken",token)
           return token;
         }
       }

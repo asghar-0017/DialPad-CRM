@@ -29,11 +29,30 @@ const authRepository = {
 
   },
   saveToken: async (adminId, token) => {
-    const tokenEntity = {
-      adminId,
-      token,
-    };
-    return await dataSource.getRepository(AdminToken).save(tokenEntity);
+    try {
+      const adminTokenRepository = dataSource.getRepository(AdminToken);
+
+      // Check if a token already exists for this admin
+      let existingToken = await adminTokenRepository.findOne({ where: { adminId } });
+
+      if (existingToken) {
+        // Update existing token
+        existingToken.token = token;
+        console.log("Updating existing token:", existingToken);
+      } else {
+        // Create new token
+        existingToken = adminTokenRepository.create({ adminId, token });
+        console.log("Creating new token:", existingToken);
+      }
+
+      // Save token to the database
+      const saveData= await adminTokenRepository.save(existingToken);
+      console.log("Saved Data",saveData)
+      return saveData
+    } catch (error) {
+      console.error("Error saving token:", error);
+      throw error;
+    }
   },
 
   deleteToken: async (token) => {

@@ -76,6 +76,14 @@ const leadService = {
       throw error;
     }
   },
+  getLeadsBySheetId: async (sheetId) => {
+    try {
+      return await leadRepository.getLeadsBySheetId(sheetId);
+    } catch (error) {
+      console.error("Error fetching leads for sheet:", error.message);
+      throw error;
+    }
+  },
 };
 
 module.exports = leadService;

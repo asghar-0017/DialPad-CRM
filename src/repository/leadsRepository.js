@@ -120,7 +120,16 @@ const leadRepository = {
       console.error("Error fetching leads grouped by labels:", error.message);
       throw error;
     }
-  }
+  },
+
+  getLeadsBySheetId: async (sheetId) => {
+    try {
+      return await dataSource.getRepository(Lead).find({ where: { sheetId } });
+    } catch (error) {
+      console.error("Error fetching leads by sheetId:", error.message);
+      throw error;
+    }
+  },
 };
 
 module.exports = leadRepository;

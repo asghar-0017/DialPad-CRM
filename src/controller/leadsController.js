@@ -7,7 +7,6 @@ const xlsx = require("xlsx");
 const leadController = {
     createLead: async (io, req, res) => {
         try {
-         
           const data=req.body
           data.leadId = generateLeadId();
           const user = req.user;
@@ -177,6 +176,29 @@ const leadController = {
     }
   },
   
+  getLeadsForSheet: async (req, res) => {
+    try {
+      const { sheetId } = req.params;
+      const leads = await leadService.getLeadsBySheetId(sheetId);
+
+      if (!leads || leads.length === 0) {
+        return res.status(404).json({ message: "No leads found for this sheet" });
+      }
+      const processedData = leads.map((lead) => {
+        const { dynamicLead = {} } = lead;
+        const mergedLead = {
+          ...dynamicLead,
+        };
+
+        return mergedLead;
+      });
+
+      return res.status(200).json({ message: "Leads retrieved successfully",steetId:processedData[0].sheetId, data: processedData });
+    } catch (error) {
+      console.error("Error fetching leads for sheet:", error);
+      return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+  },
 };
 
 module.exports = { leadController };
