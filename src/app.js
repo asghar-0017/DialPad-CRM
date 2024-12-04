@@ -6,7 +6,8 @@ const AdminAuthRoute = require("./routes/authRoute");
 const agentRoute = require("./routes/agentRoute");
 const leadRoute = require("./routes/leadRoute");
 const leadsRoute = require("./routes/leadsRoute");
-const sheerRoute = require("./routes/sheetRoute");
+const sheetRoute = require("./routes/sheetRoute");
+const labelRoute = require("./routes/labelRoute");
 
 const followUpRoute = require("./routes/followUpRoute");
 const otherRoute = require("./routes/otherRoute");
@@ -69,7 +70,8 @@ messageRoute(app, io);
 cloudnaryRoute(app);
 taskToAgents(app);
 leadsRoute(app,io)
-sheerRoute(app,io)
+sheetRoute(app,io)
+labelRoute(app,io)
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
