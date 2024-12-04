@@ -30,34 +30,47 @@ const leadService = {
   updateLeadDynamicFields: async (leadId, updates, user) => {
     try {
       const lead = await leadRepository.getLeadById(leadId);
+      console.log("Existing Lead:", lead);
+  
       if (!lead) {
         throw new Error("Lead not found");
       }
+  
+      const originalLabel = lead.dynamicLead.label;
+  
       const updatedDynamicLead = {
         ...lead.dynamicLead,
         ...updates,
+        label: originalLabel, 
       };
-
-      return await leadRepository.updateLead(leadId, {
+  
+      if (updates.label) {
+        updatedDynamicLead.Status = updates.label;
+      }
+        const updatedLead = await leadRepository.updateLead(leadId, {
         dynamicLead: updatedDynamicLead,
       });
+  
+      console.log("Updated Lead:", updatedLead);
+      return updatedLead;
     } catch (error) {
       console.error("Error updating lead:", error.message);
       throw error;
     }
   },
-  getAllLabels: async () => {
+
+  getAllLabels: async (sheetId) => {
     try {
-      return await leadRepository.getAllUniqueLabels();
+      return await leadRepository.getAllUniqueStatuses(sheetId);
     } catch (error) {
       console.error("Error in service while fetching labels:", error.message);
       throw error;
     }
   },
 
-  leadReadService: async () => {
+  leadReadService: async (sheetId) => {
     try {
-      const result = await leadRepository.getLeadData();
+      const result = await leadRepository.getLeadData(sheetId);
       return result;
     } catch (error) {
       throw error;
@@ -68,22 +81,15 @@ const leadService = {
     return await leadRepository.delete(leadId, user);
   },
 
-  getLeadsGroupedByLabels: async () => {
+  getLeadsGroupedByLabels: async (sheetId) => {
     try {
-      return await leadRepository.getAllLeadsGroupedByLabels();
+      return await leadRepository.getAllLeadsGroupedByLabels(sheetId);
     } catch (error) {
       console.error("Error in service while fetching grouped leads:", error.message);
       throw error;
     }
   },
-  getLeadsBySheetId: async (sheetId) => {
-    try {
-      return await leadRepository.getLeadsBySheetId(sheetId);
-    } catch (error) {
-      console.error("Error fetching leads for sheet:", error.message);
-      throw error;
-    }
-  },
+
 };
 
 module.exports = leadService;

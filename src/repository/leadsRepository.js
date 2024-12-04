@@ -1,6 +1,7 @@
 const dataSource = require("../infrastructure/psql");
 const Lead = require("../entities/lead");
 const leadsTrash = require("../entities/leadTrash");
+const sheetRepository = require('../entities/createSheet')
 
 const leadRepository = {
   saveLead: async (role, leadId, lead) => {
@@ -39,24 +40,36 @@ const leadRepository = {
       throw error;
     }
   },
-  getAllUniqueLabels: async () => {
+  getAllUniqueStatuses: async (sheetId) => {
     try {
+      const sheetData = dataSource.getRepository(sheetRepository);
+      const existSheet = await sheetData.findOne({ where: { sheetId: sheetId } });
+      console.log("ExistingSheet", existSheet);
+  
+      if (!existSheet) {
+        return `Data not found with sheet ID ${sheetId}`;
+      }
+  
       const query = `
-            SELECT DISTINCT("dynamicLead"->>'label') AS label
-            FROM leads
-            WHERE "dynamicLead"->>'label' IS NOT NULL;
-          `;
-      const result = await dataSource.query(query);
-      return result.map((row) => row.label);
+        SELECT DISTINCT("dynamicLead"->>'Status') AS status
+        FROM leads
+        WHERE "sheetId" = $1 AND "dynamicLead"->>'Status' IS NOT NULL;
+      `;
+  
+      const result = await dataSource.query(query, [sheetId]);
+  
+      return result.map((row) => row.status);
     } catch (error) {
-      console.error("Error fetching labels:", error.message);
-      throw error;
+      console.error("Error fetching statuses:", error.message);
+      throw new Error(`Error fetching statuses for sheet ID ${sheetId}: ${error.message}`);
     }
   },
+  
+  
 
-  getLeadData: async () => {
+  getLeadData: async (sheetId) => {
     try {
-      const data = await dataSource.getRepository(Lead).find();
+      const data = await dataSource.getRepository(Lead).find({where:{sheetId}});
       return data;
     } catch (error) {
       throw error;
@@ -101,35 +114,31 @@ const leadRepository = {
       };
     }
   },
-  getAllLeadsGroupedByLabels: async () => {
+  getAllLeadsGroupedByLabels: async (sheetId) => {
     try {
       const query = `
         SELECT 
-          "dynamicLead"->>'label' AS label,
+          "dynamicLead"->>'Status' AS status,
           json_agg("dynamicLead") AS leads
         FROM leads
-        WHERE "dynamicLead"->>'label' IS NOT NULL
-        GROUP BY "dynamicLead"->>'label';
+        WHERE "dynamicLead"->>'Status' IS NOT NULL
+          AND "sheetId" = $1
+        GROUP BY "dynamicLead"->>'Status';
       `;
-      const result = await dataSource.query(query);
+  
+      const result = await dataSource.query(query, [sheetId]);
+  
       return result.map(row => ({
-        label: row.label,
+        status: row.status, 
         leads: row.leads,
       }));
     } catch (error) {
-      console.error("Error fetching leads grouped by labels:", error.message);
-      throw error;
+      console.error("Error fetching leads grouped by statuses for sheetId:", error.message);
+      throw new Error(`Error fetching leads for sheet ID ${sheetId}: ${error.message}`);
     }
   },
+  
 
-  getLeadsBySheetId: async (sheetId) => {
-    try {
-      return await dataSource.getRepository(Lead).find({ where: { sheetId } });
-    } catch (error) {
-      console.error("Error fetching leads by sheetId:", error.message);
-      throw error;
-    }
-  },
 };
 
 module.exports = leadRepository;
