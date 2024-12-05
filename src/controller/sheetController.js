@@ -1,16 +1,14 @@
 const sheetRepository = require("../repository/sheetRepository");
 const generateSheetId = require("../utils/token");
-const generateLeadId = require('../utils/token')
-const Lead = require('../entities/lead')
-const dataSource= require('../infrastructure/psql')
+const generateLeadId = require("../utils/token");
+const Lead = require("../entities/lead");
+const dataSource = require("../infrastructure/psql");
 
 const sheetController = {
- 
     createSheet: async (io, req, res) => {
         try {
             const data = req.body;
             data.sheetId = generateSheetId();
-
             const initialData = [
                 {
                     name: "Harray",
@@ -19,8 +17,6 @@ const sheetController = {
                     date: "XX-XX-XXXX",
                     text: "Hello",
                     status: "FollowUp",
-                    leadId: generateLeadId(),
-
                 },
                 {
                     name: "Harray",
@@ -29,8 +25,6 @@ const sheetController = {
                     date: "XX-XX-XXXX",
                     text: "Hello",
                     status: "FollowUp",
-                    leadId: generateLeadId(),
-
                 },
                 {
                     name: "Harray",
@@ -39,30 +33,33 @@ const sheetController = {
                     date: "XX-XX-XXXX",
                     text: "Hello",
                     status: "FollowUp",
-                    leadId: generateLeadId(),
-
                 },
             ];
 
-            const leadEntity = {
-                agentId: req.agentId || null,
-                role: req.role,
-                dynamicLead: data.dynamicLead || {},
-                sheetId: data.sheetId,
-            };
-            const addedDataInLead = await dataSource.getRepository(Lead).save({ ...leadEntity, initialData });
-
+            const leads = [];
+            for (const item of initialData) {
+                const leadId = generateLeadId();
+                const leadEntity = {
+                    leadId,
+                    agentId: req.user.agentId || null,
+                    role: req.user.user ,
+                    dynamicLead: item,
+                    sheetId: data.sheetId,
+                };
+                const savedLead = await dataSource.getRepository(Lead).save(leadEntity);
+                leads.push(savedLead); 
+            }
             const sheet = await sheetRepository.createSheet(data);
+
             return res.status(201).json({
                 message: "Sheet created successfully",
-                initialData: addedDataInLead,
-                data: sheet,
+                leads,
+                sheet,
             });
         } catch (error) {
             return res.status(500).json({ message: error.message });
         }
     },
-
     getAllSheets: async (req, res) => {
         try {
             const sheets = await sheetRepository.getAllSheets();
