@@ -9,27 +9,29 @@ const sheetController = {
         try {
             const data = req.body;
             data.sheetId = generateSheetId();
+            const currentDate = new Date().toLocaleDateString();
+
             const initialData = [
                 {
                     lead: "New Lead",
-                    date: Date.now(),
+                    date: currentDate,
                     text: "",
                     email:"",
-                    status: "Follow-up",
+                    status: "New Lead",
                 },
                 {
                     lead: "New Lead",
-                    date: Date.now(),
+                    date: currentDate,
                     text: "",
                     email:"",
-                    status: "Follow-up",
+                    status: "New Lead",
                 },
                 {
                     lead: "New Lead",
-                    date: Date.now(),
+                    date: currentDate,
                     text: "",
                     email:"",
-                    status: "Follow-up",
+                    status: "New Lead",
                 },
             ];
 
