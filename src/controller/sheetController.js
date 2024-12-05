@@ -10,27 +10,26 @@ const sheetController = {
             const data = req.body;
             data.sheetId = generateSheetId();
             const currentDate = new Date().toLocaleDateString();
-
             const initialData = [
                 {
                     lead: "New Lead",
                     date: currentDate,
                     text: "",
-                    email:"",
+                    email: "",
                     status: "New Lead",
                 },
                 {
                     lead: "New Lead",
                     date: currentDate,
                     text: "",
-                    email:"",
+                    email: "",
                     status: "New Lead",
                 },
                 {
                     lead: "New Lead",
                     date: currentDate,
                     text: "",
-                    email:"",
+                    email: "",
                     status: "New Lead",
                 },
             ];
@@ -39,17 +38,17 @@ const sheetController = {
             for (const item of initialData) {
                 const leadId = generateLeadId();
                 const leadEntity = {
-                    leadId,
+                    leadId, 
                     agentId: req.user.agentId || null,
-                    role: req.user.user ,
-                    dynamicLead: item,
+                    role: req.user.user,
+                    dynamicLead: { ...item, leadId },
                     sheetId: data.sheetId,
                 };
                 const savedLead = await dataSource.getRepository(Lead).save(leadEntity);
-                leads.push(savedLead); 
+                leads.push(savedLead);
             }
-            const sheet = await sheetRepository.createSheet(data);
 
+            const sheet = await sheetRepository.createSheet(data);
             return res.status(201).json({
                 message: "Sheet created successfully",
                 leads,
@@ -59,6 +58,7 @@ const sheetController = {
             return res.status(500).json({ message: error.message });
         }
     },
+
     getAllSheets: async (req, res) => {
         try {
             const sheets = await sheetRepository.getAllSheets();
