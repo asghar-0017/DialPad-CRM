@@ -6,12 +6,19 @@ const labelController = {
 
     createLabel: async (io, req, res) => {
         try {
+            const sheetId = req.params.sheetId;
+
             const { label } = req.body; 
                 if (!label || typeof label !== "string") {
                 return res.status(400).json({ 
                     message: "Invalid input. Please provide a label name as a string." 
                 });
             }
+
+            const sheetRepository = dataSource.getRepository(sheetRepo);
+            const existSheetId = await sheetRepository.findOne({ where: { sheetId: lead.sheetId } });
+        
+
             const labelRepository = dataSource.getRepository('label');
                 const existingLabel = await labelRepository.findOne({ where: { name: label } });
             if (existingLabel) {

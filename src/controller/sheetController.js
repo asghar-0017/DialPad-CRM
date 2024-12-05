@@ -11,28 +11,25 @@ const sheetController = {
             data.sheetId = generateSheetId();
             const initialData = [
                 {
-                    name: "Harray",
-                    person: "Harray",
-                    label: "Lead",
-                    date: "XX-XX-XXXX",
-                    text: "Hello",
-                    status: "FollowUp",
+                    lead: "New Lead",
+                    date: Date.now(),
+                    text: "",
+                    email:"",
+                    status: "Follow-up",
                 },
                 {
-                    name: "Harray",
-                    person: "Harray",
-                    label: "Lead",
-                    date: "XX-XX-XXXX",
-                    text: "Hello",
-                    status: "FollowUp",
+                    lead: "New Lead",
+                    date: Date.now(),
+                    text: "",
+                    email:"",
+                    status: "Follow-up",
                 },
                 {
-                    name: "Harray",
-                    person: "Harray",
-                    label: "Lead",
-                    date: "XX-XX-XXXX",
-                    text: "Hello",
-                    status: "FollowUp",
+                    lead: "New Lead",
+                    date: Date.now(),
+                    text: "",
+                    email:"",
+                    status: "Follow-up",
                 },
             ];
 
