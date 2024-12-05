@@ -5,7 +5,7 @@ const trashService = {
     try {
       const data = await trashRepository.getLeadTrashDataFromRepo();
       return data;
-    } catch (error) { 
+    } catch (error) {
       throw error;
     }
   },

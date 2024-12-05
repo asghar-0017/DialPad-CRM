@@ -55,13 +55,11 @@ setupSockets(io);
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
     logger.error("Bad JSON:", err.message);
-    return res
-      .status(400)
-      .send({
-        code: 400,
-        status: "Bad Request",
-        message: "Invalid JSON payload",
-      });
+    return res.status(400).send({
+      code: 400,
+      status: "Bad Request",
+      message: "Invalid JSON payload",
+    });
   }
   next();
 });
