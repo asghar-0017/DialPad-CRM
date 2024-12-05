@@ -5,26 +5,27 @@ const path = require("path");
 const xlsx = require("xlsx");
 
 const leadController = {
-    createLead: async (io, req, res) => {
-        try {
-          const data=req.body
-          data.leadId = generateLeadId();
-          const user = req.user;
-          const sheetId = req.params.sheetId;
-          const lead = await leadService.leadCreateService(data, user, sheetId);
-          if (!lead) {
-            return res.status(400).json({ message: "Failed to create lead" });
-          }
-          const { dynamicLead = {} } = lead;
-          io.emit("receive_message", dynamicLead);
-          return res.status(200).json({ message: "Lead created successfully", data: lead });
-        } catch (error) {
-          console.error("Error creating lead:", error);
-          return res
-            .status(500)
-            .json({ message: "Internal Server Error", error: error.message });
-        }
-      },
+  createLead: async (io, req, res) => {
+    try {
+      const data = req.body;
+      data.leadId = generateLeadId();
+      const user = req.user;
+
+      const sheetId = req.params.sheetId;
+      const lead = await leadService.leadCreateService(data, user, sheetId);
+  
+      if (!lead || !lead.leadId) {
+        return res.status(400).json({ message: "Failed to create lead" });
+      }
+  
+      const { dynamicLead = {} } = lead;
+      io.emit("receive_message", dynamicLead);
+      return res.status(200).json({ message: "Lead created successfully", data: lead });
+    } catch (error) {
+      console.error("Error creating lead:", error.message);
+      return res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+  },
       
   updateLeadDynamicFields: async (io, req, res) => {
     try {
@@ -162,34 +163,42 @@ const leadController = {
       });
     }
   },
-
   saveExcelFileData: async (io, req, res) => {
     console.log("API hit for uploading leads CSV");
   
     if (!req.file) {
-      return res.status(400).json({ message: "Please upload an Excel file." });}
+      return res.status(400).json({ message: "Please upload an Excel file." });
+    }
+  
     const filePath = path.join(__dirname, "../uploads/", req.file.filename);
+  
     try {
       const sheetId = req.params.sheetId;
       console.log("Received Sheet ID:", sheetId);
-        const workbook = xlsx.readFile(filePath);
+  
+      const workbook = xlsx.readFile(filePath);
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       const results = xlsx.utils.sheet_to_json(sheet);
+  
       if (!results.length) {
         return res.status(400).json({ message: "No data found in the Excel file." });
       }
+  
       const leadCreate = [];
+  
       for (const row of results) {
         const leadData = {
           ...row,
           leadId: generateLeadId(),
-          sheetId, 
+          sheetId,
         };
-        console.log("Lead Data",leadData)
+  
+        console.log("Processing lead data:", leadData);
   
         try {
           const assignedLead = await leadService.leadCreateService(leadData, req.user, sheetId);
+  
           if (assignedLead) {
             const { dynamicLead, ...leadDetails } = assignedLead;
             const flattenedLead = { ...leadDetails, ...dynamicLead };
@@ -199,7 +208,8 @@ const leadController = {
           console.error(`Error creating lead for row: ${JSON.stringify(row)}`, error.message);
         }
       }
-        if (leadCreate.length > 0) {
+  
+      if (leadCreate.length > 0) {
         io.emit("send_message", leadCreate);
         return res.status(200).json({
           message: "Leads created successfully",
@@ -225,6 +235,7 @@ const leadController = {
       }
     }
   },
+  
   
   };
 

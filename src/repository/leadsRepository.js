@@ -1,26 +1,33 @@
 const dataSource = require("../infrastructure/psql");
 const Lead = require("../entities/lead");
 const leadsTrash = require("../entities/leadTrash");
-const sheetRepository = require('../entities/createSheet')
+const sheetRepo = require('../entities/createSheet')
 
 const leadRepository = {
   saveLead: async (role, leadId, lead) => {
     try {
-      const leadEntity = {
-        leadId,
-        agentId: lead.agentId,
-        role,
-        dynamicLead: lead.dynamicLead,
-        sheetId: lead.sheetId || null
-
-      };
-
-      return await dataSource.getRepository(Lead).save(leadEntity);
+      const sheetRepository = dataSource.getRepository(sheetRepo);
+      const existSheetId = await sheetRepository.findOne({ where: { sheetId: lead.sheetId } });
+  
+      if (existSheetId) {
+        const leadEntity = {
+          leadId,
+          agentId: lead.agentId || null,
+          role,
+          dynamicLead: lead.dynamicLead,
+          sheetId: lead.sheetId || null,
+        };
+        return await dataSource.getRepository(Lead).save(leadEntity);
+      } else {
+        console.error(`Sheet ID not found: ${lead.sheetId}`);
+        throw new Error(`Sheet ID not found: ${lead.sheetId}`);
+      }
     } catch (error) {
       console.error("Error saving lead:", error.message);
       throw error;
     }
   },
+  
 
   getLeadById: async (leadId) => {
     try {

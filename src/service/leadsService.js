@@ -1,31 +1,34 @@
 const leadRepository = require("../repository/leadsRepository");
 
 const leadService = {
-    leadCreateService: async (data, user, sheetId) => {
-        try {
-      if (user.role === "agent") {
-        data.agentId = user.agentId;
-      }
-      if (sheetId) {
-        data.sheetId = sheetId;
-      }
-
-
-      const lead = await leadRepository.saveLead(user.role, data.leadId, {
-        dynamicLead: data,
-        agentId: data.agentId || null,
-        sheetId: data.sheetId || null,
-      });
-
-      if (!lead || !lead.leadId) {
-        throw new Error("Failed to create lead");
-      }
-      return lead;
-    } catch (error) {
-      console.error("Error creating lead:", error.message);
-      throw error;
+    
+leadCreateService: async (data, user, sheetId) => {
+  try {
+    if (user.role === "agent") {
+      data.agentId = user.agentId;
     }
-  },
+
+    if (sheetId) {
+      data.sheetId = sheetId;
+    }
+
+    const lead = await leadRepository.saveLead(user.role, data.leadId, {
+      dynamicLead: data,
+      agentId: data.agentId || null,
+      sheetId: data.sheetId || null,
+    });
+
+    if (!lead || !lead.leadId) {
+      throw new Error("Failed to create lead");
+    }
+
+    return lead;
+  } catch (error) {
+    console.error("Error creating lead:", error.message);
+    throw error;
+  }
+},
+
 
   updateLeadDynamicFields: async (leadId, updates, user) => {
     try {
