@@ -16,21 +16,21 @@ const sheetController = {
                     date: currentDate,
                     text: "",
                     email: "",
-                    status: "New Lead",
+                    status: "Lead",
                 },
                 {
                     lead: "New Lead",
                     date: currentDate,
                     text: "",
                     email: "",
-                    status: "New Lead",
+                    status: "Lead",
                 },
                 {
                     lead: "New Lead",
                     date: currentDate,
                     text: "",
                     email: "",
-                    status: "New Lead",
+                    status: "Lead",
                 },
             ];
 
