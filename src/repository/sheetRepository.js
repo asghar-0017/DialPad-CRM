@@ -28,6 +28,10 @@ const sheetRepository = {
             throw error;
         }
     },
+    save: async (sheet) => {
+        const sheetRepository = dataSource.getRepository(Sheet);
+        return await sheetRepository.save(sheet); // Save the updated sheet
+    },
 };
 
 module.exports = sheetRepository;

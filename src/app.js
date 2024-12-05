@@ -2,19 +2,8 @@ const express = require("express");
 const http = require("http");
 const dotenv = require("dotenv");
 const { logger } = require("../logger");
-const AdminAuthRoute = require("./routes/authRoute");
-const agentRoute = require("./routes/agentRoute");
-const leadRoute = require("./routes/leadRoute");
-const leadsRoute = require("./routes/leadsRoute");
-const sheetRoute = require("./routes/sheetRoute");
-const labelRoute = require("./routes/labelRoute");
-
-const followUpRoute = require("./routes/followUpRoute");
-const otherRoute = require("./routes/otherRoute");
-const TrashRoute = require("./routes/trashRoute");
-const messageRoute = require("./routes/messagingRoute");
-const taskToAgents = require("./routes/taskToAgents");
-const cloudnaryRoute = require("./routes/cloudnaryRoute");
+const setupRoutes = require("./routes/AllRoutes");
+const setupSockets = require("./socket/socket");
 const dataSource = require("./infrastructure/psql");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -60,18 +49,8 @@ app.get("/", async (req, res) => {
   });
 });
 
-AdminAuthRoute(app, io);
-agentRoute(app, io);
-leadRoute(app, io);
-followUpRoute(app, io);
-otherRoute(app, io);
-TrashRoute(app);
-messageRoute(app, io);
-cloudnaryRoute(app);
-taskToAgents(app);
-leadsRoute(app,io)
-sheetRoute(app,io)
-labelRoute(app,io)
+setupRoutes(app, io);
+setupSockets(io);
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
@@ -87,50 +66,6 @@ app.use((err, req, res, next) => {
   next();
 });
 
-const onlineAgents = new Map();
-const onlineAdmins = new Map();
-
-io.on("connection", (socket) => {
-  console.log(`A user connected: ${socket.id}`);
-  socket.on("agent_connected", (agentId) => {
-    onlineAgents.set(agentId, socket.id);
-    console.log(`Agent ${agentId} is online`);
-    io.emit("online_agents", Array.from(onlineAgents.keys()));
-  });
-
-  socket.on("admin_connected", (adminId) => {
-    onlineAdmins.set(adminId, socket.id);
-    logger.info(`Admin ${adminId} is online`);
-
-    io.emit("admin_online", { adminId, online: true });
-  });
-
-  socket.on("send_message", (data) => {
-    console.log("data of socket", data);
-    socket.broadcast.emit("receive_message", data);
-  });
-
-  socket.on("disconnect", () => {
-    for (const [agentId, socketId] of onlineAgents.entries()) {
-      if (socketId === socket.id) {
-        onlineAgents.delete(agentId);
-        console.log(`Agent ${agentId} is offline`);
-        break;
-      }
-    }
-
-    for (const [adminId, socketId] of onlineAdmins.entries()) {
-      if (socketId === socket.id) {
-        onlineAdmins.delete(adminId);
-        logger.info(`Admin ${adminId} is offline`);
-        io.emit("admin_online", { adminId, online: false });
-        break;
-      }
-    }
-    io.emit("online_agents", Array.from(onlineAgents.keys()));
-    console.log(`User disconnected: ${socket.id}`);
-  });
-});
 const StartServer = async () => {
   try {
     await dataSource.initialize();

@@ -11,6 +11,10 @@ module.exports = new EntitySchema({
       },
       sheetId:{type:'varchar'},
       sheetName: { type: "varchar" },
+      columns: {
+        type: "jsonb", 
+        nullable: true,
+      },
       created_at: {
         type: "timestamp",
         default: () => "CURRENT_TIMESTAMP",
