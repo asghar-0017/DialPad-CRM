@@ -13,7 +13,6 @@ const sheetController = {
       data.sheetId = generateSheetId();
       const currentDate = new Date().toLocaleDateString();
 
-      // Initial leads data
       const initialData = [
         {
           lead: "New Lead",
@@ -41,7 +40,6 @@ const sheetController = {
         },
       ];
 
-      // Define columns
       const columns = [
         { name: "Lead", type: "string" },
         { name: "Date", type: "date" },
@@ -50,7 +48,6 @@ const sheetController = {
         { name: "Status", type: "string" },
       ];
 
-      // Sheet entity data
       const sheetEntity = {
         sheetId: data.sheetId,
         sheetName: data.sheetName,
@@ -58,11 +55,7 @@ const sheetController = {
         created_at: new Date(),
         updated_at: new Date(),
       };
-
-      // Create the sheet
       const sheet = await sheetRepository.createSheet(sheetEntity);
-
-      // Initial labels data
       const initialLabels = [
         { name: "Lead", sheetId: data.sheetId },
         { name: "Qualified", sheetId: data.sheetId },
@@ -70,22 +63,23 @@ const sheetController = {
         { name: "Disqualified", sheetId: data.sheetId },
       ];
 
-      // Check if the initial labels already exist
-      const labelRepository = dataSource.getRepository(Label);
+      const labelRepository = dataSource.getRepository('label'); 
       const existingLabels = await labelRepository.find({ where: { sheetId: data.sheetId } });
 
-      // Filter out the labels that already exist
-      const newLabels = initialLabels.filter(label => {
-        return !existingLabels.some(existingLabel => existingLabel.name === label.name);
+      const newLabels = initialLabels.map(label => {
+        return {
+          ...label,
+          labelId: generateSheetId(), 
+        };
+      });
+      const labelsToCreate = newLabels.filter(newLabel => {
+        return !existingLabels.some(existingLabel => existingLabel.name === newLabel.name);
       });
 
-      // Insert only the new labels that do not already exist
-      if (newLabels.length > 0) {
-        const createdLabels = await labelRepository.save(newLabels);
-        console.log("Created Labels:", createdLabels); // Log the created labels for debugging
+      if (labelsToCreate.length > 0) {
+        const createdLabels = await labelRepository.save(labelsToCreate);
+        console.log("Created Labels:", createdLabels); 
       }
-
-      // Add leads data for the created sheet
       const leads = [];
       for (const item of initialData) {
         const leadId = generateLeadId();
@@ -104,7 +98,7 @@ const sheetController = {
         message: "Sheet created successfully",
         leads,
         sheet,
-        labels: newLabels.length > 0 ? newLabels : "No new labels added", // Return the created labels
+        labels: labelsToCreate.length > 0 ? labelsToCreate : "No new labels added",
       });
     } catch (error) {
       console.error("Error creating sheet:", error.message);

@@ -5,27 +5,53 @@ const path = require("path");
 const xlsx = require("xlsx");
 
 const leadController = {
-  createLead: async (io, req, res) => {
+  createLabel: async (io, req, res) => {
     try {
-      const data = req.body;
-      data.leadId = generateLeadId();
-      const user = req.user;
+        console.log("API Hit");
+        const sheetId = req.params.sheetId;
+        const { label } = req.body;
 
-      const sheetId = req.params.sheetId;
-      const lead = await leadService.leadCreateService(data, user, sheetId);
-  
-      if (!lead || !lead.leadId) {
-        return res.status(400).json({ message: "Failed to create lead" });
-      }
-  
-      const { dynamicLead = {} } = lead;
-      io.emit("receive_message", dynamicLead);
-      return res.status(200).json({ message: "Lead created successfully", data: lead });
+        if (!label || typeof label !== "string") {
+            return res.status(400).json({
+                message: "Invalid input. Please provide a label name as a string."
+            });
+        }
+
+        const labelId = generateLabelId(); 
+
+        const sheetRepository = dataSource.getRepository(sheetRepo);
+        const existSheetId = await sheetRepository.findOne({ where: { sheetId: sheetId } });
+
+        if (!existSheetId) {
+            return res.status(404).json({ message: "Sheet not found" });
+        }
+
+        const labelRepository = dataSource.getRepository('label');
+        const existingLabel = await labelRepository.findOne({ where: { name: label, sheetId } });
+
+        if (existingLabel) {
+            return res.status(200).json({
+                message: `Label '${label}' already exists.`,
+                data: existingLabel
+            });
+        }
+        const createdLabel = await labelRepository.save({
+            name: label,
+            sheetId: sheetId,
+            labelId: labelId,  
+        });
+        return res.status(201).json({
+            message: "Label created successfully.",
+            data: createdLabel,
+        });
     } catch (error) {
-      console.error("Error creating lead:", error.message);
-      return res.status(500).json({ message: "Internal Server Error", error: error.message });
+        console.error("Error creating label:", error.message);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            error: error.message,
+        });
     }
-  },
+},
       
   updateLeadDynamicFields: async (io, req, res) => {
     try {
