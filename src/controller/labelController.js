@@ -10,22 +10,18 @@ const labelController = {
             const sheetId = req.params.sheetId;
             const { label } = req.body;
 
-            // Validate label input
             if (!label || typeof label !== "string") {
                 return res.status(400).json({
                     message: "Invalid input. Please provide a label name as a string."
                 });
             }
 
-            // Check if sheet exists
             const sheetRepository = dataSource.getRepository(sheetRepo);
             const existSheetId = await sheetRepository.findOne({ where: { sheetId: sheetId } });
 
             if (!existSheetId) {
                 return res.status(404).json({ message: "Sheet not found" });
             }
-
-            // Check if label already exists
             const labelRepository = dataSource.getRepository('label');
             const existingLabel = await labelRepository.findOne({ where: { name: label } });
 
@@ -35,8 +31,6 @@ const labelController = {
                     data: existingLabel
                 });
             }
-
-            // Create new label
             const createdLabel = await labelRepository.save({ name: label, sheetId });
             return res.status(201).json({
                 message: "Label created successfully.",

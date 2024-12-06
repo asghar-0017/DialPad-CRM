@@ -4,6 +4,8 @@ const generateLeadId = require("../utils/token");
 const Lead = require("../entities/lead");
 const dataSource = require("../infrastructure/psql");
 const Sheet = require("../entities/createSheet");
+const Label = require("../entities/labels"); // Assuming the label entity is imported here
+
 const sheetController = {
   createSheet: async (io, req, res) => {
     try {
@@ -11,6 +13,7 @@ const sheetController = {
       data.sheetId = generateSheetId();
       const currentDate = new Date().toLocaleDateString();
 
+      // Initial leads data
       const initialData = [
         {
           lead: "New Lead",
@@ -38,6 +41,7 @@ const sheetController = {
         },
       ];
 
+      // Define columns
       const columns = [
         { name: "Lead", type: "string" },
         { name: "Date", type: "date" },
@@ -46,6 +50,7 @@ const sheetController = {
         { name: "Status", type: "string" },
       ];
 
+      // Sheet entity data
       const sheetEntity = {
         sheetId: data.sheetId,
         sheetName: data.sheetName,
@@ -53,7 +58,34 @@ const sheetController = {
         created_at: new Date(),
         updated_at: new Date(),
       };
+
+      // Create the sheet
       const sheet = await sheetRepository.createSheet(sheetEntity);
+
+      // Initial labels data
+      const initialLabels = [
+        { name: "Lead", sheetId: data.sheetId },
+        { name: "Qualified", sheetId: data.sheetId },
+        { name: "FollowUp", sheetId: data.sheetId },
+        { name: "Disqualified", sheetId: data.sheetId },
+      ];
+
+      // Check if the initial labels already exist
+      const labelRepository = dataSource.getRepository(Label);
+      const existingLabels = await labelRepository.find({ where: { sheetId: data.sheetId } });
+
+      // Filter out the labels that already exist
+      const newLabels = initialLabels.filter(label => {
+        return !existingLabels.some(existingLabel => existingLabel.name === label.name);
+      });
+
+      // Insert only the new labels that do not already exist
+      if (newLabels.length > 0) {
+        const createdLabels = await labelRepository.save(newLabels);
+        console.log("Created Labels:", createdLabels); // Log the created labels for debugging
+      }
+
+      // Add leads data for the created sheet
       const leads = [];
       for (const item of initialData) {
         const leadId = generateLeadId();
@@ -67,15 +99,19 @@ const sheetController = {
         const savedLead = await dataSource.getRepository(Lead).save(leadEntity);
         leads.push(savedLead);
       }
+
       return res.status(201).json({
         message: "Sheet created successfully",
         leads,
         sheet,
+        labels: newLabels.length > 0 ? newLabels : "No new labels added", // Return the created labels
       });
     } catch (error) {
+      console.error("Error creating sheet:", error.message);
       return res.status(500).json({ message: error.message });
     }
   },
+
 
   getAllSheets: async (req, res) => {
     try {
