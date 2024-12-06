@@ -49,7 +49,7 @@ const leadRepository = {
   },
   getAllUniqueStatuses: async (sheetId) => {
     try {
-      const sheetData = dataSource.getRepository(sheetRepository);
+      const sheetData = dataSource.getRepository(sheetRepo);
       const existSheet = await sheetData.findOne({ where: { sheetId: sheetId } });
       console.log("ExistingSheet", existSheet);
   
@@ -58,9 +58,9 @@ const leadRepository = {
       }
   
       const query = `
-        SELECT DISTINCT("dynamicLead"->>'Status') AS status
+        SELECT DISTINCT("dynamicLead"->>'status') AS status
         FROM leads
-        WHERE "sheetId" = $1 AND "dynamicLead"->>'Status' IS NOT NULL;
+        WHERE "sheetId" = $1 AND "dynamicLead"->>'status' IS NOT NULL;
       `;
   
       const result = await dataSource.query(query, [sheetId]);
