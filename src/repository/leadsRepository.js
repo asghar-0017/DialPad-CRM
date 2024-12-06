@@ -125,12 +125,12 @@ const leadRepository = {
     try {
       const query = `
         SELECT 
-          "dynamicLead"->>'Status' AS status,
+          "dynamicLead"->>'status' AS status,
           json_agg("dynamicLead") AS leads
         FROM leads
-        WHERE "dynamicLead"->>'Status' IS NOT NULL
+        WHERE "dynamicLead"->>'status' IS NOT NULL
           AND "sheetId" = $1
-        GROUP BY "dynamicLead"->>'Status';
+        GROUP BY "dynamicLead"->>'status';
       `;
   
       const result = await dataSource.query(query, [sheetId]);

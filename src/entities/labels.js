@@ -13,6 +13,9 @@ module.exports = new EntitySchema({
       type: "varchar",
       unique: true,
     },
+    sheetId:{
+      type:'varchar'
+    },
     created_at: {
       type: "timestamp",
       default: () => "CURRENT_TIMESTAMP",
