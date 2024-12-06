@@ -337,6 +337,6 @@ const agentAuthService = {
       throw error;
     }
   },
-};
+}
 
 module.exports = { agentService, agentAuthService };
