@@ -106,7 +106,42 @@ const sheetController = {
     }
   },
 
-
+  updateKeysOnly: async (req, res) => {
+    try {
+      const { sheetId, newKeys } = req.body;
+  
+      if (!sheetId || !Array.isArray(newKeys)) {
+        return res.status(400).json({ message: "Invalid input. Provide 'sheetId' and 'newKeys' array." });
+      }
+  
+      const leadRepository = dataSource.getRepository(Lead);
+      const leads = await leadRepository.find({ where: { sheetId } });
+  
+      if (!leads.length) {
+        return res.status(404).json({ message: "No leads found for the given sheetId." });
+      }
+  
+      const defaultValues = {};
+      newKeys.forEach(key => {
+        defaultValues[key] = ""; // Default value for new keys
+      });
+  
+      const updatedLeads = leads.map(lead => ({
+        ...lead.dynamicLead,
+        ...defaultValues, // Add new keys with default values
+      }));
+  
+      for (const updatedLead of updatedLeads) {
+        await leadRepository.update({ leadId: updatedLead.leadId }, { dynamicLead: updatedLead });
+      }
+  
+      return res.status(200).json({ message: "Keys updated successfully", updatedLeads });
+    } catch (error) {
+      console.error("Error updating keys:", error.message);
+      return res.status(500).json({ message: error.message });
+    }
+  },
+  
   getAllSheets: async (req, res) => {
     try {
       const sheets = await sheetRepository.getAllSheets();
@@ -152,82 +187,75 @@ const sheetController = {
 
   addColumn: async (req, res) => {
     try {
-      const { sheetId } = req.params;
-      const { newColumn } = req.body;
-
-      if (!newColumn || !newColumn.name || !newColumn.type) {
-        return res
-          .status(400)
-          .json({ message: "Invalid column data. Provide 'name' and 'type'." });
-      }
-
-      const sheetRepository = dataSource.getRepository(Sheet);
-
-      const sheet = await sheetRepository.findOne({
-        where: { sheetId: sheetId },
-      });
-      if (!sheet) {
-        return res.status(404).json({ message: "Sheet not found" });
-      }
-
-      const columnExists = sheet.columns.some(
-        (column) => column.name === newColumn.name
-      );
-      if (columnExists) {
-        return res
-          .status(400)
-          .json({ message: `Column '${newColumn.name}' already exists.` });
-      }
-      sheet.columns.push(newColumn);
-      sheet.updated_at = new Date();
-      const updatedSheet = await sheetRepository.save(sheet);
-      return res.status(200).json({
-        message: "Column added successfully",
-        columns: updatedSheet.columns,
-      });
+        const { sheetId } = req.params;
+        const { newColumn } = req.body;
+        if (!newColumn || !newColumn.name || !newColumn.type) {
+            return res.status(400).json({
+                message: "Invalid column data. Provide 'name' and 'type'."
+            });
+        }
+        const sheetRepository = dataSource.getRepository(Sheet);
+        const sheet = await sheetRepository.findOne({ where: { sheetId: sheetId } });
+        if (!sheet) {
+            return res.status(404).json({ message: "Sheet not found" });
+        }
+        const columnExists = sheet.columns.some(column => column.name === newColumn.name);
+        if (columnExists) {
+            return res.status(400).json({
+                message: `Column '${newColumn.name}' already exists.`
+            });
+        }
+        sheet.columns.push(newColumn);
+        sheet.updated_at = new Date();
+        const updatedSheet = await sheetRepository.save(sheet);
+        return res.status(200).json({
+            message: "Column added successfully",
+            columns: updatedSheet.columns
+        });
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
-  },
+},
+
 
   updateSheetColumns: async (req, res) => {
     try {
-      const { sheetId } = req.params;
-      const { columnsToUpdate } = req.body;
-      if (!Array.isArray(columnsToUpdate)) {
-        return res
-          .status(400)
-          .json({
-            message: "Invalid input. Provide an array of columns to update.",
-          });
-      }
-      const sheet = await sheetRepository.getSheetById(sheetId);
-      if (!sheet) {
-        return res.status(404).json({ message: "Sheet not found" });
-      }
-      const updatedColumns = sheet.columns.map((existingColumn) => {
-        const update = columnsToUpdate.find(
-          (col) => col.name === existingColumn.name
-        );
-        if (update) {
-          return {
-            name: update.newName || existingColumn.name,
-            type: update.type || existingColumn.type,
-          };
+        const { sheetId } = req.params;
+        const { columnsToUpdate } = req.body;
+
+        if (!Array.isArray(columnsToUpdate)) {
+            return res.status(400).json({
+                message: "Invalid input. Provide an array of columns to update."
+            });
         }
-        return existingColumn;
-      });
-      sheet.columns = updatedColumns;
-      sheet.updated_at = new Date();
-      const updatedSheet = await sheetRepository.save(sheet);
-      return res.status(200).json({
-        message: "Columns updated successfully",
-        columns: updatedSheet.columns,
-      });
+
+        const sheet = await sheetRepository.getSheetById(sheetId);
+        if (!sheet) {
+            return res.status(404).json({ message: "Sheet not found" });
+        }
+
+        const updatedColumns = sheet.columns.map((existingColumn) => {
+            const update = columnsToUpdate.find(col => col.name === existingColumn.name);
+            if (update) {
+                return {
+                    name: update.newName || existingColumn.name,
+                    type: update.type || existingColumn.type 
+                };
+            }
+            return existingColumn; 
+        });
+        sheet.columns = updatedColumns;
+        sheet.updated_at = new Date();
+        const updatedSheet = await sheetRepository.save(sheet);
+        return res.status(200).json({
+            message: "Columns updated successfully",
+            columns: updatedSheet.columns
+        });
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
-  },
+},
+
 };
 
 module.exports = sheetController;

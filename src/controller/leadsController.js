@@ -3,56 +3,164 @@ const generateLeadId = require("../utils/token");
 const fs = require("fs");
 const path = require("path");
 const xlsx = require("xlsx");
+const Lead = require('../entities/lead')
+const dataSource = require('../infrastructure/psql')
 
 const leadController = {
-  createLabel: async (io, req, res) => {
+  createLead: async (io, req, res) => {
     try {
-        console.log("API Hit");
-        const sheetId = req.params.sheetId;
-        const { label } = req.body;
+      const data = req.body;
+      data.leadId = generateLeadId();
+      const user = req.user;
 
-        if (!label || typeof label !== "string") {
-            return res.status(400).json({
-                message: "Invalid input. Please provide a label name as a string."
-            });
-        }
-
-        const labelId = generateLabelId(); 
-
-        const sheetRepository = dataSource.getRepository(sheetRepo);
-        const existSheetId = await sheetRepository.findOne({ where: { sheetId: sheetId } });
-
-        if (!existSheetId) {
-            return res.status(404).json({ message: "Sheet not found" });
-        }
-
-        const labelRepository = dataSource.getRepository('label');
-        const existingLabel = await labelRepository.findOne({ where: { name: label, sheetId } });
-
-        if (existingLabel) {
-            return res.status(200).json({
-                message: `Label '${label}' already exists.`,
-                data: existingLabel
-            });
-        }
-        const createdLabel = await labelRepository.save({
-            name: label,
-            sheetId: sheetId,
-            labelId: labelId,  
-        });
-        return res.status(201).json({
-            message: "Label created successfully.",
-            data: createdLabel,
-        });
+      const sheetId = req.params.sheetId;
+      const lead = await leadService.leadCreateService(data, user, sheetId);
+  
+      if (!lead || !lead.leadId) {
+        return res.status(400).json({ message: "Failed to create lead" });
+      }
+  
+      const { dynamicLead = {} } = lead;
+      io.emit("receive_message", dynamicLead);
+      return res.status(200).json({ message: "Lead created successfully", data: lead });
     } catch (error) {
-        console.error("Error creating label:", error.message);
-        return res.status(500).json({
-            message: "Internal Server Error",
-            error: error.message,
-        });
+      console.error("Error creating lead:", error.message);
+      return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
-},
+  },
       
+  // updateKeysOnly: async (req, res) => {
+  //   try {
+  //     console.log("API hit");
+  
+  //     // Validate and extract inputs
+  //     const sheetId = req.params.sheetId;
+  //     const { newKeys } = req.body; // Explicitly extract `newKeys`
+  
+  //     console.log("SheetId:", sheetId);
+  //     console.log("New Keys:", newKeys);
+  
+  //     if (!sheetId) {
+  //       return res.status(400).json({ message: "sheetId is required." });
+  //     }
+  
+  //     if (!Array.isArray(newKeys) || newKeys.length === 0) {
+  //       return res.status(400).json({ message: "newKeys must be a non-empty array." });
+  //     }
+  
+  //     // Get repository
+  //     const leadRepository = dataSource.getRepository("lead");
+  
+  //     // Fetch leads by sheetId
+  //     const leads = await leadRepository.find({ where: { sheetId } });
+  
+  //     console.log("Leads retrieved:", leads);
+  
+  //     if (!leads || leads.length === 0) {
+  //       return res.status(404).json({ message: "No leads found for the given sheetId." });
+  //     }
+  
+  //     // Prepare default values for new keys
+  //     const defaultValues = {};
+  //     newKeys.forEach(key => {
+  //       defaultValues[key] = ""; // Assign default value
+  //     });
+  
+  //     // Update leads
+  //     const updatedLeads = leads.map(lead => {
+  //       lead.dynamicLead = { ...defaultValues, ...lead.dynamicLead }; // Merge default and existing keys
+  //       return lead;
+  //     });
+  
+  //     // Save updated leads
+  //     const savePromises = updatedLeads.map(async updatedLead => {
+  //       await leadRepository.save({
+  //         id: updatedLead.id,
+  //         dynamicLead: updatedLead.dynamicLead, // Only update the dynamicLead field
+  //       });
+  //     });
+  
+  //     await Promise.all(savePromises);
+  
+  //     return res.status(200).json({
+  //       message: "Keys updated successfully",
+  //       updatedLeads,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error updating keys:", error);
+  //     return res.status(500).json({ message: error.message });
+  //   }
+  // },
+  
+  updateKeysOnly: async (req, res) => {
+    try {
+      console.log("API hit");
+  
+      // Extract inputs
+      const sheetId = req.params.sheetId;
+      const { renameKeys } = req.body; // { oldKey: "newKey" }
+  
+      console.log("SheetId:", sheetId);
+      console.log("Rename Keys:", renameKeys);
+  
+      if (!sheetId) {
+        return res.status(400).json({ message: "sheetId is required." });
+      }
+  
+      if (!renameKeys || typeof renameKeys !== "object" || Array.isArray(renameKeys)) {
+        return res.status(400).json({
+          message: "renameKeys must be an object with { oldKey: newKey } pairs.",
+        });
+      }
+  
+      // Get repository
+      const leadRepository = dataSource.getRepository("lead");
+  
+      // Fetch leads by sheetId
+      const leads = await leadRepository.find({ where: { sheetId } });
+  
+      console.log("Leads retrieved:", leads);
+  
+      if (!leads || leads.length === 0) {
+        return res.status(404).json({ message: "No leads found for the given sheetId." });
+      }
+  
+      // Update leads with renamed keys
+      const updatedLeads = leads.map(lead => {
+        const updatedDynamicLead = { ...lead.dynamicLead };
+  
+        // Rename keys
+        for (const [oldKey, newKey] of Object.entries(renameKeys)) {
+          if (updatedDynamicLead.hasOwnProperty(oldKey)) {
+            updatedDynamicLead[newKey] = updatedDynamicLead[oldKey]; // Copy value
+            delete updatedDynamicLead[oldKey]; // Remove old key
+          }
+        }
+  
+        // Return updated lead
+        return { ...lead, dynamicLead: updatedDynamicLead };
+      });
+  
+      // Save updated leads
+      const savePromises = updatedLeads.map(async updatedLead => {
+        await leadRepository.save({
+          id: updatedLead.id,
+          dynamicLead: updatedLead.dynamicLead, // Update only the `dynamicLead` field
+        });
+      });
+  
+      await Promise.all(savePromises);
+  
+      return res.status(200).json({
+        message: "Keys renamed successfully",
+        updatedLeads,
+      });
+    } catch (error) {
+      console.error("Error renaming keys:", error);
+      return res.status(500).json({ message: error.message });
+    }
+  },  
+  
   updateLeadDynamicFields: async (io, req, res) => {
     try {
       const { leadId } = req.params;
