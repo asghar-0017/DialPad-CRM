@@ -15,37 +15,37 @@ const sheetController = {
 
       const initialData = [
         {
-          Lead: "New Lead",
-          Date: currentDate,
-          Text: "",
-          Email: "",
-          Status: "Lead",
+          lead: "New Lead",
+          date: currentDate,
+          text: "",
+          email: "",
+          status: "Lead",
           id: Date.now(),
         },
         {
-          Lead: "New Lead",
-          Date: currentDate,
-          Text: "",
-          Email: "",
-          Status: "Lead",
+          lead: "New Lead",
+          date: currentDate,
+          text: "",
+          email: "",
+          status: "Lead",
           id: Date.now()+1,
         },
         {
-          Lead: "New Lead",
-          Date: currentDate,
-          Text: "",
-          Email: "",
-          Status: "Lead",
+          lead: "New Lead",
+          date: currentDate,
+          text: "",
+          email: "",
+          status: "Lead",
           id: Date.now()+2,
         },
       ];
 
       const columns = [
-        { name: "Lead", type: "string" },
-        { name: "Date", type: "date" },
-        { name: "Text", type: "string" },
-        { name: "Email", type: "string" },
-        { name: "Status", type: "string" },
+        { name: "lead", type: "string" },
+        { name: "date", type: "date" },
+        { name: "text", type: "string" },
+        { name: "email", type: "string" },
+        { name: "status", type: "string" },
       ];
 
       const sheetEntity = {
