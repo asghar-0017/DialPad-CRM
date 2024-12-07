@@ -12,14 +12,14 @@ const leadsRoute = (app,io) => {
         checkRole(['admin', 'agent']),
         async (req, res) => {
           try {
-            await leadController.updateKeysOnly(req, res); // Call the controller's function
+            await leadController.updateKeysOnly(req, res);
           } catch (error) {
             console.error("Error in route handler:", error);
             res.status(500).json({ message: "An unexpected error occurred." });
           }
         }
       );
-          app.get('/leads/status/:sheetId', (req, res) => leadController.getLabels(req, res));
+    app.get('/leads/status/:sheetId', (req, res) => leadController.getLabels(req, res));
     app.get('/get-leads',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => leadController.readLead(io, req, res));
     app.get('/get-leads/:sheetId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => leadController.readLeadBySheetId(io, req, res));
     app.delete('/delete-leads/:leadId',combinedAuthenticate, checkRole(['admin','agent']),(req, res) => leadController.deleteLead(io, req, res));

@@ -6,6 +6,7 @@ const xlsx = require("xlsx");
 const Lead = require('../entities/lead')
 const dataSource = require('../infrastructure/psql')
 
+
 const leadController = {
   createLead: async (io, req, res) => {
     try {
@@ -29,79 +30,13 @@ const leadController = {
     }
   },
       
-  // updateKeysOnly: async (req, res) => {
-  //   try {
-  //     console.log("API hit");
-  
-  //     // Validate and extract inputs
-  //     const sheetId = req.params.sheetId;
-  //     const { newKeys } = req.body; // Explicitly extract `newKeys`
-  
-  //     console.log("SheetId:", sheetId);
-  //     console.log("New Keys:", newKeys);
-  
-  //     if (!sheetId) {
-  //       return res.status(400).json({ message: "sheetId is required." });
-  //     }
-  
-  //     if (!Array.isArray(newKeys) || newKeys.length === 0) {
-  //       return res.status(400).json({ message: "newKeys must be a non-empty array." });
-  //     }
-  
-  //     // Get repository
-  //     const leadRepository = dataSource.getRepository("lead");
-  
-  //     // Fetch leads by sheetId
-  //     const leads = await leadRepository.find({ where: { sheetId } });
-  
-  //     console.log("Leads retrieved:", leads);
-  
-  //     if (!leads || leads.length === 0) {
-  //       return res.status(404).json({ message: "No leads found for the given sheetId." });
-  //     }
-  
-  //     // Prepare default values for new keys
-  //     const defaultValues = {};
-  //     newKeys.forEach(key => {
-  //       defaultValues[key] = ""; // Assign default value
-  //     });
-  
-  //     // Update leads
-  //     const updatedLeads = leads.map(lead => {
-  //       lead.dynamicLead = { ...defaultValues, ...lead.dynamicLead }; // Merge default and existing keys
-  //       return lead;
-  //     });
-  
-  //     // Save updated leads
-  //     const savePromises = updatedLeads.map(async updatedLead => {
-  //       await leadRepository.save({
-  //         id: updatedLead.id,
-  //         dynamicLead: updatedLead.dynamicLead, // Only update the dynamicLead field
-  //       });
-  //     });
-  
-  //     await Promise.all(savePromises);
-  
-  //     return res.status(200).json({
-  //       message: "Keys updated successfully",
-  //       updatedLeads,
-  //     });
-  //   } catch (error) {
-  //     console.error("Error updating keys:", error);
-  //     return res.status(500).json({ message: error.message });
-  //   }
-  // },
-  
+
   updateKeysOnly: async (req, res) => {
     try {
       console.log("API hit");
   
-      // Extract inputs
       const sheetId = req.params.sheetId;
       const { renameKeys } = req.body; // { oldKey: "newKey" }
-  
-      console.log("SheetId:", sheetId);
-      console.log("Rename Keys:", renameKeys);
   
       if (!sheetId) {
         return res.status(400).json({ message: "sheetId is required." });
@@ -113,20 +48,50 @@ const leadController = {
         });
       }
   
-      // Get repository
+      // Fetch the sheet
+      const sheetRepository = dataSource.getRepository("createSheet");
+      const sheet = await sheetRepository.findOne({ where: { sheetId } });
+  
+      if (!sheet) {
+        return res.status(404).json({ message: "Sheet not found." });
+      }
+  
+      const sheetColumns = sheet.columns.map((col) => col.name);
+      console.log("Existing Sheet Columns:", sheetColumns);
+  
+      // Update sheet columns
+      const updatedColumns = [...sheet.columns];
+  
+      for (const [oldKey, newKey] of Object.entries(renameKeys)) {
+        const oldColumnIndex = updatedColumns.findIndex((col) => col.name === oldKey);
+        const newColumnExists = updatedColumns.some((col) => col.name === newKey);
+  
+        // Remove old column if it exists
+        if (oldColumnIndex !== -1) {
+          updatedColumns.splice(oldColumnIndex, 1);
+        }
+  
+        // Add new column if it does not already exist
+        if (!newColumnExists) {
+          updatedColumns.push({ name: newKey, type: "string" }); // Assuming type "string" for new columns
+        }
+      }
+  
+      // Save updated columns back to the sheet
+      sheet.columns = updatedColumns;
+      await sheetRepository.save(sheet);
+      console.log("Updated Sheet Columns:", updatedColumns);
+  
+      // Fetch leads to update dynamicLead
       const leadRepository = dataSource.getRepository("lead");
-  
-      // Fetch leads by sheetId
       const leads = await leadRepository.find({ where: { sheetId } });
-  
-      console.log("Leads retrieved:", leads);
   
       if (!leads || leads.length === 0) {
         return res.status(404).json({ message: "No leads found for the given sheetId." });
       }
   
-      // Update leads with renamed keys
-      const updatedLeads = leads.map(lead => {
+      // Update leads' dynamicLead
+      const updatedLeads = leads.map((lead) => {
         const updatedDynamicLead = { ...lead.dynamicLead };
   
         // Rename keys
@@ -137,30 +102,33 @@ const leadController = {
           }
         }
   
-        // Return updated lead
         return { ...lead, dynamicLead: updatedDynamicLead };
       });
   
-      // Save updated leads
-      const savePromises = updatedLeads.map(async updatedLead => {
+      const savePromises = updatedLeads.map(async (updatedLead) => {
         await leadRepository.save({
           id: updatedLead.id,
-          dynamicLead: updatedLead.dynamicLead, // Update only the `dynamicLead` field
+          dynamicLead: updatedLead.dynamicLead,
         });
       });
   
       await Promise.all(savePromises);
   
       return res.status(200).json({
-        message: "Keys renamed successfully",
+        message: "Keys renamed successfully in leads and sheet columns updated.",
         updatedLeads,
+        updatedColumns,
       });
     } catch (error) {
-      console.error("Error renaming keys:", error);
+      console.error("Error renaming keys and updating sheet columns:", error);
       return res.status(500).json({ message: error.message });
     }
-  },  
+  },
   
+  
+  
+  
+
   updateLeadDynamicFields: async (io, req, res) => {
     try {
       const { leadId } = req.params;
