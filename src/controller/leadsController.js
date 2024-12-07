@@ -36,7 +36,7 @@ const leadController = {
       console.log("API hit");
   
       const sheetId = req.params.sheetId;
-      const { renameKeys } = req.body; // { oldKey: "newKey" }
+      const { renameKeys } = req.body; 
   
       if (!sheetId) {
         return res.status(400).json({ message: "sheetId is required." });
@@ -47,9 +47,7 @@ const leadController = {
           message: "renameKeys must be an object with { oldKey: newKey } pairs.",
         });
       }
-  
-      // Fetch the sheet
-      const sheetRepository = dataSource.getRepository("createSheet");
+        const sheetRepository = dataSource.getRepository("createSheet");
       const sheet = await sheetRepository.findOne({ where: { sheetId } });
   
       if (!sheet) {
@@ -59,46 +57,33 @@ const leadController = {
       const sheetColumns = sheet.columns.map((col) => col.name);
       console.log("Existing Sheet Columns:", sheetColumns);
   
-      // Update sheet columns
       const updatedColumns = [...sheet.columns];
   
       for (const [oldKey, newKey] of Object.entries(renameKeys)) {
         const oldColumnIndex = updatedColumns.findIndex((col) => col.name === oldKey);
         const newColumnExists = updatedColumns.some((col) => col.name === newKey);
-  
-        // Remove old column if it exists
-        if (oldColumnIndex !== -1) {
+          if (oldColumnIndex !== -1) {
           updatedColumns.splice(oldColumnIndex, 1);
         }
-  
-        // Add new column if it does not already exist
-        if (!newColumnExists) {
-          updatedColumns.push({ name: newKey, type: "string" }); // Assuming type "string" for new columns
+          if (!newColumnExists) {
+          updatedColumns.push({ name: newKey, type: "string" }); 
         }
       }
-  
-      // Save updated columns back to the sheet
-      sheet.columns = updatedColumns;
+        sheet.columns = updatedColumns;
       await sheetRepository.save(sheet);
       console.log("Updated Sheet Columns:", updatedColumns);
-  
-      // Fetch leads to update dynamicLead
-      const leadRepository = dataSource.getRepository("lead");
+        const leadRepository = dataSource.getRepository("lead");
       const leads = await leadRepository.find({ where: { sheetId } });
   
       if (!leads || leads.length === 0) {
         return res.status(404).json({ message: "No leads found for the given sheetId." });
       }
-  
-      // Update leads' dynamicLead
-      const updatedLeads = leads.map((lead) => {
+        const updatedLeads = leads.map((lead) => {
         const updatedDynamicLead = { ...lead.dynamicLead };
-  
-        // Rename keys
-        for (const [oldKey, newKey] of Object.entries(renameKeys)) {
+          for (const [oldKey, newKey] of Object.entries(renameKeys)) {
           if (updatedDynamicLead.hasOwnProperty(oldKey)) {
-            updatedDynamicLead[newKey] = updatedDynamicLead[oldKey]; // Copy value
-            delete updatedDynamicLead[oldKey]; // Remove old key
+            updatedDynamicLead[newKey] = updatedDynamicLead[oldKey]; 
+            delete updatedDynamicLead[oldKey]; 
           }
         }
   
@@ -124,10 +109,6 @@ const leadController = {
       return res.status(500).json({ message: error.message });
     }
   },
-  
-  
-  
-  
 
   updateLeadDynamicFields: async (io, req, res) => {
     try {

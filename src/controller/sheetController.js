@@ -105,42 +105,6 @@ const sheetController = {
       return res.status(500).json({ message: error.message });
     }
   },
-
-  updateKeysOnly: async (req, res) => {
-    try {
-      const { sheetId, newKeys } = req.body;
-  
-      if (!sheetId || !Array.isArray(newKeys)) {
-        return res.status(400).json({ message: "Invalid input. Provide 'sheetId' and 'newKeys' array." });
-      }
-  
-      const leadRepository = dataSource.getRepository(Lead);
-      const leads = await leadRepository.find({ where: { sheetId } });
-  
-      if (!leads.length) {
-        return res.status(404).json({ message: "No leads found for the given sheetId." });
-      }
-  
-      const defaultValues = {};
-      newKeys.forEach(key => {
-        defaultValues[key] = ""; // Default value for new keys
-      });
-  
-      const updatedLeads = leads.map(lead => ({
-        ...lead.dynamicLead,
-        ...defaultValues, // Add new keys with default values
-      }));
-  
-      for (const updatedLead of updatedLeads) {
-        await leadRepository.update({ leadId: updatedLead.leadId }, { dynamicLead: updatedLead });
-      }
-  
-      return res.status(200).json({ message: "Keys updated successfully", updatedLeads });
-    } catch (error) {
-      console.error("Error updating keys:", error.message);
-      return res.status(500).json({ message: error.message });
-    }
-  },
   
   getAllSheets: async (req, res) => {
     try {
