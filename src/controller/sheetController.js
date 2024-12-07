@@ -28,7 +28,7 @@ const sheetController = {
           Text: "",
           Email: "",
           Status: "Lead",
-          id: Date.now(),
+          id: Date.now()+1,
         },
         {
           Lead: "New Lead",
@@ -36,7 +36,7 @@ const sheetController = {
           Text: "",
           Email: "",
           Status: "Lead",
-          id: Date.now(),
+          id: Date.now()+2,
         },
       ];
 
