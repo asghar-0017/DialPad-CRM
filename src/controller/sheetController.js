@@ -57,10 +57,10 @@ const sheetController = {
       };
       const sheet = await sheetRepository.createSheet(sheetEntity);
       const initialLabels = [
-        { name: "Lead", sheetId: data.sheetId },
-        { name: "Qualified", sheetId: data.sheetId },
-        { name: "FollowUp", sheetId: data.sheetId },
-        { name: "Disqualified", sheetId: data.sheetId },
+        { name: "Lead", sheetId: data.sheetId, color:'#FDBC64'},
+        { name: "Qualified", sheetId: data.sheetId,color:'#33BB87'},
+        { name: "FollowUp", sheetId: data.sheetId,color:'#339ECD'},
+        { name: "Disqualified", sheetId: data.sheetId,color:'#E8697D' },
       ];
 
       const labelRepository = dataSource.getRepository('label'); 
