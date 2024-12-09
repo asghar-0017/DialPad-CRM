@@ -17,7 +17,6 @@ module.exports = new EntitySchema({
     },
     labelId:{
       type:'varchar'
-
     },
     color: {
       type: "varchar", 

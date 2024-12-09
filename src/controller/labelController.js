@@ -8,7 +8,7 @@ const labelController = {
         try {
             console.log("API Hit");
             const sheetId = req.params.sheetId;
-            const { label } = req.body;
+            const { label,color } = req.body;
 
             if (!label || typeof label !== "string") {
                 return res.status(400).json({
@@ -32,7 +32,7 @@ const labelController = {
                 });
             }
             const labelId=generateLabelId()
-            const createdLabel = await labelRepository.save({ name: label, sheetId , labelId});
+            const createdLabel = await labelRepository.save({ name: label, sheetId , labelId , color});
             return res.status(201).json({
                 message: "Label created successfully.",
                 data: createdLabel
@@ -69,7 +69,7 @@ const labelController = {
     updateLabel: async (io, req, res) => {
         try {
           const { labelId } = req.params; 
-          const { name } = req.body;
+          const { name,color } = req.body;
     
           if (!name || typeof name !== 'string') {
             return res.status(400).json({
@@ -93,6 +93,7 @@ const labelController = {
             });
           }
               existingLabel.name = name;
+              existingLabel.color = color;
           existingLabel.updated_at = new Date(); 
          const updatedLabel = await labelRepository.save(existingLabel);
           return res.status(200).json({
