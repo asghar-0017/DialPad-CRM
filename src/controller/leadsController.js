@@ -31,73 +31,149 @@ const leadController = {
   },
       
 
+  // updateKeysOnly: async (req, res) => {
+  //   try {
+  //     console.log("API hit");
+  
+  //     const sheetId = req.params.sheetId;
+  //     const { renameKeys } = req.body; 
+  
+  //     if (!sheetId) {
+  //       return res.status(400).json({ message: "sheetId is required." });
+  //     }
+  
+  //     if (!renameKeys || typeof renameKeys !== "object" || Array.isArray(renameKeys)) {
+  //       return res.status(400).json({
+  //         message: "renameKeys must be an object with { oldKey: newKey } pairs.",
+  //       });
+  //     }
+  //       const sheetRepository = dataSource.getRepository("createSheet");
+  //     const sheet = await sheetRepository.findOne({ where: { sheetId } });
+  
+  //     if (!sheet) {
+  //       return res.status(404).json({ message: "Sheet not found." });
+  //     }
+  
+  //     const sheetColumns = sheet.columns.map((col) => col.name);
+  //     console.log("Existing Sheet Columns:", sheetColumns);
+  
+  //     const updatedColumns = [...sheet.columns];
+  
+  //     for (const [oldKey, newKey] of Object.entries(renameKeys)) {
+  //       const oldColumnIndex = updatedColumns.findIndex((col) => col.name === oldKey);
+  //       const newColumnExists = updatedColumns.some((col) => col.name === newKey);
+  //         if (oldColumnIndex !== -1) {
+  //         updatedColumns.splice(oldColumnIndex, 1);
+  //       }
+  //         if (!newColumnExists) {
+  //         updatedColumns.push({ name: newKey, type: "string" }); 
+  //       }
+  //     }
+  //       sheet.columns = updatedColumns;
+  //     await sheetRepository.save(sheet);
+  //     console.log("Updated Sheet Columns:", updatedColumns);
+  //       const leadRepository = dataSource.getRepository("lead");
+  //     const leads = await leadRepository.find({ where: { sheetId } });
+  
+  //     if (!leads || leads.length === 0) {
+  //       return res.status(404).json({ message: "No leads found for the given sheetId." });
+  //     }
+  //       const updatedLeads = leads.map((lead) => {
+  //       const updatedDynamicLead = { ...lead.dynamicLead };
+  //         for (const [oldKey, newKey] of Object.entries(renameKeys)) {
+  //         if (updatedDynamicLead.hasOwnProperty(oldKey)) {
+  //           updatedDynamicLead[newKey] = updatedDynamicLead[oldKey]; 
+  //           delete updatedDynamicLead[oldKey]; 
+  //         }
+  //       }
+  
+  //       return { ...lead, dynamicLead: updatedDynamicLead };
+  //     });
+  
+  //     const savePromises = updatedLeads.map(async (updatedLead) => {
+  //       await leadRepository.save({
+  //         id: updatedLead.id,
+  //         dynamicLead: updatedLead.dynamicLead,
+  //       });
+  //     });
+  
+  //     await Promise.all(savePromises);
+  
+  //     return res.status(200).json({
+  //       message: "Keys renamed successfully in leads and sheet columns updated.",
+  //       updatedLeads,
+  //       updatedColumns,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error renaming keys and updating sheet columns:", error);
+  //     return res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   updateKeysOnly: async (req, res) => {
+    const { sheetId } = req.params;
+    const { renameKeys } = req.body;
+  
+    if (!sheetId) {
+      return res.status(400).json({ message: "sheetId is required." });
+    }
+  
+    if (!renameKeys || typeof renameKeys !== "object" || Array.isArray(renameKeys) || Object.keys(renameKeys).length === 0) {
+      return res.status(400).json({ 
+        message: "renameKeys must be a non-empty object with { oldKey: newKey } pairs." 
+      });
+    }
+  
     try {
-      console.log("API hit");
+      const sheetRepository = dataSource.getRepository("createSheet");
+      const leadRepository = dataSource.getRepository("lead");
   
-      const sheetId = req.params.sheetId;
-      const { renameKeys } = req.body; 
-  
-      if (!sheetId) {
-        return res.status(400).json({ message: "sheetId is required." });
-      }
-  
-      if (!renameKeys || typeof renameKeys !== "object" || Array.isArray(renameKeys)) {
-        return res.status(400).json({
-          message: "renameKeys must be an object with { oldKey: newKey } pairs.",
-        });
-      }
-        const sheetRepository = dataSource.getRepository("createSheet");
+      // Fetch sheet and validate
       const sheet = await sheetRepository.findOne({ where: { sheetId } });
-  
       if (!sheet) {
         return res.status(404).json({ message: "Sheet not found." });
       }
   
-      const sheetColumns = sheet.columns.map((col) => col.name);
-      console.log("Existing Sheet Columns:", sheetColumns);
-  
-      const updatedColumns = [...sheet.columns];
-  
-      for (const [oldKey, newKey] of Object.entries(renameKeys)) {
-        const oldColumnIndex = updatedColumns.findIndex((col) => col.name === oldKey);
-        const newColumnExists = updatedColumns.some((col) => col.name === newKey);
-          if (oldColumnIndex !== -1) {
-          updatedColumns.splice(oldColumnIndex, 1);
-        }
-          if (!newColumnExists) {
-          updatedColumns.push({ name: newKey, type: "string" }); 
-        }
-      }
-        sheet.columns = updatedColumns;
-      await sheetRepository.save(sheet);
-      console.log("Updated Sheet Columns:", updatedColumns);
-        const leadRepository = dataSource.getRepository("lead");
       const leads = await leadRepository.find({ where: { sheetId } });
-  
       if (!leads || leads.length === 0) {
         return res.status(404).json({ message: "No leads found for the given sheetId." });
       }
-        const updatedLeads = leads.map((lead) => {
+  
+      // Update sheet columns
+      const updatedColumns = [...sheet.columns];
+      for (const [oldKey, newKey] of Object.entries(renameKeys)) {
+        const oldColumnIndex = updatedColumns.findIndex(col => col.name === oldKey);
+        const newColumnExists = updatedColumns.some(col => col.name === newKey);
+  
+        if (oldColumnIndex !== -1) updatedColumns.splice(oldColumnIndex, 1);
+        if (!newColumnExists) updatedColumns.push({ name: newKey, type: "string" });
+      }
+      sheet.columns = updatedColumns;
+      await sheetRepository.save(sheet);
+  
+      // Update leads
+      const updatedLeads = leads.map(lead => {
         const updatedDynamicLead = { ...lead.dynamicLead };
-          for (const [oldKey, newKey] of Object.entries(renameKeys)) {
+  
+        // Rename keys and add new keys with default value
+        for (const [oldKey, newKey] of Object.entries(renameKeys)) {
           if (updatedDynamicLead.hasOwnProperty(oldKey)) {
-            updatedDynamicLead[newKey] = updatedDynamicLead[oldKey]; 
-            delete updatedDynamicLead[oldKey]; 
+            updatedDynamicLead[newKey] = updatedDynamicLead[oldKey];
+            delete updatedDynamicLead[oldKey];
+          } else if (!updatedDynamicLead.hasOwnProperty(newKey)) {
+            updatedDynamicLead[newKey] = ""; // Default value for new column
           }
         }
   
         return { ...lead, dynamicLead: updatedDynamicLead };
       });
   
-      const savePromises = updatedLeads.map(async (updatedLead) => {
-        await leadRepository.save({
-          id: updatedLead.id,
-          dynamicLead: updatedLead.dynamicLead,
-        });
-      });
-  
-      await Promise.all(savePromises);
+      // Save all updated leads
+      await Promise.all(
+        updatedLeads.map(async updatedLead => 
+          leadRepository.save({ id: updatedLead.id, dynamicLead: updatedLead.dynamicLead })
+        )
+      );
   
       return res.status(200).json({
         message: "Keys renamed successfully in leads and sheet columns updated.",
@@ -108,8 +184,8 @@ const leadController = {
       console.error("Error renaming keys and updating sheet columns:", error);
       return res.status(500).json({ message: error.message });
     }
-  },
-
+  },  
+  
   updateLeadDynamicFields: async (io, req, res) => {
     try {
       const { leadId } = req.params;
