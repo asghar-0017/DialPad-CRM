@@ -30,35 +30,39 @@ const leadService = {
 
   updateLeadDynamicFields: async (leadId, updates, user) => {
     try {
+      // Validate leadId
+      if (!leadId) {
+        throw new Error("Lead ID is required");
+      }
+  
+      // Fetch the lead from the database
       const lead = await leadRepository.getLeadById(leadId);
-      console.log("Existing Lead:", lead);
-
       if (!lead) {
         throw new Error("Lead not found");
       }
-
-      const originalLabel = lead.dynamicLead.label;
-
+  
+      console.log("Existing Lead:", lead);
+  
+      // Merge the existing dynamicLead with the updates
       const updatedDynamicLead = {
         ...lead.dynamicLead,
         ...updates,
-        label: originalLabel,
       };
-
-      if (updates.label) {
-        updatedDynamicLead.Status = updates.label;
-      }
+  
+      // Save the updated lead back to the database
       const updatedLead = await leadRepository.updateLead(leadId, {
         dynamicLead: updatedDynamicLead,
       });
-
+  
       console.log("Updated Lead:", updatedLead);
+  
       return updatedLead;
     } catch (error) {
       console.error("Error updating lead:", error.message);
-      throw error;
+      throw new Error("Failed to update lead: " + error.message);
     }
   },
+  
 
   getAllLabels: async (sheetId) => {
     try {
