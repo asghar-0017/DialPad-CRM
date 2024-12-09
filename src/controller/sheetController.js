@@ -7,47 +7,149 @@ const Sheet = require("../entities/createSheet");
 const Label = require("../entities/labels"); // Assuming the label entity is imported here
 
 const sheetController = {
+  // createSheet: async (io, req, res) => {
+  //   try {
+  //     const data = req.body;
+  //     data.sheetId = generateSheetId();
+  //     const currentDate = new Date().toLocaleDateString();
+
+  //     const initialData = [
+  //       {
+  //         lead: "New Lead",
+  //         date: currentDate,
+  //         text: "",
+  //         email: "",
+  //         status: "Lead",
+  //         id: Date.now(),
+  //       },
+  //       {
+  //         lead: "New Lead",
+  //         date: currentDate,
+  //         text: "",
+  //         email: "",
+  //         status: "Lead",
+  //         id: Date.now()+1,
+  //       },
+  //       {
+  //         lead: "New Lead",
+  //         date: currentDate,
+  //         text: "",
+  //         email: "",
+  //         status: "Lead",
+  //         id: Date.now()+2,
+  //       },
+  //     ];
+
+  //     const columns = [
+  //       { name: "lead", type: "string" },
+  //       { name: "date", type: "date" },
+  //       { name: "text", type: "string" },
+  //       { name: "email", type: "string" },
+  //       { name: "status", type: "string" },
+  //     ];
+
+  //     const sheetEntity = {
+  //       sheetId: data.sheetId,
+  //       sheetName: data.sheetName,
+  //       columns: columns,
+  //       created_at: new Date(),
+  //       updated_at: new Date(),
+  //     };
+  //     const sheet = await sheetRepository.createSheet(sheetEntity);
+  //     const initialLabels = [
+  //       { name: "Lead", sheetId: data.sheetId },
+  //       { name: "Qualified", sheetId: data.sheetId },
+  //       { name: "FollowUp", sheetId: data.sheetId },
+  //       { name: "Disqualified", sheetId: data.sheetId },
+  //     ];
+
+  //     const labelRepository = dataSource.getRepository('label'); 
+  //     const existingLabels = await labelRepository.find({ where: { sheetId: data.sheetId } });
+
+  //     const newLabels = initialLabels.map(label => {
+  //       return {
+  //         ...label,
+  //         labelId: generateSheetId(), 
+  //       };
+  //     });
+  //     const labelsToCreate = newLabels.filter(newLabel => {
+  //       return !existingLabels.some(existingLabel => existingLabel.name === newLabel.name);
+  //     });
+
+  //     if (labelsToCreate.length > 0) {
+  //       const createdLabels = await labelRepository.save(labelsToCreate);
+  //       console.log("Created Labels:", createdLabels); 
+  //     }
+  //     const leads = [];
+  //     for (const item of initialData) {
+  //       const leadId = generateLeadId();
+  //       const leadEntity = {
+  //         leadId,
+  //         agentId: req.user.agentId || null,
+  //         role: req.user.user,
+  //         dynamicLead: { ...item, leadId },
+  //         sheetId: data.sheetId,
+  //       };
+  //       const savedLead = await dataSource.getRepository(Lead).save(leadEntity);
+  //       leads.push(savedLead);
+  //     }
+
+  //     return res.status(201).json({
+  //       message: "Sheet created successfully",
+  //       leads,
+  //       sheet,
+  //       labels: labelsToCreate.length > 0 ? labelsToCreate : "No new labels added",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error creating sheet:", error.message);
+  //     return res.status(500).json({ message: error.message });
+  //   }
+  // },
+  
   createSheet: async (io, req, res) => {
     try {
       const data = req.body;
       data.sheetId = generateSheetId();
-      const currentDate = new Date().toLocaleDateString();
-
-      const initialData = [
-        {
-          lead: "New Lead",
-          date: currentDate,
-          text: "",
-          email: "",
-          status: "Lead",
-          id: Date.now(),
-        },
-        {
-          lead: "New Lead",
-          date: currentDate,
-          text: "",
-          email: "",
-          status: "Lead",
-          id: Date.now()+1,
-        },
-        {
-          lead: "New Lead",
-          date: currentDate,
-          text: "",
-          email: "",
-          status: "Lead",
-          id: Date.now()+2,
-        },
-      ];
-
+  
+      // Define columns with types
       const columns = [
         { name: "lead", type: "string" },
         { name: "date", type: "date" },
         { name: "text", type: "string" },
         { name: "email", type: "string" },
-        { name: "status", type: "string" },
+        { name: "status", type: "enum", options: ["Lead", "Qualified", "FollowUp", "Disqualified"] },
       ];
-
+  
+      // Generate default values based on type
+      const getDefaultValue = (column, index) => {
+        switch (column.type) {
+          case "string":
+            return "";
+          case "date": {
+            const currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() + index); // Increment date by index
+            return currentDate.toLocaleDateString();
+          }
+          case "enum":
+            return column.options ? column.options[0] : null; // Default to the first enum option
+          default:
+            return null; // For unknown types, default to null
+        }
+      };
+  
+      // Create initial data dynamically from column definitions
+      const initialData = Array(3)
+        .fill(null)
+        .map((_, index) => {
+          const dynamicLead = {};
+          columns.forEach((column) => {
+            dynamicLead[column.name] = getDefaultValue(column, index);
+          });
+          dynamicLead.id = Date.now() + Math.floor(Math.random() * 1000); // Unique ID
+          return dynamicLead;
+        });
+  
+      // Create the sheet entity
       const sheetEntity = {
         sheetId: data.sheetId,
         sheetName: data.sheetName,
@@ -56,33 +158,38 @@ const sheetController = {
         updated_at: new Date(),
       };
       const sheet = await sheetRepository.createSheet(sheetEntity);
+  
+      // Add default labels
       const initialLabels = [
         { name: "Lead", sheetId: data.sheetId },
         { name: "Qualified", sheetId: data.sheetId },
         { name: "FollowUp", sheetId: data.sheetId },
         { name: "Disqualified", sheetId: data.sheetId },
       ];
-
-      const labelRepository = dataSource.getRepository('label'); 
+  
+      const labelRepository = dataSource.getRepository("label");
       const existingLabels = await labelRepository.find({ where: { sheetId: data.sheetId } });
-
-      const newLabels = initialLabels.map(label => {
-        return {
-          ...label,
-          labelId: generateSheetId(), 
-        };
-      });
-      const labelsToCreate = newLabels.filter(newLabel => {
-        return !existingLabels.some(existingLabel => existingLabel.name === newLabel.name);
-      });
-
+  
+      const newLabels = initialLabels.map(label => ({
+        ...label,
+        labelId: generateSheetId(),
+      }));
+  
+      const labelsToCreate = newLabels.filter(newLabel => 
+        !existingLabels.some(existingLabel => existingLabel.name === newLabel.name)
+      );
+  
       if (labelsToCreate.length > 0) {
-        const createdLabels = await labelRepository.save(labelsToCreate);
-        console.log("Created Labels:", createdLabels); 
+        await labelRepository.save(labelsToCreate);
       }
+  
+      // Save leads in the database
       const leads = [];
+      const leadRepository = dataSource.getRepository("lead");
+  
       for (const item of initialData) {
         const leadId = generateLeadId();
+  
         const leadEntity = {
           leadId,
           agentId: req.user.agentId || null,
@@ -90,10 +197,11 @@ const sheetController = {
           dynamicLead: { ...item, leadId },
           sheetId: data.sheetId,
         };
-        const savedLead = await dataSource.getRepository(Lead).save(leadEntity);
+  
+        const savedLead = await leadRepository.save(leadEntity);
         leads.push(savedLead);
       }
-
+  
       return res.status(201).json({
         message: "Sheet created successfully",
         leads,
