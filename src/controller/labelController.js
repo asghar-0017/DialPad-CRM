@@ -31,7 +31,8 @@ const labelController = {
                     data: existingLabel
                 });
             }
-            const createdLabel = await labelRepository.save({ name: label, sheetId });
+            const labelId=generateLabelId()
+            const createdLabel = await labelRepository.save({ name: label, sheetId , labelId});
             return res.status(201).json({
                 message: "Label created successfully.",
                 data: createdLabel
