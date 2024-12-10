@@ -16,6 +16,8 @@ module.exports = new EntitySchema({
     dynamicLead: {
       type: 'jsonb',
       nullable: true,
+      name: "dynamicLead"  // Added name to explicitly specify the column name.
+
     },
     agentId:{
         type: "varchar",
