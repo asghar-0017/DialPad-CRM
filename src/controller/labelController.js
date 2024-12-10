@@ -73,40 +73,58 @@ const labelController = {
       try {
         const { labelId } = req.params;
         const { name, color } = req.body;
+    
+        // Validate the input
         if (!name || typeof name !== "string") {
           return res.status(400).json({ message: "Invalid input. Please provide a valid label name." });
         }
+    
         await dataSource.transaction(async (transactionalEntityManager) => {
           const labelRepository = transactionalEntityManager.getRepository(Label);
           const leadRepository = transactionalEntityManager.getRepository(Lead);
-              const existingLabel = await labelRepository.findOne({ where: { labelId } });
+    
+          // Fetch the existing label
+          const existingLabel = await labelRepository.findOne({ where: { labelId } });
           if (!existingLabel) {
             throw new Error(`Label with labelId '${labelId}' not found.`);
           }
-              const duplicateLabel = await labelRepository.findOne({
+    
+          // Check for duplicate label name in the same sheet
+          const duplicateLabel = await labelRepository.findOne({
             where: { name, sheetId: existingLabel.sheetId },
           });
           if (duplicateLabel && duplicateLabel.labelId !== labelId) {
             throw new Error(`A label with the name '${name}' already exists.`);
           }
+    
+          // Store the old label name
           const oldLabelName = existingLabel.name;
+    
+          // Update the label
           existingLabel.name = name;
           existingLabel.color = color;
           existingLabel.updated_at = new Date();
           const updatedLabel = await labelRepository.save(existingLabel);
+    
+          // Fetch all leads associated with the same sheetId
           const associatedLeads = await leadRepository.find({
             where: { sheetId: existingLabel.sheetId },
           });
+    
+          // Update leads with the old label name in their dynamicLead status
           for (const lead of associatedLeads) {
-            if (lead.dynamicLead) {
-              lead.dynamicLead.status = name; 
-            } else {
-              lead.dynamicLead = { status: name };
+            if (lead.dynamicLead && lead.dynamicLead.status === oldLabelName) {
+              // If the lead's status matches the old label name, update it to the new label name
+              lead.dynamicLead.status = name;
+              lead.updated_at = new Date();
+              await leadRepository.save(lead);
             }
-            lead.updated_at = new Date();
-            await leadRepository.save(lead);
           }
+    
+          // Emit the update event to notify other parts of the system
           io.emit("label_updated", updatedLabel);
+    
+          // Respond to the API request
           res.status(200).json({
             message: "Label and associated leads updated successfully",
             data: updatedLabel,
@@ -117,6 +135,7 @@ const labelController = {
         return res.status(500).json({ message: "Error updating label", error: error.message });
       }
     }
+    
     
     
     
