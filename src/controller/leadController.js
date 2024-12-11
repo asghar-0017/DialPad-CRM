@@ -43,7 +43,7 @@ const convertKeysToPascalCase = (data) => {
 };
 
 const leadController = {
-  createLead: async (io, req, res) => {
+  createLead: async ( req, res) => {
     try {
       const data = req.body;
       data.leadId = leadId();
@@ -88,7 +88,7 @@ const leadController = {
 
       console.log("Processed Data:", mergedLead);
 
-      io.emit("receive_message", mergedLead);
+      // io.emit("receive_message", mergedLead);
       return res.status(200).json({ message: "Success", data: mergedLead });
     } catch (error) {
       console.error("Error creating lead:", error);
@@ -98,7 +98,7 @@ const leadController = {
     }
   },
 
-  readLead: async (io, req, res) => {
+  readLead: async ( req, res) => {
     try {
       const data = await leadService.leadReadService();
 
@@ -127,7 +127,7 @@ const leadController = {
       });
       console.log("processedData");
 
-      io.emit("receive_message", processedData);
+      // io.emit("receive_message", processedData);
       res.status(200).json({ message: "Success", data: processedData });
     } catch (error) {
       res
@@ -136,7 +136,7 @@ const leadController = {
     }
   },
 
-  updateLead: async (io, req, res) => {
+  updateLead: async ( req, res) => {
     try {
       const data = req.body;
       const leadId = req.params.leadId;
@@ -159,7 +159,7 @@ const leadController = {
         delete formattedLead.otherDetail;
       }
 
-      io.emit("receive_message", lead);
+      // io.emit("receive_message", lead);
       res
         .status(201)
         .json({ message: "Lead Updated successfully", data: formattedLead });
@@ -170,7 +170,7 @@ const leadController = {
     }
   },
 
-  saveExcelFileData: async (io, req, res) => {
+  saveExcelFileData: async ( req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "Please upload an Excel file." });
     }
@@ -214,7 +214,7 @@ const leadController = {
       }
 
       if (leadCreate.length > 0) {
-        io.emit("send_message", leadCreate);
+        // io.emit("send_message", leadCreate);
         return res
           .status(200)
           .json({ message: "Leads created successfully", data: leadCreate });
@@ -235,7 +235,7 @@ const leadController = {
     }
   },
 
-  getLeadById: async (io, req, res) => {
+  getLeadById: async ( req, res) => {
     try {
       const leadId = req.params.leadId;
       const data = await leadService.leadGetServiceById(leadId);
@@ -260,7 +260,7 @@ const leadController = {
         })(data); // Immediately invoke the processing function with 'data'
 
         res.status(200).send({ message: "success", data: processedData });
-        io.emit("receive_message", processedData);
+        // io.emit("receive_message", processedData);
       } else {
         res.status(200).send({ message: "Data Not Found" });
       }
@@ -271,7 +271,7 @@ const leadController = {
     }
   },
 
-  getallSpecificLeadByAgentId: async (io, req, res) => {
+  getallSpecificLeadByAgentId: async ( req, res) => {
     try {
       const agentId = req.params.agentId;
       const data = await leadService.leadAllGetServiceByAgentId(agentId);
@@ -293,7 +293,7 @@ const leadController = {
           return mergedLead;
         });
         res.status(200).send({ message: "success", data: processedData });
-        io.emit("receive_message", processedData);
+        // io.emit("receive_message", processedData);
       } else {
         res
           .status(404)
@@ -307,7 +307,7 @@ const leadController = {
     }
   },
 
-  deleteLead: async (io, req, res) => {
+  deleteLead: async ( req, res) => {
     try {
       const leadId = req.params.leadId;
       console.log("leadId in params", leadId);
@@ -319,7 +319,7 @@ const leadController = {
       res
         .status(200)
         .json({ message: "Lead Data deleted successfully", data: result });
-      io.emit("receive_message", result);
+      // io.emit("receive_message", result);
     } catch (error) {
       res
         .status(500)

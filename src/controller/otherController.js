@@ -1,7 +1,7 @@
 const otherService = require("../service/otherService");
 
 const otherController = {
-  getAllOthers: async (io, req, res) => {
+  getAllOthers: async (req, res) => {
     try {
       const { role } = req.user;
       const others = await otherService.getAllOthers();
@@ -23,7 +23,7 @@ const otherController = {
 
           return mergedOther;
         });
-        io.emit("receive_message", processedData);
+        // io.emit("receive_message", processedData);
         res.status(200).json({ message: "success", data: processedData });
       } else {
         res.status(404).json({ message: "No others found" });
@@ -36,7 +36,7 @@ const otherController = {
     }
   },
 
-  getOtherUpById: async (io, req, res) => {
+  getOtherUpById: async ( req, res) => {
     try {
       const { leadId } = req.params;
       const other = await otherService.getOthersUpById(leadId);
@@ -67,7 +67,7 @@ const otherController = {
         .json({ message: "Internal Server Error", error: error.message });
     }
   },
-  getallSpecificOtherByAgentId: async (io, req, res) => {
+  getallSpecificOtherByAgentId: async ( req, res) => {
     try {
       const agentId = req.params.agentId;
       const { role } = req.user;
@@ -89,7 +89,7 @@ const otherController = {
         });
 
         res.status(200).json({ message: "success", data: processedData });
-        io.emit("receive_message", processedData);
+        // io.emit("receive_message", processedData);
       } else {
         res
           .status(404)
@@ -103,7 +103,7 @@ const otherController = {
     }
   },
 
-  updateOther: async (io, req, res) => {
+  updateOther: async (req, res) => {
     try {
       const { leadId } = req.params;
       const otherData = req.body;
@@ -112,7 +112,7 @@ const otherController = {
         otherData
       );
       if (updatedOther) {
-        io.emit("receive_message", updatedOther);
+        // io.emit("receive_message", updatedOther);
         res
           .status(200)
           .json({ message: "Other updated successfully", updatedOther });
@@ -126,7 +126,7 @@ const otherController = {
     }
   },
 
-  deleteOther: async (io, req, res) => {
+  deleteOther: async ( req, res) => {
     try {
       const leadId = req.params.leadId;
       const user = req.user;
@@ -135,7 +135,7 @@ const otherController = {
         return res.status(404).json({ message: "Other not found" });
       }
       res.status(200).json({ message: "Other deleted successfully" });
-      io.emit("receive_message", result);
+      // io.emit("receive_message", result);
     } catch (error) {
       res
         .status(500)

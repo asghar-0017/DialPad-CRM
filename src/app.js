@@ -3,7 +3,7 @@ const http = require("http");
 const dotenv = require("dotenv");
 const { logger } = require("../logger");
 const setupRoutes = require("./routes/AllRoutes");
-const setupSockets = require("./socket/socket");
+// const setupSockets = require("./socket/socket");
 const dataSource = require("./infrastructure/psql");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -50,7 +50,7 @@ app.get("/", async (req, res) => {
 }); 
 
 setupRoutes(app, io);
-setupSockets(io);
+// setupSockets(io);
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {

@@ -8,7 +8,7 @@ const dataSource = require('../infrastructure/psql')
 
 
 const leadController = {
-  createLead: async (io, req, res) => {
+  createLead: async (req, res) => {
     try {
       const data = req.body;
       data.leadId = generateLeadId();
@@ -22,7 +22,7 @@ const leadController = {
       }
   
       const { dynamicLead = {} } = lead;
-      io.emit("receive_message", dynamicLead);
+      // io.emit("receive_message", dynamicLead);
       return res.status(200).json({ message: "Lead created successfully", data: lead });
     } catch (error) {
       console.error("Error creating lead:", error.message);
@@ -30,86 +30,6 @@ const leadController = {
     }
   },
       
-
-  // updateKeysOnly: async (req, res) => {
-  //   try {
-  //     console.log("API hit");
-  
-  //     const sheetId = req.params.sheetId;
-  //     const { renameKeys } = req.body; 
-  
-  //     if (!sheetId) {
-  //       return res.status(400).json({ message: "sheetId is required." });
-  //     }
-  
-  //     if (!renameKeys || typeof renameKeys !== "object" || Array.isArray(renameKeys)) {
-  //       return res.status(400).json({
-  //         message: "renameKeys must be an object with { oldKey: newKey } pairs.",
-  //       });
-  //     }
-  //       const sheetRepository = dataSource.getRepository("createSheet");
-  //     const sheet = await sheetRepository.findOne({ where: { sheetId } });
-  
-  //     if (!sheet) {
-  //       return res.status(404).json({ message: "Sheet not found." });
-  //     }
-  
-  //     const sheetColumns = sheet.columns.map((col) => col.name);
-  //     console.log("Existing Sheet Columns:", sheetColumns);
-  
-  //     const updatedColumns = [...sheet.columns];
-  
-  //     for (const [oldKey, newKey] of Object.entries(renameKeys)) {
-  //       const oldColumnIndex = updatedColumns.findIndex((col) => col.name === oldKey);
-  //       const newColumnExists = updatedColumns.some((col) => col.name === newKey);
-  //         if (oldColumnIndex !== -1) {
-  //         updatedColumns.splice(oldColumnIndex, 1);
-  //       }
-  //         if (!newColumnExists) {
-  //         updatedColumns.push({ name: newKey, type: "string" }); 
-  //       }
-  //     }
-  //       sheet.columns = updatedColumns;
-  //     await sheetRepository.save(sheet);
-  //     console.log("Updated Sheet Columns:", updatedColumns);
-  //       const leadRepository = dataSource.getRepository("lead");
-  //     const leads = await leadRepository.find({ where: { sheetId } });
-  
-  //     if (!leads || leads.length === 0) {
-  //       return res.status(404).json({ message: "No leads found for the given sheetId." });
-  //     }
-  //       const updatedLeads = leads.map((lead) => {
-  //       const updatedDynamicLead = { ...lead.dynamicLead };
-  //         for (const [oldKey, newKey] of Object.entries(renameKeys)) {
-  //         if (updatedDynamicLead.hasOwnProperty(oldKey)) {
-  //           updatedDynamicLead[newKey] = updatedDynamicLead[oldKey]; 
-  //           delete updatedDynamicLead[oldKey]; 
-  //         }
-  //       }
-  
-  //       return { ...lead, dynamicLead: updatedDynamicLead };
-  //     });
-  
-  //     const savePromises = updatedLeads.map(async (updatedLead) => {
-  //       await leadRepository.save({
-  //         id: updatedLead.id,
-  //         dynamicLead: updatedLead.dynamicLead,
-  //       });
-  //     });
-  
-  //     await Promise.all(savePromises);
-  
-  //     return res.status(200).json({
-  //       message: "Keys renamed successfully in leads and sheet columns updated.",
-  //       updatedLeads,
-  //       updatedColumns,
-  //     });
-  //   } catch (error) {
-  //     console.error("Error renaming keys and updating sheet columns:", error);
-  //     return res.status(500).json({ message: error.message });
-  //   }
-  // },
-
   updateKeysOnly: async (req, res) => {
     const { sheetId } = req.params;
     const { renameKeys } = req.body;
@@ -123,24 +43,18 @@ const leadController = {
         message: "renameKeys must be a non-empty object with { oldKey: newKey } pairs." 
       });
     }
-  
     try {
       const sheetRepository = dataSource.getRepository("createSheet");
       const leadRepository = dataSource.getRepository("lead");
-  
-      // Fetch sheet and validate
-      const sheet = await sheetRepository.findOne({ where: { sheetId } });
+        const sheet = await sheetRepository.findOne({ where: { sheetId } });
       if (!sheet) {
         return res.status(404).json({ message: "Sheet not found." });
       }
-  
       const leads = await leadRepository.find({ where: { sheetId } });
       if (!leads || leads.length === 0) {
         return res.status(404).json({ message: "No leads found for the given sheetId." });
       }
-  
-      // Update sheet columns
-      const updatedColumns = [...sheet.columns];
+        const updatedColumns = [...sheet.columns];
       for (const [oldKey, newKey] of Object.entries(renameKeys)) {
         const oldColumnIndex = updatedColumns.findIndex(col => col.name === oldKey);
         const newColumnExists = updatedColumns.some(col => col.name === newKey);
@@ -150,26 +64,21 @@ const leadController = {
       }
       sheet.columns = updatedColumns;
       await sheetRepository.save(sheet);
-  
-      // Update leads
-      const updatedLeads = leads.map(lead => {
+        const updatedLeads = leads.map(lead => {
         const updatedDynamicLead = { ...lead.dynamicLead };
   
-        // Rename keys and add new keys with default value
         for (const [oldKey, newKey] of Object.entries(renameKeys)) {
           if (updatedDynamicLead.hasOwnProperty(oldKey)) {
             updatedDynamicLead[newKey] = updatedDynamicLead[oldKey];
             delete updatedDynamicLead[oldKey];
           } else if (!updatedDynamicLead.hasOwnProperty(newKey)) {
-            updatedDynamicLead[newKey] = ""; // Default value for new column
+            updatedDynamicLead[newKey] = ""; 
           }
         }
   
         return { ...lead, dynamicLead: updatedDynamicLead };
       });
-  
-      // Save all updated leads
-      await Promise.all(
+        await Promise.all(
         updatedLeads.map(async updatedLead => 
           leadRepository.save({ id: updatedLead.id, dynamicLead: updatedLead.dynamicLead })
         )
@@ -226,7 +135,7 @@ const leadController = {
     }
   },
 
-  readLead: async (io, req, res) => {
+  readLead: async (req, res) => {
     try {
       const data = await leadService.leadReadService();
 
@@ -246,7 +155,7 @@ const leadController = {
 
         return mergedLead;
       });
-      io.emit("receive_message", processedData);
+      // io.emit("receive_message", processedData);
       res.status(200).json({ message: "Success", data: processedData });
     } catch (error) {
       res
@@ -254,7 +163,7 @@ const leadController = {
         .json({ message: "Internal Server Error", error: error.message });
     }
   },
-  readLeadBySheetId: async (io, req, res) => {
+  readLeadBySheetId: async (req, res) => {
     try {
       const sheetId= req.params.sheetId
       const data = await leadService.leadReadService(sheetId);
@@ -277,7 +186,7 @@ const leadController = {
 
         return mergedLead;
       });
-      io.emit("receive_message", processedData);
+      // io.emit("receive_message", processedData);
       res.status(200).json({ message: "Success",sheetId:sheetId, data: processedData });
     } catch (error) {
       res
@@ -285,7 +194,7 @@ const leadController = {
         .json({ message: "Internal Server Error", error: error.message });
     }
   },
-  deleteLead: async (io, req, res) => {
+  deleteLead: async ( req, res) => {
     try {
       const leadId = req.params.leadId;
       console.log("leadId in params", leadId);
@@ -297,7 +206,7 @@ const leadController = {
       res
         .status(200)
         .json({ message: "Lead Data deleted successfully", data: result });
-      io.emit("receive_message", result);
+      // io.emit("receive_message", result);
     } catch (error) {
       res
         .status(500)
@@ -322,7 +231,7 @@ const leadController = {
       });
     }
   },
-  saveExcelFileData: async (io, req, res) => {
+  saveExcelFileData: async ( req, res) => {
     console.log("API hit for uploading leads CSV");
   
     if (!req.file) {
@@ -369,7 +278,7 @@ const leadController = {
       }
   
       if (leadCreate.length > 0) {
-        io.emit("send_message", leadCreate);
+        // io.emit("send_message", leadCreate);
         return res.status(200).json({
           message: "Leads created successfully",
           data: leadCreate,

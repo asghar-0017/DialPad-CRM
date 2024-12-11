@@ -10,16 +10,16 @@ const messageRoute = require("./messagingRoute");
 const taskToAgents = require("./taskToAgents");
 const cloudnaryRoute = require("./cloudnaryRoute");
 
-const setupRoutes = (app, io) => {
-  AdminAuthRoute(app, io);
-  agentRoute(app, io);
-  leadsRoute(app, io);
-  sheetRoute(app, io);
-  labelRoute(app, io);
+const setupRoutes = (app) => {
+  AdminAuthRoute(app);
+  agentRoute(app);
+  leadsRoute(app);
+  sheetRoute(app);
+  labelRoute(app);
 //   followUpRoute(app, io);
 //   otherRoute(app, io);
   TrashRoute(app);
-  messageRoute(app, io);
+  messageRoute(app);
   cloudnaryRoute(app);
   taskToAgents(app);
 };

@@ -6,7 +6,7 @@ const Label = require('../entities/labels')
 const Lead = require("../entities/lead"); // Import Lead entity
 const labelController = {
 
-    createLabel: async (io, req, res) => {
+    createLabel: async (req, res) => {
         try {
             console.log("API Hit");
             const sheetId = req.params.sheetId;
@@ -48,7 +48,7 @@ const labelController = {
         }
     },
 
-    getLabel: async (io, req, res) => {
+    getLabel: async (req, res) => {
         try {
             const sheetId = req.params.sheetId;
 
@@ -69,7 +69,7 @@ const labelController = {
         }
     },
 
-    updateLabel: async (io, req, res) => {
+    updateLabel: async ( req, res) => {
       try {
         const { labelId } = req.params;
         const { name, color } = req.body;
@@ -105,27 +105,19 @@ const labelController = {
           existingLabel.color = color;
           existingLabel.updated_at = new Date();
           const updatedLabel = await labelRepository.save(existingLabel);
-    
-          // Fetch all leads associated with the same sheetId
-          const associatedLeads = await leadRepository.find({
+              const associatedLeads = await leadRepository.find({
             where: { sheetId: existingLabel.sheetId },
           });
     
-          // Update leads with the old label name in their dynamicLead status
           for (const lead of associatedLeads) {
             if (lead.dynamicLead && lead.dynamicLead.status === oldLabelName) {
-              // If the lead's status matches the old label name, update it to the new label name
               lead.dynamicLead.status = name;
               lead.updated_at = new Date();
               await leadRepository.save(lead);
             }
           }
-    
-          // Emit the update event to notify other parts of the system
-          io.emit("label_updated", updatedLabel);
-    
-          // Respond to the API request
-          res.status(200).json({
+              // io.emit("label_updated", updatedLabel);
+              res.status(200).json({
             message: "Label and associated leads updated successfully",
             data: updatedLabel,
           });

@@ -2,7 +2,7 @@ const { request } = require("express");
 const messageService = require("../service/messageService");
 const messageId = require("../utils/token");
 const messageController = {
-  sendMessageToAgent: async (io, req, res) => {
+  sendMessageToAgent: async ( req, res) => {
     try {
       const agentId = req.params.agentId;
       admin = req.user;
@@ -19,7 +19,7 @@ const messageController = {
       );
 
       if (data) {
-        io.to(agentId).emit("send_message", data);
+        // io.to(agentId).emit("send_message", data);
         res.status(200).send({ message: "success", data: data });
       } else {
         res.status(404).send({ message: "data Not Found" });
@@ -30,7 +30,7 @@ const messageController = {
       throw error;
     }
   },
-  getAssignMessagesById: async (io, req, res) => {
+  getAssignMessagesById: async ( req, res) => {
     try {
       const agentId = req.params.agentId;
       const data = await messageService.getAssignMessagesToAgentById(agentId);
@@ -41,7 +41,7 @@ const messageController = {
         const { messageId, message, role } = newData;
         return { messageId, message, role };
       });
-      io.emit("receive_message", Messagedata);
+      // io.emit("receive_message", Messagedata);
 
       res.status(201).json({ message: "success", data: Messagedata });
     } catch (error) {
@@ -50,7 +50,7 @@ const messageController = {
     }
   },
 
-  sendMessageToAdmin: async (io, req, res) => {
+  sendMessageToAdmin: async (req, res) => {
     try {
       const agentId = req.params.agentId;
       const adminId = req.params.adminId;
@@ -66,7 +66,7 @@ const messageController = {
       );
 
       if (data) {
-        io.to(adminId).emit("send_message", data);
+        // io.to(adminId).emit("send_message", data);
         res.status(200).send({ message: "success", data: data });
       } else {
         res.status(404).send({ message: "data Not Found" });
@@ -77,7 +77,7 @@ const messageController = {
     }
   },
 
-  getSendMessagesToAdminById: async (io, req, res) => {
+  getSendMessagesToAdminById: async ( req, res) => {
     try {
       const agentId = req.params.agentId;
       const adminId = req.params.adminId;
@@ -92,7 +92,7 @@ const messageController = {
         const { messageId, message } = newData;
         return { messageId, message };
       });
-      io.emit("receive_message", Messagedata);
+      // io.emit("receive_message", Messagedata);
       res.status(201).json({ message: "success", data: Messagedata });
     } catch (error) {
       console.error("Error fetching Reviews by agent ID:", error.message);
@@ -100,7 +100,7 @@ const messageController = {
     }
   },
 
-  getAllMessagesFromAdmin: async (io, req, res) => {
+  getAllMessagesFromAdmin: async ( req, res) => {
     try {
       const adminId = req.params.adminId;
       const data = await messageService.getAllMessagesFromAdmin(adminId);
@@ -128,7 +128,7 @@ const messageController = {
         agentMessages,
         adminMessages,
       };
-      io.emit("receive_message", allMessages);
+      // io.emit("receive_message", allMessages);
       res.status(200).json({ message: "success", data: allMessages });
     } catch (error) {
       console.error("Error fetching all messages:", error.message);

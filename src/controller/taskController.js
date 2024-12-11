@@ -42,7 +42,7 @@ const convertKeysToPascalCase = (data) => {
 };
 
 const taskController = {
-  saveExcelFileData: async (io, req, res) => {
+  saveExcelFileData: async ( req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "Please upload an Excel file." });
     }
@@ -81,7 +81,7 @@ const taskController = {
         console.log("Lead Data:", taskData);
 
         const uploadTask = await taskService.createTaskService(taskData);
-        taskCreate.push(formattedTask); // Push formattedTask into taskCreate
+        taskCreate.push(formattedTask);
       }
 
       if (taskCreate.length > 0) {
@@ -105,7 +105,7 @@ const taskController = {
       fs.unlinkSync(filePath);
     }
   },
-  getTaskData: async (io, req, res) => {
+  getTaskData: async ( req, res) => {
     try {
       const data = await taskService.getTaskFromDb();
       console.log("Data", data);

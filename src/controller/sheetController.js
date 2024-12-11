@@ -7,7 +7,7 @@ const Sheet = require("../entities/createSheet");
 const Label = require("../entities/labels"); // Assuming the label entity is imported here
 
 const sheetController = {
-  createSheet: async (io, req, res) => {
+  createSheet: async (req, res) => {
     try {
       const data = req.body;
       data.sheetId = generateSheetId();
