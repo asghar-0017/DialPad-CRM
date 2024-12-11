@@ -32,7 +32,7 @@ const entityPath = path.join(__dirname, "..", "entities", "*.js");
 // });
 const dataSource = new DataSource({
   type: "postgres",
-  host: "pg-c8f8020-maju-31c9.f.aivencloud.com",  // Host
+  host: "13.126.179.178",       // Use IP instead of hostname
   port: 28730,                                    // Port
   username: "avnadmin",                           // Username
   password: "AVNS_MwtQUtP9nagQvFYuQQ2",           // Password

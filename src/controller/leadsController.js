@@ -95,7 +95,7 @@ const leadController = {
     }
   },  
   
-  updateLeadDynamicFields: async (io, req, res) => {
+  updateLeadDynamicFields: async (req, res) => {
     try {
       const { leadId } = req.params;
       const updates = req.body;
@@ -110,7 +110,7 @@ const leadController = {
         return res.status(400).json({ message: "Failed to update lead" });
       }
 
-      io.emit("lead_updated", updatedLead);
+      // io.emit("lead_updated", updatedLead);
       return res
         .status(200)
         .json({ message: "Lead updated successfully", data: updatedLead });
@@ -158,9 +158,7 @@ const leadController = {
       // io.emit("receive_message", processedData);
       res.status(200).json({ message: "Success", data: processedData });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: "Internal Server Error", error: error.message });
+      res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
   },
   readLeadBySheetId: async (req, res) => {
@@ -183,15 +181,12 @@ const leadController = {
           delete mergedLead.agentId;
         }
 
-
         return mergedLead;
       });
       // io.emit("receive_message", processedData);
       res.status(200).json({ message: "Success",sheetId:sheetId, data: processedData });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: "Internal Server Error", error: error.message });
+      res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
   },
   deleteLead: async ( req, res) => {

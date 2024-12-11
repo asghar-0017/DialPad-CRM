@@ -49,7 +49,7 @@ app.get("/", async (req, res) => {
   });
 }); 
 
-setupRoutes(app, io);
+setupRoutes(app);
 // setupSockets(io);
 
 app.use((err, req, res, next) => {
@@ -72,7 +72,7 @@ const StartServer = async () => {
     const PORT = process.env.PORT || 4000;
     server.listen(PORT, () => {
       logger.info(`Server is listening on ${PORT}`);
-      logger.info("Socket.io instance is initialized");
+      // logger.info("Socket.io instance is initialized");
     });
   } catch (error) {
     logger.error(error.message);

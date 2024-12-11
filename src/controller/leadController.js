@@ -257,7 +257,7 @@ const leadController = {
           }
 
           return mergedLead;
-        })(data); // Immediately invoke the processing function with 'data'
+        })(data);
 
         res.status(200).send({ message: "success", data: processedData });
         // io.emit("receive_message", processedData);

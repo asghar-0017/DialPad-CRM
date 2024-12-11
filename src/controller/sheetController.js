@@ -10,6 +10,7 @@ const sheetController = {
   createSheet: async (req, res) => {
     try {
       const data = req.body;
+      console.log("Data",data)
       data.sheetId = generateSheetId();
       const currentDate = new Date().toLocaleDateString();
 
@@ -102,7 +103,6 @@ const sheetController = {
       });
     } catch (error) {
       console.error("Error creating sheet:", error.message);
-      return res.status(500).json({ message: error.message });
     }
   },
 
