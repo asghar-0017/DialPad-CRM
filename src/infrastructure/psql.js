@@ -37,7 +37,7 @@ const dataSource = new DataSource({
   username: "avnadmin",                           // Username
   password: "AVNS_MwtQUtP9nagQvFYuQQ2",           // Password
   database: "defaultdb",                          // Database name
-  synchronize: true,                              // Set to false in production
+  synchronize: false,                              // Set to false in production
   logging: true,
   ssl: {
     rejectUnauthorized: false,                   // Enables SSL without verifying certificate

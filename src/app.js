@@ -47,7 +47,7 @@ app.get("/", async (req, res) => {
     status: "OK",
     message: "Express server is running",
   });
-});
+}); 
 
 setupRoutes(app, io);
 setupSockets(io);
