@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const initializeAdmin = async () => {
   try {
-    // await dataSource.initialize();
+    await dataSource.initialize();
 
     const adminRepository = dataSource.getRepository(AdminAuth);
     const admin = await adminRepository.findOne({ where: { userName: 'admin' } });
@@ -33,4 +33,4 @@ const initializeAdmin = async () => {
   }
 };
 
-module.exports=initializeAdmin
+initializeAdmin();
