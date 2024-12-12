@@ -33,4 +33,4 @@ const initializeAdmin = async () => {
   }
 };
 
-module.exports=initializeAdmin
+initializeAdmin();
