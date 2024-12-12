@@ -30,22 +30,32 @@ const entityPath = path.join(__dirname, "..", "entities", "*.js");
 //   logger: new PinoLogger(),
 //   entities: [entityPath],
 // });
+// const dataSource = new DataSource({
+//   type: "postgres",
+//   host: "13.126.179.178",       // Use IP instead of hostname
+//   port: 28730,                                    // Port
+//   username: "avnadmin",                           // Username
+//   password: "AVNS_MwtQUtP9nagQvFYuQQ2",           // Password
+//   database: "defaultdb",                          // Database name
+//   synchronize: false,                              // Set to false in production
+//   logging: false,
+//   ssl: {
+//     rejectUnauthorized: false,                   // Enables SSL without verifying certificate
+//   },
+//   entities: [entityPath],                         // Ensure entityPath points to your entities
+// });
+
 const dataSource = new DataSource({
   type: "postgres",
-  host: "13.126.179.178",       // Use IP instead of hostname
-  port: 28730,                                    // Port
-  username: "avnadmin",                           // Username
-  password: "AVNS_MwtQUtP9nagQvFYuQQ2",           // Password
-  database: "defaultdb",                          // Database name
+  host: "awcowwwccsgww4oko8kg0w44",       // Use IP instead of hostname
+  port: 5432,                                    // Port
+  username: "postgres",                           // Username
+  password: "7dvqh9cQlS6RhmEB4LBRo5FkEbS2u4wDs0b6rPtdhEoHBat1aoqpkYGRCzvfh4mP",           // Password
+  database: "postgres",                          // Database name
   synchronize: false,                              // Set to false in production
   logging: false,
-  ssl: {
-    rejectUnauthorized: false,                   // Enables SSL without verifying certificate
-  },
   entities: [entityPath],                         // Ensure entityPath points to your entities
 });
-
-
 
 // // module.exports = dataSource;
 // const { DataSource } = require("typeorm");
