@@ -69,8 +69,6 @@ const StartServer = async () => {
   try {
     await dataSource.initialize();
     logger.info("Database connection has been established");
-
-    await initializeAdmin();
     const PORT = process.env.PORT || 4000;
     server.listen(PORT, () => {
       logger.info(`Server is listening on ${PORT}`);
