@@ -24,7 +24,9 @@ const dataSource = new DataSource({
   //   rejectUnauthorized: false,                     // Use SSL safely
   // },
   entities: [entityPath],
-  logger: new PinoLogger(),                        // Use the PinoLogger for logging
+  logger: new PinoLogger(),    
+  migrations: [__dirname + "/../migrations/*.js"], // Ensure migrations are defined here
+  // Use the PinoLogger for logging
 });
 
 module.exports = dataSource;
