@@ -14,7 +14,7 @@ const url = new URL(DATABASE_URL);
 
 const dataSource = new DataSource({
   type: "postgres",
-  host: 'localhost',                                // Extract hostname dynamically
+  host: 'awcowwwccsgww4oko8kg0w44',                                // Extract hostname dynamically
   port: '5432',                    // Parse port number
   username: url.username,                           // Extract username dynamically
   password: url.password,                           // Extract password dynamically
